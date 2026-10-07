@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Seguridad y privacidad · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Seguridad y privacidad.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Seguridad y privacidad · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Seguridad y privacidad.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 24</a> › Ejercicio</div>
+        <h1>Ejercicio: Seguridad y privacidad</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: avanzado</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Escribir las cuatro funciones de defensa básicas del bot: enmascarar teléfonos, limpiar entradas, limitar la tasa de mensajes y decidir cuándo borrar un registro.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> revisa tu propio proyecto con la lista de seguridad. La <strong>parte B</strong> son funciones de JavaScript puro. Las horas son números en milisegundos (<code>Date.now()</code>). Los teléfonos de ejemplo son falsos.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Escribe <code>anonimizar(pedido)</code>, que devuelva una copia del pedido con el teléfono enmascarado y sin dirección ni nombre, pero conservando productos y total. Es la forma de mantener estadísticas del negocio sin conservar datos personales.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En tu proyecto, comprueba con <code>git check-ignore -v .dev.vars</code> que git ignora tus secretos y busca en el historial con <code>git log -p -S"token"</code> que nunca subiste uno. Apunta el resultado en <code>notas.md</code>.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Redacta en <code>notas.md</code> la política de privacidad de La Esquina en 7 puntos (responsable, datos, finalidad, destinatarios, conservación, derechos, consentimiento). Recuerda que no es asesoría legal.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>enmascararTelefono(tel)</code>: deja solo dígitos, conserva los 2 primeros y los 3 últimos y sustituye el resto por <code>*</code>. Si tiene 5 dígitos o menos, devuelve todo con <code>*</code>. Con <code>null</code> devuelve <code>""</code>.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>limpiarEntrada(texto, max = 500)</code>: si no es texto devuelve <code>""</code>; elimina caracteres de ancho cero, convierte caracteres de control (incluidos saltos de línea y tabuladores) en espacios, colapsa espacios, recorta los extremos y corta a <code>max</code> caracteres.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>limitarTasa(registro, clave, ahora, max, ventanaMs)</code>: ventana deslizante. <code>registro</code> es un objeto <code>{ clave: [horas...] }</code> que la función actualiza. Devuelve <code>true</code> y registra la hora si hay menos de <code>max</code> peticiones dentro de la ventana; si no, <code>false</code>. Una petición cuenta mientras <code>ahora - hora &lt; ventanaMs</code>.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>debeBorrarse(registro, ahora, diasRetencion)</code>: <code>true</code> si <code>registro.solicitudBorrado</code> es verdadero o si pasaron <code>diasRetencion</code> días o más desde <code>registro.creado</code>.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Enmascarar</summary><p><code>String(tel ?? "").replace(/\D/g, "")</code> deja solo dígitos. Con <code>d.slice(0, 2) + "*".repeat(d.length - 5) + d.slice(-3)</code> conservas los extremos.</p></details>
+      <details><summary>💡 Pista 2: Limpiar</summary><p>Encadena <code>replace</code>: primero <code>/[​-‍﻿]/g</code> por <code>""</code>, luego <code>/[\u0000-\u001F\u007F]/g</code> por <code>" "</code>, luego <code>/\s+/g</code> por <code>" "</code>; después <code>trim()</code> y <code>slice(0, max)</code>.</p></details>
+      <details><summary>💡 Pista 3: Ventana deslizante</summary><p>Filtra <code>registro[clave] ?? []</code> dejando las horas con <code>ahora - t &lt; ventanaMs</code>. Si quedan <code>max</code> o más, devuelve <code>false</code>; si no, añade <code>ahora</code>, guarda la lista y devuelve <code>true</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`enmascararTelefono` conserva 2 primeros y 3 últimos dígitos", "h": "Usa slice(0,2), repeat de asteriscos y slice(-3).", "t": "return enmascararTelefono('51999000111')==='51******111'"}, {"d": "`enmascararTelefono` ignora símbolos y maneja números cortos o nulos", "h": "Quita lo que no sea dígito con /\\D/g; 5 dígitos o menos se enmascaran por completo.", "t": "return enmascararTelefono('+51 999 000 111')==='51******111' && enmascararTelefono('12345')==='*****' && enmascararTelefono(null)===''"}, {"d": "`limpiarEntrada` colapsa espacios y saltos de línea", "h": "Reemplaza los caracteres de control por espacios y colapsa con /\\s+/.", "t": "return limpiarEntrada('  hola\\n\\n\\tquiero    pan  ')==='hola quiero pan'"}, {"d": "`limpiarEntrada` quita caracteres de control y de ancho cero", "h": "Elimina \\u200B-\\u200D y \\uFEFF; los control (\\u0000-\\u001F) pasan a espacio.", "t": "return limpiarEntrada('ho\\u200Bla\\u0000mundo')==='hola mundo'"}, {"d": "`limpiarEntrada` corta al máximo y rechaza lo que no es texto", "h": "Usa slice(0, max) al final y devuelve '' si typeof no es string.", "t": "return limpiarEntrada('a'.repeat(1000))===('a'.repeat(500)) && limpiarEntrada('abcdef',3)==='abc' && limpiarEntrada(null)==='' && limpiarEntrada(42)===''"}, {"d": "`limitarTasa` permite hasta `max` peticiones y bloquea la siguiente", "h": "Si ya hay `max` horas vivas, devuelve false sin registrar la nueva.", "t": "var r={};return limitarTasa(r,'a',0,3,60000)===true && limitarTasa(r,'a',1000,3,60000)===true && limitarTasa(r,'a',2000,3,60000)===true && limitarTasa(r,'a',3000,3,60000)===false"}, {"d": "`limitarTasa` vuelve a permitir cuando la ventana se desliza", "h": "Descarta horas con `ahora - t >= ventanaMs`. Una petición bloqueada no cuenta como registrada.", "t": "var r={};[0,1000,2000].forEach(function(t){limitarTasa(r,'a',t,3,60000)});limitarTasa(r,'a',3000,3,60000);return limitarTasa(r,'a',60000,3,60000)===true && limitarTasa(r,'a',61000,3,60000)===true"}, {"d": "`limitarTasa` lleva la cuenta por cliente", "h": "Usa `registro[clave]` para separar a cada cliente.", "t": "var r={};limitarTasa(r,'a',0,1,60000);return limitarTasa(r,'a',1,1,60000)===false && limitarTasa(r,'b',1,1,60000)===true"}, {"d": "`debeBorrarse` aplica la retención por días", "h": "Compara `ahora - creado` con `diasRetencion * 24 * 60 * 60 * 1000` usando `>=`.", "t": "var D=86400000;return debeBorrarse({creado:0},91*D,90)===true && debeBorrarse({creado:0},90*D,90)===true && debeBorrarse({creado:0},10*D,90)===false"}, {"d": "`debeBorrarse` obedece una solicitud de borrado", "h": "Si `solicitudBorrado` es true, devuelve true sin mirar la fecha.", "t": "var D=86400000;return debeBorrarse({creado:0,solicitudBorrado:true},D,90)===true && debeBorrarse({creado:0,solicitudBorrado:false},D,90)===false"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>seguridad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function enmascararTelefono(tel) {
+  const d = String(tel ?? &quot;&quot;).replace(/\D/g, &quot;&quot;);
+  if (d.length &lt;= 5) return &quot;*&quot;.repeat(d.length);
+  return d.slice(0, 2) + &quot;*&quot;.repeat(d.length - 5) + d.slice(-3);
+}
+
+function limpiarEntrada(texto, max = 500) {
+  if (typeof texto !== &quot;string&quot;) return &quot;&quot;;
+  return texto
+    .replace(/[​-‍﻿]/g, &quot;&quot;)
+    .replace(/[\u0000-\u001F\u007F]/g, &quot; &quot;)
+    .replace(/\s+/g, &quot; &quot;)
+    .trim()
+    .slice(0, max);
+}
+
+function limitarTasa(registro, clave, ahora, max, ventanaMs) {
+  const vivos = (registro[clave] ?? []).filter(t =&gt; ahora - t &lt; ventanaMs);
+  if (vivos.length &gt;= max) {
+    registro[clave] = vivos;
+    return false;
+  }
+  vivos.push(ahora);
+  registro[clave] = vivos;
+  return true;
+}
+
+function debeBorrarse(registro, ahora, diasRetencion) {
+  if (registro.solicitudBorrado) return true;
+  return ahora - registro.creado &gt;= diasRetencion * 24 * 60 * 60 * 1000;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 24</a>
+        <a class="next" href="../25-atencion-humana/"><small>Siguiente →</small>Atención humana y traspaso</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 24 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Seguridad%20y%20privacidad&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

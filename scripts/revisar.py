@@ -19,7 +19,7 @@ ARREGLAR = "--arreglar" in sys.argv
 sys.stdout.reconfigure(encoding="utf-8")
 errores = []
 
-paginas = sorted(p for p in RAIZ.rglob("*.html") if ".git" not in p.parts and "vendor" not in p.parts)
+paginas = sorted(p for p in RAIZ.rglob("*.html") if ".git" not in p.parts and "vendor" not in p.parts and "node_modules" not in p.parts)
 
 
 def limpio(html):

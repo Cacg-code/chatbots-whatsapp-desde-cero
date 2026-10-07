@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webhooks y JSON de WhatsApp · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo Meta te entrega los mensajes: forma del JSON, parser que lo convierte en eventos simples, verificación GET del webhook y firma HMAC-SHA256.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Webhooks y JSON de WhatsApp · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo Meta te entrega los mensajes: forma del JSON, parser que lo convierte en eventos simples, verificación GET del webhook y firma HMAC-SHA256.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#del-bot-en-consola-al-bot-que-escucha">Del bot en consola al bot que escucha</a></li><li><a href="#anatomia-de-un-payload-de-mensaje">Anatomía de un payload de mensaje</a></li><li><a href="#cuatro-formas-de-mensaje-y-los-estados">Cuatro formas de «mensaje» y los estados</a></li><li><a href="#parsearwebhook-de-json-anidado-a-eventos">parsearWebhook: de JSON anidado a eventos simples</a></li><li><a href="#la-verificacion-get-este-webhook-es-tuyo">La verificación GET: «¿este webhook es tuyo?»</a></li><li><a href="#la-firma-este-post-viene-de-meta">La firma: «¿este POST viene de Meta?»</a></li><li><a href="#que-hacer-con-lo-que-no-entiendes">Qué hacer con lo que no entiendes</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 9</div>
+        <h1>Webhooks y JSON de WhatsApp</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Describir el recorrido de un webhook de WhatsApp y qué trae el JSON de un mensaje de texto, de un botón y de un estado.</li><li>Leer un payload anidado con seguridad y convertirlo en eventos simples con <code>parsearWebhook</code>.</li><li>Explicar y probar el handshake de verificación (<code>hub.mode</code>, <code>hub.verify_token</code>, <code>hub.challenge</code>).</li><li>Calcular y comprobar la firma <code>X-Hub-Signature-256</code> con HMAC-SHA256 sobre el cuerpo crudo.</li><li>Justificar por qué un servidor de bot debe ignorar con elegancia todo lo que no entiende.</li></ul>
+</div>
+
+<h2 id="del-bot-en-consola-al-bot-que-escucha"><span class="n">1.</span>Del bot en consola al bot que escucha</h2>
+<p>Hasta la <a href="../08-flujo-de-pedido/">lección 8</a> tu bot vivía en tu terminal: tú escribías una línea y el motor (<code>procesar(sesion, entrada)</code>) devolvía respuestas. Para que lo use un cliente real falta una pieza: algo que reciba lo que Meta le entrega y lo convierta en la <code>entrada</code> que el motor entiende.</p>
+<p>Meta no le entrega los mensajes a tu bot «preguntándole». Hace lo contrario: <strong>te llama él a ti</strong>. Cada vez que un cliente escribe, los servidores de Meta hacen una petición <code>POST</code> a una dirección de tu servidor. Esa dirección se llama <strong>webhook</strong> (en español, «gancho web»). Es el mismo patrón de cualquier servicio que avisa de un evento: tú das una URL y ellos llaman cuando pasa algo.</p>
+<div class="flow"><div class="node"><strong>Cliente</strong><span>escribe &quot;Quiero 2 leches&quot;</span></div><div class="arrow">→<code>mensaje</code></div><div class="node"><strong>Meta</strong><span>WhatsApp Cloud API</span></div><div class="arrow">→<code>POST /webhook + JSON</code></div><div class="node"><strong>Tu servidor</strong><span>verifica, parsea</span></div><div class="arrow">→<code>entrada del motor</code></div><div class="node"><strong>Motor</strong><span>procesar()</span></div></div>
+<p>En esta lección trabajamos la <strong>mitad de entrada</strong>: qué JSON llega, cómo leerlo sin que el servidor se caiga, cómo demostrar que viene de Meta y no de un impostor. La mitad de salida (enviar) la verás en la <a href="../14-enviar-mensajes/">lección 14</a>, y todo ensamblado en un servidor en la <a href="../10-servidor-del-bot/">lección 10</a>.</p>
+<p>Todo el código de esta lección vive en <code>src/whatsapp.js</code> del proyecto de referencia, y se prueba con los archivos de <code>test/payloads/</code>. No necesitas cuenta de Meta: trabajaremos con los mismos ejemplos que usa la documentación oficial.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>La forma exacta de los payloads (nombres de campos, tipos de mensaje nuevos) la define Meta y puede ampliarse. Los ejemplos de esta lección se contrastaron el 2026-10-07 con la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples">documentación oficial de payloads</a>. Si algo no coincide con lo que recibes, la documentación manda.</p></div>
+<h2 id="anatomia-de-un-payload-de-mensaje"><span class="n">2.</span>Anatomía de un payload de mensaje</h2>
+<p>Un webhook de WhatsApp es un JSON <strong>muy anidado</strong>. Este es el que usamos como ejemplo (<code>test/payloads/texto.json</code>): el cliente escribió «Quiero 2 leches».</p>
+<div class="code">
+  <div class="code-head"><span>texto.json</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;object&quot;: &quot;whatsapp_business_account&quot;,
+  &quot;entry&quot;: [{
+    &quot;id&quot;: &quot;102290129340398&quot;,
+    &quot;changes&quot;: [{
+      &quot;field&quot;: &quot;messages&quot;,
+      &quot;value&quot;: {
+        &quot;messaging_product&quot;: &quot;whatsapp&quot;,
+        &quot;metadata&quot;: {
+          &quot;display_phone_number&quot;: &quot;51999000222&quot;,
+          &quot;phone_number_id&quot;: &quot;106540352242922&quot;
+        },
+        &quot;contacts&quot;: [{ &quot;profile&quot;: { &quot;name&quot;: &quot;Cliente Ejemplo&quot; }, &quot;wa_id&quot;: &quot;51999000111&quot; }],
+        &quot;messages&quot;: [{
+          &quot;from&quot;: &quot;51999000111&quot;,
+          &quot;id&quot;: &quot;wamid.TEXTO001&quot;,
+          &quot;timestamp&quot;: &quot;1791360000&quot;,
+          &quot;text&quot;: { &quot;body&quot;: &quot;Quiero 2 leches&quot; },
+          &quot;type&quot;: &quot;text&quot;
+        }]
+      }
+    }]
+  }]
+}</code></pre>
+</div>
+<p>(Está recortado en espacios para que quepa; el archivo del repositorio tiene el mismo contenido.) Lee de afuera hacia adentro:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Qué significa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>object</code></td>
+<td>Siempre <code>"whatsapp_business_account"</code> para esta API. Si es otra cosa, no es para ti.</td>
+</tr>
+<tr>
+<td><code>entry[]</code></td>
+<td>Una lista: Meta puede agrupar varias cuentas o varios cambios en una sola llamada.</td>
+</tr>
+<tr>
+<td><code>changes[].field</code></td>
+<td>Qué cambió. Para mensajes y estados es <code>"messages"</code>; otros campos existen (plantillas, calidad del número…) y los ignoraremos.</td>
+</tr>
+<tr>
+<td><code>value.metadata.phone_number_id</code></td>
+<td>El <strong>id interno</strong> de tu número de negocio (no es el teléfono). Lo usarás para responder.</td>
+</tr>
+<tr>
+<td><code>value.contacts[]</code></td>
+<td>Datos del cliente: su <code>wa_id</code> (su teléfono) y el nombre de perfil.</td>
+</tr>
+<tr>
+<td><code>value.messages[]</code></td>
+<td>Los mensajes nuevos. También es una lista.</td>
+</tr>
+<tr>
+<td><code>messages[].from</code></td>
+<td>Teléfono del cliente, con código de país y sin <code>+</code>.</td>
+</tr>
+<tr>
+<td><code>messages[].id</code></td>
+<td>Identificador único del mensaje (<code>wamid.…</code>). Clave para evitar duplicados.</td>
+</tr>
+<tr>
+<td><code>messages[].timestamp</code></td>
+<td>Segundos Unix, <strong>como texto</strong>: <code>"1791360000"</code>.</td>
+</tr>
+<tr>
+<td><code>messages[].type</code></td>
+<td><code>text</code>, <code>interactive</code>, <code>image</code>, <code>audio</code>, <code>unsupported</code>…</td>
+</tr>
+</tbody>
+</table></div>
+<p>Fíjate en que casi todo son <strong>listas</strong>. No hay garantía de que <code>messages</code> tenga un solo elemento, ni de que <code>entry</code> tenga uno. Tu código debe recorrerlas siempre.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Los números de teléfono del curso</p>
+<p><code>51999000111</code> (cliente) y <code>51999000222</code> (negocio) son números inventados, claramente falsos. Usa siempre rangos así en tus ejemplos y pruebas: nunca pegues teléfonos reales de clientes en el código ni en un repositorio.</p></div>
+<h2 id="cuatro-formas-de-mensaje-y-los-estados"><span class="n">3.</span>Cuatro formas de «mensaje» y los estados</h2>
+<p>El mismo sobre (<code>entry/changes/value</code>) transporta cosas distintas. En el proyecto hay un archivo por cada caso en <code>test/payloads/</code>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Qué representa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>texto.json</code></td>
+<td>El cliente escribió un texto.</td>
+</tr>
+<tr>
+<td><code>boton.json</code></td>
+<td>El cliente tocó un botón de respuesta (<code>type: "interactive"</code>, <code>button_reply</code>).</td>
+</tr>
+<tr>
+<td><code>lista.json</code></td>
+<td>El cliente eligió una fila de una lista (<code>list_reply</code>).</td>
+</tr>
+<tr>
+<td><code>imagen.json</code></td>
+<td>El cliente mandó una foto (<code>type: "image"</code>).</td>
+</tr>
+<tr>
+<td><code>no-soportado.json</code></td>
+<td>Algo que la API no entrega, como una actualización de encuesta (<code>type: "unsupported"</code>).</td>
+</tr>
+<tr>
+<td><code>estado-entregado.json</code></td>
+<td><strong>No es un mensaje</strong>: Meta avisa que un mensaje <em>tuyo</em> se entregó. Viene en <code>statuses[]</code>, no en <code>messages[]</code>.</td>
+</tr>
+<tr>
+<td><code>estado-fallido.json</code></td>
+<td>Un envío tuyo falló; trae <code>errors[]</code> con el motivo.</td>
+</tr>
+</tbody>
+</table></div>
+<p>La diferencia más importante: cuando tu bot <strong>envía</strong> un mensaje, Meta te sigue llamando después para decirte qué pasó con él (<code>sent</code>, <code>delivered</code>, <code>read</code>, <code>failed</code>). Esas llamadas llegan al mismo webhook. Si tu código asume que <em>toda</em> llamada trae un mensaje de cliente, se romperá con la primera confirmación de lectura.</p>
+<p>Veamos el cuerpo de un botón pulsado, que es lo que llega cuando el cliente toca «Hacer pedido»:</p>
+<div class="code">
+  <div class="code-head"><span>JSON</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{ &quot;context&quot;: { &quot;from&quot;: &quot;51999000222&quot;, &quot;id&quot;: &quot;wamid.ORIGEN001&quot; },
+  &quot;from&quot;: &quot;51999000111&quot;, &quot;id&quot;: &quot;wamid.BOTON001&quot;, &quot;timestamp&quot;: &quot;1791360010&quot;,
+  &quot;type&quot;: &quot;interactive&quot;,
+  &quot;interactive&quot;: { &quot;type&quot;: &quot;button_reply&quot;,
+                   &quot;button_reply&quot;: { &quot;id&quot;: &quot;menu_pedir&quot;, &quot;title&quot;: &quot;Hacer pedido&quot; } } }</code></pre>
+</div>
+<p>El campo que importa es <code>button_reply.id</code>: es el <strong>mismo id</strong> que tu motor puso en el botón (<code>menu_pedir</code>). Por eso en el motor las entradas interactivas se manejan por id y no por el texto visible: el título puede cambiar de idioma o de redacción, el id no.</p>
+<h2 id="parsearwebhook-de-json-anidado-a-eventos"><span class="n">4.</span>parsearWebhook: de JSON anidado a eventos simples</h2>
+<p>Recorrer <code>entry → changes → value → messages</code> en medio del código del bot lo volvería ilegible. La solución es una función <strong>pura</strong> (sin red, sin disco) que haga solo esa traducción. En el proyecto se llama <code>parsearWebhook(payload)</code> y devuelve una lista de eventos planos. Su núcleo es este recorrido:</p>
+<div class="code">
+  <div class="code-head"><span>src/whatsapp.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function parsearWebhook(payload) {
+  const eventos = [];
+  if (!payload || payload.object !== &#x27;whatsapp_business_account&#x27; || !Array.isArray(payload.entry)) return eventos;
+
+  for (const entrada of payload.entry) {
+    for (const cambio of entrada?.changes ?? []) {
+      if (cambio?.field !== &#x27;messages&#x27;) continue;
+      const valor = cambio.value ?? {};
+      const phoneNumberId = valor.metadata?.phone_number_id;
+
+      for (const msg of valor.messages ?? []) {
+        const evento = parsearMensaje(msg, valor.contacts ?? [], phoneNumberId);
+        if (evento) eventos.push(evento);
+      }
+      for (const st of valor.statuses ?? []) {
+        if (!st?.id) continue;
+        eventos.push({ tipo: &#x27;estado&#x27;, id: st.id, estado: st.status,
+          timestamp: Number(st.timestamp) || null, destinatario: st.recipient_id, errores: st.errors ?? [] });
+      }
+    }
+  }
+  return eventos;
+}</code></pre>
+</div>
+<p>Tres decisiones de diseño merecen atención:</p>
+<ol>
+<li><strong><code>?.</code> y <code>?? []</code> por todas partes.</strong> Cada nivel puede faltar. Con <code>valor.messages ?? []</code> un cambio sin mensajes (por ejemplo solo estados) simplemente no recorre nada, en vez de lanzar un error.</li>
+<li><strong>Nunca lanza excepciones por basura.</strong> Si el payload no es de WhatsApp, devuelve <code>[]</code>. Un servidor público recibe de todo: escáneres, pruebas, versiones nuevas del formato. Un bot que se cae por un campo inesperado es un bot caído para todos sus clientes.</li>
+<li><strong>Solo traduce.</strong> No decide qué responder: eso es del motor. La función de traducir el contenido a una <code>entrada</code> es esta:</li>
+</ol>
+<div class="code">
+  <div class="code-head"><span>src/whatsapp.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function parsearEntrada(msg) {
+  switch (msg.type) {
+    case &#x27;text&#x27;:
+      return { tipo: &#x27;texto&#x27;, texto: msg.text?.body ?? &#x27;&#x27; };
+    case &#x27;interactive&#x27;: {
+      const i = msg.interactive ?? {};
+      if (i.type === &#x27;button_reply&#x27;) return { tipo: &#x27;interactivo&#x27;, id: i.button_reply?.id, titulo: i.button_reply?.title };
+      if (i.type === &#x27;list_reply&#x27;) return { tipo: &#x27;interactivo&#x27;, id: i.list_reply?.id, titulo: i.list_reply?.title };
+      return { tipo: &#x27;no_soportado&#x27;, subtipo: `interactive:${i.type}` };
+    }
+    default:
+      return { tipo: &#x27;no_soportado&#x27;, subtipo: msg.type === &#x27;unsupported&#x27; ? `unsupported:${msg.unsupported?.type}` : msg.type };
+  }
+}</code></pre>
+</div>
+<p>(En el archivo real hay además un caso <code>button</code> para las respuestas rápidas de plantillas, marcado con un comentario <code>VERIFICAR</code>; lo retomaremos en la <a href="../17-plantillas/">lección 17</a>.)</p>
+<p>Cada tipo que no manejamos se reduce a <code>{ tipo: 'no_soportado', subtipo }</code>, y el motor contesta con un texto amable («Por ahora solo entiendo texto y botones»). Así una foto o un audio nunca rompen la conversación.</p>
+<h3>Resultado real</h3>
+<p>Ejecutando <code>parsearWebhook</code> sobre cada archivo de <code>test/payloads/</code> (Node 24), esto es lo que salió:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>texto            → { tipo:&#x27;mensaje&#x27;, de:&#x27;51999000111&#x27;, nombre:&#x27;Cliente Ejemplo&#x27;, id:&#x27;wamid.TEXTO001&#x27;,
+                     timestamp:1791360000, phoneNumberId:&#x27;106540352242922&#x27;,
+                     entrada:{ tipo:&#x27;texto&#x27;, texto:&#x27;Quiero 2 leches&#x27; } }
+boton            → ... entrada:{ tipo:&#x27;interactivo&#x27;, id:&#x27;menu_pedir&#x27;, titulo:&#x27;Hacer pedido&#x27; }
+lista            → ... entrada:{ tipo:&#x27;interactivo&#x27;, id:&#x27;prod:leche&#x27;, titulo:&#x27;Leche entera 1 L&#x27; }
+imagen           → ... entrada:{ tipo:&#x27;no_soportado&#x27;, subtipo:&#x27;image&#x27; }
+no-soportado     → ... entrada:{ tipo:&#x27;no_soportado&#x27;, subtipo:&#x27;unsupported:poll_update&#x27; }
+estado-entregado → { tipo:&#x27;estado&#x27;, id:&#x27;wamid.SALIDA001&#x27;, estado:&#x27;delivered&#x27;,
+                     timestamp:1791360050, destinatario:&#x27;51999000111&#x27;, errores:[] }
+estado-fallido   → { tipo:&#x27;estado&#x27;, id:&#x27;wamid.SALIDA002&#x27;, estado:&#x27;failed&#x27;, timestamp:1791360060,
+                     destinatario:&#x27;51999000111&#x27;,
+                     errores:[{ code:131047, title:&#x27;Re-engagement message&#x27;, ... }] }</code></pre>
+</div>
+<p>(Las líneas con <code>...</code> repiten los mismos campos <code>tipo</code>, <code>de</code>, <code>nombre</code>, <code>id</code>, <code>timestamp</code> y <code>phoneNumberId</code> del primer evento; los acorté solo para que quepan.)</p>
+<p>Y con basura:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>parsearWebhook({ object: &#x27;x&#x27; })        → []
+parsearWebhook(null)                   → []
+parsearWebhook({ object:&#x27;whatsapp_business_account&#x27;, entry:&#x27;raro&#x27; })  → []
+mensaje sin id ni from                 → []</code></pre>
+</div>
+<p>Fíjate en el estado fallido: el código de error <code>131047</code> con la explicación «han pasado más de 24 horas desde que el cliente respondió». Es la regla de la ventana de 24 horas de la <a href="../01-como-funciona-un-bot/">lección 1</a> hablándote directamente. Los códigos de error cambian con el tiempo; consulta la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes">lista oficial de errores</a>.</p>
+<h2 id="la-verificacion-get-este-webhook-es-tuyo"><span class="n">5.</span>La verificación GET: «¿este webhook es tuyo?»</h2>
+<p>Cuando registres tu URL en el panel de Meta (lo harás en la <a href="../13-recibir-mensajes-reales/">lección 13</a>), Meta no confía a ciegas: antes de empezar a mandarte mensajes, comprueba que <strong>tú controlas esa dirección</strong>. Lo hace con una petición <code>GET</code> con tres parámetros:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>GET /webhook?hub.mode=subscribe&amp;hub.verify_token=minimarket-123&amp;hub.challenge=1158201444</code></pre>
+</div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Quién lo pone</th>
+<th>Qué debes hacer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hub.mode</code></td>
+<td>Meta</td>
+<td>Debe ser <code>subscribe</code>.</td>
+</tr>
+<tr>
+<td><code>hub.verify_token</code></td>
+<td>Tú, en el panel de Meta, al registrar el webhook</td>
+<td>Compararlo con el valor que guardaste en tu servidor (<code>VERIFY_TOKEN</code>).</td>
+</tr>
+<tr>
+<td><code>hub.challenge</code></td>
+<td>Meta (un número al azar)</td>
+<td>Devolverlo <strong>tal cual</strong>, como texto, con estado 200.</td>
+</tr>
+</tbody>
+</table></div>
+<p>El <code>verify_token</code> es una frase larga que inventas tú. No es un secreto de Meta: es un acuerdo entre las dos partes («si me llamas con esta frase, soy yo»). Si no coincide, respondes <code>403</code> y Meta rechaza el registro. La implementación del proyecto:</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function verificarWebhook(url, env) {
+  const modo = url.searchParams.get(&#x27;hub.mode&#x27;);
+  const token = url.searchParams.get(&#x27;hub.verify_token&#x27;);
+  const reto = url.searchParams.get(&#x27;hub.challenge&#x27;);
+  if (modo === &#x27;subscribe&#x27; &amp;&amp; env.VERIFY_TOKEN &amp;&amp; token === env.VERIFY_TOKEN &amp;&amp; reto) {
+    return new Response(reto, { status: 200 });
+  }
+  return new Response(&#x27;Prohibido&#x27;, { status: 403 });
+}</code></pre>
+</div>
+<p>Observa <code>env.VERIFY_TOKEN &amp;&amp;</code>: si olvidaste configurar la variable, <strong>nadie</strong> pasa la verificación, en vez de «pasar todos porque <code>undefined === undefined</code>». Ese es el tipo de detalle que separa un código que funciona de uno seguro.</p>
+<p>Probado contra el Worker corriendo en local (lección 10), con los resultados reales:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>GET /webhook?hub.mode=subscribe&amp;hub.verify_token=minimarket-123&amp;hub.challenge=1158201444  →  1158201444 [200]
+GET /webhook?hub.mode=subscribe&amp;hub.verify_token=malo&amp;hub.challenge=1                    →  Prohibido [403]</code></pre>
+</div>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · El punto sutil de los parámetros con punto</p>
+<p>En una URL, <code>hub.mode</code> es el nombre del parámetro, con el punto incluido. Con <code>URLSearchParams</code> se lee con <code>url.searchParams.get('hub.mode')</code>; no existe «<code>hub</code> con propiedad <code>mode</code>». En frameworks como Express, algunos transforman los puntos en objetos anidados y rompen la lectura; con la API estándar de <code>URL</code> no pasa.</p></div>
+<h2 id="la-firma-este-post-viene-de-meta"><span class="n">6.</span>La firma: «¿este POST viene de Meta?»</h2>
+<p>La verificación GET ocurre una vez. Pero tu webhook es una <strong>URL pública</strong>: cualquiera que la conozca puede enviarle un <code>POST</code> con un JSON inventado que diga «el cliente 51999000111 confirmó un pedido de 500 soles». Necesitas una forma de distinguir el POST auténtico del falso.</p>
+<p>Meta la ofrece: <strong>firma cada llamada</strong>. Calcula un <strong>HMAC-SHA256</strong> del cuerpo usando el <strong>App Secret</strong> de tu app (un secreto que solo conocen Meta y tú) y lo envía en la cabecera:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>X-Hub-Signature-256: sha256=58646b68861070c92a00276f31a1ab94d217826c2cf997a571b05468af1cc813</code></pre>
+</div>
+<p>Un <strong>HMAC</strong> es una «huella» del mensaje que depende de una clave. Quien no conoce la clave no puede producir una huella válida, y si alguien cambia aunque sea una coma del cuerpo, la huella ya no coincide. Tu servidor repite el cálculo con su copia del secreto y compara.</p>
+<p>El proyecto lo implementa con la API estándar <code>crypto.subtle</code>, que existe tanto en Node como en Cloudflare Workers (sin instalar nada):</p>
+<div class="code">
+  <div class="code-head"><span>src/whatsapp.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export async function verificarFirma(secretoApp, cuerpoCrudo, cabecera) {
+  if (!secretoApp || typeof cabecera !== &#x27;string&#x27;) return false;
+  const coincidencia = /^sha256=([0-9a-f]{64})$/i.exec(cabecera.trim());
+  if (!coincidencia) return false;
+  const clave = await crypto.subtle.importKey(
+    &#x27;raw&#x27;, codificador.encode(secretoApp), { name: &#x27;HMAC&#x27;, hash: &#x27;SHA-256&#x27; }, false, [&#x27;verify&#x27;],
+  );
+  return crypto.subtle.verify(&#x27;HMAC&#x27;, clave, hexABytes(coincidencia[1].toLowerCase()), codificador.encode(cuerpoCrudo));
+}</code></pre>
+</div>
+<p>Detalles que importan:</p>
+<ul>
+<li><strong>Formato primero.</strong> Si la cabecera no es <code>sha256=</code> seguido de 64 caracteres hexadecimales, ni se calcula nada: es falso.</li>
+<li><strong>Comparación en tiempo constante.</strong> <code>crypto.subtle.verify</code> compara sin «salir temprano» al primer byte distinto. Una comparación ingenua con <code>===</code> filtra, por diferencias de milisegundos, cuánto de la firma acertó el atacante. La idea se explica en la <a href="../24-seguridad-y-privacidad/">lección 24</a>.</li>
+<li><strong>Cuerpo crudo, no el objeto.</strong> La firma se calculó sobre los bytes exactos que mandó Meta. Si haces <code>JSON.parse</code> y luego <code>JSON.stringify</code>, el texto cambia (espacios, orden) y la firma deja de coincidir.</li>
+</ul>
+<p>Hay una función compañera, <code>firmar</code>, que calcula la cabecera. Sirve en las pruebas para fabricar peticiones «de Meta». Con el cuerpo de <code>texto.json</code> (608 caracteres) y el secreto de ejemplo <code>secreto</code>:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>firmar(&#x27;secreto&#x27;, cuerpo)                  → sha256=58646b68861070c92a00276f31a1ab94d217826c2cf997a571b05468af1cc813
+firmar(&#x27;secreto&#x27;, &#x27;{}&#x27;)                    → sha256=9b09d74c60be8d716f80e3db365e4e4f49b2b1a55a3d1d5931e96eb98dde17e9
+
+verificarFirma(&#x27;secreto&#x27;, cuerpo, firma)           → true
+verificarFirma(&#x27;otro-secreto&#x27;, cuerpo, firma)      → false   (secreto distinto)
+verificarFirma(&#x27;secreto&#x27;, cuerpo + &#x27; &#x27;, firma)     → false   (un espacio de más)
+verificarFirma(&#x27;secreto&#x27;, cuerpo, &#x27;sha256=abc&#x27;)    → false   (formato inválido)</code></pre>
+</div>
+<p>Y para estar seguros de que no nos engañamos a nosotros mismos, contrasté con una herramienta independiente, <code>openssl</code>:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>openssl dgst -sha256 -hmac secreto -hex &lt; test/payloads/texto.json</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>58646b68861070c92a00276f31a1ab94d217826c2cf997a571b05468af1cc813</code></pre>
+</div>
+<p>Idéntico. Y este es el error clásico del cuerpo reconstruido, ejecutado de verdad:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>cuerpo original: 608 caracteres
+JSON.stringify(JSON.parse(cuerpo)): 438 caracteres
+verificarFirma(&#x27;secreto&#x27;, reconstruido, firma) → false</code></pre>
+</div>
+<p>Mismo contenido para una persona, distintos bytes para el HMAC. Por eso el Worker lee el cuerpo con <code>await request.text()</code> y recién después hace <code>JSON.parse</code>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Dónde está el App Secret</p>
+<p>El <strong>App Secret</strong> (secreto de la app) se consulta en el panel de tu app de Meta; el nombre exacto del menú cambia con el tiempo. Trátalo como una contraseña: nunca va en el código ni en Git, sino en una variable secreta (lección <a href="../11-despliegue-en-cloudflare/">11</a>). Verifica la ubicación y el formato de la firma en la <a href="https://developers.facebook.com/docs/graph-api/webhooks/getting-started">guía oficial de webhooks</a>.</p></div>
+<h2 id="que-hacer-con-lo-que-no-entiendes"><span class="n">7.</span>Qué hacer con lo que no entiendes</h2>
+<p>Resume la filosofía de esta lección: <strong>un webhook es una puerta pública, y por ella entra de todo</strong>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Situación</th>
+<th>Respuesta correcta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>El POST no trae firma o es inválida</td>
+<td><code>401</code>, sin procesar nada.</td>
+</tr>
+<tr>
+<td>El cuerpo no es JSON</td>
+<td><code>400</code>.</td>
+</tr>
+<tr>
+<td>JSON válido pero no es de WhatsApp (<code>object</code> distinto)</td>
+<td><code>200</code> y no hacer nada (<code>parsearWebhook</code> devuelve <code>[]</code>).</td>
+</tr>
+<tr>
+<td>Estados (<code>sent</code>, <code>delivered</code>, <code>read</code>)</td>
+<td><code>200</code>; solo registrar los <code>failed</code>.</td>
+</tr>
+<tr>
+<td>Un tipo de mensaje nuevo que no conoces</td>
+<td><code>no_soportado</code>; el motor pide texto o botones.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Hay una razón más para devolver <code>200</code> ante lo desconocido: si respondes con error, Meta <strong>reintenta</strong> durante un tiempo, y tu bot recibirá una tormenta de la misma llamada que nunca podrá procesar. «No me sirve, pero la recibí» es respuesta válida.</p>
+<h2 id="errores-frecuentes"><span class="n">8.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Verificar la firma sobre el JSON ya parseado.</strong> Se rompe con cualquier diferencia de espacios. Lee el cuerpo como texto crudo.</li>
+<li><strong>Comparar la firma con <code>===</code>.</strong> Funciona, pero filtra información por tiempos. Usa una comparación de tiempo constante como <code>crypto.subtle.verify</code>.</li>
+<li><strong>Suponer que <code>messages[0]</code> siempre existe.</strong> Los estados llegan sin <code>messages</code>. Recorre listas con <code>?? []</code>.</li>
+<li><strong>Devolver el <code>hub.challenge</code> como JSON.</strong> Debe ser el valor en texto plano, no <code>{"challenge": ...}</code>.</li>
+<li><strong>Dejar que <code>VERIFY_TOKEN</code> sea <code>undefined</code>.</strong> Si no está configurado, <code>undefined === undefined</code> podría dejar pasar a cualquiera. Exige que exista.</li>
+<li><strong>Confundir <code>phone_number_id</code> con el teléfono.</strong> El primero es un identificador interno de la API; el teléfono del cliente está en <code>from</code>.</li>
+<li><strong>Tratar <code>timestamp</code> como milisegundos.</strong> Meta lo manda en <strong>segundos</strong>, y como texto. Conviértelo con <code>Number(...)</code> y multiplica por 1000 cuando compares con <code>Date.now()</code>.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">9.</span>Apuntes para llevar</h2>
+<ul>
+<li>En la API oficial, <strong>Meta te llama</strong> (webhook): un <code>GET</code> para verificar y un <code>POST</code> por cada mensaje o estado.</li>
+<li>El JSON está anidado (<code>entry → changes → value → messages/statuses</code>) y casi todo son listas: recórrelas con <code>?? []</code>.</li>
+<li><code>parsearWebhook</code> convierte ese JSON en eventos planos (<code>mensaje</code> o <code>estado</code>) y devuelve <code>[]</code> ante basura, sin lanzar errores.</li>
+<li>Verificación GET: si <code>hub.mode === 'subscribe'</code> y el token coincide, devuelve <code>hub.challenge</code> en texto con 200; si no, 403.</li>
+<li>Firma: HMAC-SHA256 del <strong>cuerpo crudo</strong> con el App Secret, en <code>X-Hub-Signature-256: sha256=&lt;hex&gt;</code>, comparada en tiempo constante.</li>
+<li>Los estados (<code>delivered</code>, <code>read</code>, <code>failed</code>) llegan al mismo webhook; los errores, como <code>131047</code>, traen la causa.</li>
+</ul>
+<h2 id="glosario"><span class="n">10.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Webhook</td>
+<td>URL de tu servidor a la que Meta envía eventos mediante peticiones POST.</td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>El cuerpo JSON de una petición; aquí, el aviso de Meta.</td>
+</tr>
+<tr>
+<td><code>wamid</code></td>
+<td>Identificador único de un mensaje de WhatsApp, útil para evitar duplicados.</td>
+</tr>
+<tr>
+<td><code>phone_number_id</code></td>
+<td>Identificador interno de tu número de negocio en la API (no es el teléfono).</td>
+</tr>
+<tr>
+<td>Estado (status)</td>
+<td>Aviso sobre un mensaje enviado por ti: <code>sent</code>, <code>delivered</code>, <code>read</code> o <code>failed</code>.</td>
+</tr>
+<tr>
+<td><code>hub.challenge</code></td>
+<td>Número que Meta manda al verificar el webhook y que debes devolver tal cual.</td>
+</tr>
+<tr>
+<td>Verify token</td>
+<td>Frase acordada entre Meta y tu servidor para la verificación inicial.</td>
+</tr>
+<tr>
+<td>HMAC-SHA256</td>
+<td>Huella de un mensaje calculada con una clave secreta; prueba autenticidad e integridad.</td>
+</tr>
+<tr>
+<td>App Secret</td>
+<td>Secreto de tu app de Meta con el que se firman los webhooks.</td>
+</tr>
+<tr>
+<td>Cuerpo crudo</td>
+<td>El texto exacto de la petición, antes de convertirlo a objeto.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Quién inicia la comunicación cuando un cliente escribe a tu bot?</p><ul class="opts"><li><button type="button" class="opt">Tu servidor, que consulta a Meta cada pocos segundos</button></li><li><button type="button" class="opt" data-ok>Meta, que hace un POST a tu webhook con el mensaje en JSON</button></li><li><button type="button" class="opt">El teléfono del cliente, que llama directamente a tu servidor</button></li><li><button type="button" class="opt">Tu bot, que abre una conexión permanente con el cliente</button></li></ul><p class="explain" hidden>En la API oficial, Meta empuja cada evento a la URL del webhook que registraste.</p></div>
+<div class="quiz-q"><p>En la verificación GET, ¿qué debe devolver tu servidor si el token coincide?</p><ul class="opts"><li><button type="button" class="opt">Un JSON con el token</button></li><li><button type="button" class="opt">Un código 204 sin cuerpo</button></li><li><button type="button" class="opt" data-ok>El valor de <code>hub.challenge</code>, como texto, con estado 200</button></li><li><button type="button" class="opt">El App Secret</button></li></ul><p class="explain" hidden>Meta compara lo que devuelves con el reto que envió; si coincide, da por verificado el webhook.</p></div>
+<div class="quiz-q"><p>¿Sobre qué se calcula el HMAC de <code>X-Hub-Signature-256</code>?</p><ul class="opts"><li><button type="button" class="opt">Sobre el objeto JavaScript ya parseado</button></li><li><button type="button" class="opt">Sobre la URL de la petición</button></li><li><button type="button" class="opt" data-ok>Sobre el cuerpo crudo exacto que mandó Meta</button></li><li><button type="button" class="opt">Sobre el <code>verify_token</code></button></li></ul><p class="explain" hidden>Cualquier cambio de bytes (incluso espacios al reconstruir el JSON) hace que la firma deje de coincidir.</p></div>
+<div class="quiz-q"><p>Llega un POST firmado que solo trae <code>statuses[]</code> con estado <code>delivered</code>. ¿Qué debe hacer <code>parsearWebhook</code>?</p><ul class="opts"><li><button type="button" class="opt">Lanzar un error porque no hay mensajes</button></li><li><button type="button" class="opt">Devolver una lista vacía</button></li><li><button type="button" class="opt" data-ok>Devolver un evento de tipo <code>estado</code> y seguir sin romperse</button></li><li><button type="button" class="opt">Convertirlo en un mensaje de texto vacío</button></li></ul><p class="explain" hidden>Los estados son eventos legítimos; el bot los registra (y reacciona solo a los <code>failed</code>).</p></div>
+<div class="quiz-q"><p>¿Por qué se usa una comparación de tiempo constante al verificar la firma?</p><ul class="opts"><li><button type="button" class="opt">Porque es más rápida que <code>===</code></button></li><li><button type="button" class="opt">Porque evita que el JSON se modifique</button></li><li><button type="button" class="opt" data-ok>Para no filtrar, por diferencias de tiempo, cuántos caracteres de la firma acertó un atacante</button></li><li><button type="button" class="opt">Porque Meta lo exige en sus términos de servicio</button></li></ul><p class="explain" hidden>Una comparación que sale al primer carácter distinto da pistas medibles sobre la firma correcta.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-09">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../08-flujo-de-pedido/"><small>← Anterior</small>Flujo de pedido</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 9 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%209:%20Webhooks%20y%20JSON%20de%20WhatsApp&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

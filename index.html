@@ -8,7 +8,7 @@
   <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#0b7a75">
   <meta name="color-scheme" content="light dark">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
@@ -22,9 +22,9 @@
 <body>
   <a class="saltar" href="#contenido">Saltar al contenido</a>
   <header class="topbar">
-    <a class="brand" href="./"><span class="brand-logo">💬</span> Chatbots de WhatsApp desde cero</a>
+    <a class="brand" href="./"><span class="brand-logo"><img src="assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
     <div class="topbar-actions">
-      <a class="icon-btn nav-cursos" href="#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn nav-cursos" href="simulador/" style="text-decoration:none">Simulador</a><a class="icon-btn nav-cursos" href="#temario" style="text-decoration:none">Temario</a>
       <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
     </div>
   </header>
@@ -32,17 +32,24 @@
   <main class="wrap" id="contenido">
     <div class="hero-grid">
       <div class="hero">
-        <span class="eyebrow">Gratis · En español · 1 lecciones</span>
+        <span class="eyebrow">Gratis · En español · 28 lecciones</span>
         <h1>Chatbots de WhatsApp desde cero</h1>
         <p>Aprende a crear un bot de WhatsApp para cualquier negocio: del primer mensaje en consola a un bot real en la nube con pedidos, recordatorios y marketing responsable. Todo con un minimarket como proyecto guía.</p>
         <a class="btn" href="01-como-funciona-un-bot/">Empezar la lección 1</a>
         <a class="btn secondary" href="#temario">Ver el temario</a>
         <div class="avance" id="avance"></div>
       </div>
-      <div class="hero-demo" role="group" aria-label="Demostración: un bot que responde en consola">
+      <div class="hero-visual">
+       <div class="hero-demo" role="group" aria-label="Demostración: un bot que responde en consola">
         <div class="win-bar"><i></i><i></i><i></i></div>
         <pre id="typing" data-lines='[&quot;const msg = \&quot;quiero 2 gaseosas\&quot;;&quot;, &quot;const r = bot(msg);&quot;, &quot;console.log(r);&quot;]' data-outs='[&quot;&quot;, &quot;&quot;, &quot;Agregué 2 × Gaseosa 500 ml (S/ 5.00 c/u). ¿Algo más?&quot;]'></pre>
         <div class="hero-out" id="typing-out"></div>
+       </div>
+       <div class="chat-float" aria-hidden="true">
+        <div class="bub in bub-1">Hola, ¿tienen mesa para hoy?</div>
+        <div class="bub out bub-2">¡Claro! Soy el bot <span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="bub warm bub-3">Reservado ✅</div>
+       </div>
       </div>
     </div>
 
@@ -53,12 +60,106 @@
       <section><h2 class="section-title" style="margin-top:0">Lo que construirás</h2><ul class="checks-list"><li>Un <strong>motor de conversación</strong> con menús, estado y lenguaje natural básico.</li><li>Un <strong>servidor</strong> con webhook desplegado en la nube, gratis.</li><li>Un bot conectado a la <strong>API oficial de WhatsApp</strong> que recibe y envía mensajes.</li><li><strong>Recordatorios</strong> y seguimiento automáticos con plantillas.</li><li>Las bases para <strong>vender</strong> bots a negocios: costos, privacidad y alcance.</li></ul></section>
     </div>
 
-    <h2 class="section-title" id="temario">Temario · ≈ 1 hora</h2>
+    <h2 class="section-title" id="temario">Temario · ≈ 30 horas</h2>
     <ul class="lessons">
       <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 1 · Fundamentos</h3><p style="color:var(--muted);margin:.2rem 0 0">Qué es un bot de WhatsApp, qué puede hacer y cómo se diseña antes de programarlo.</p></li>
       <li><a class="lesson-card" href="01-como-funciona-un-bot/" data-leccion="bot-01">
         <span class="lesson-num">LECCIÓN 01</span><h3>Cómo funciona un bot de WhatsApp</h3>
         <p>Qué es un bot de WhatsApp, qué piezas lo forman, qué diferencia a la API oficial de las apps no oficiales y qué reglas impone Meta.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="02-disenar-la-conversacion/" data-leccion="bot-02">
+        <span class="lesson-num">LECCIÓN 02</span><h3>Diseñar la conversación antes de programar</h3>
+        <p>Define qué hará y qué no hará tu bot, su tono, sus flujos y estados, los límites de los mensajes interactivos y cómo pasar a una persona.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 2 · Herramientas</h3><p style="color:var(--muted);margin:.2rem 0 0">Lo mínimo de JavaScript y Node para construir un bot, y tu primer bot en la terminal.</p></li>
+      <li><a class="lesson-card" href="03-javascript-y-node-para-bots/" data-leccion="bot-03">
+        <span class="lesson-num">LECCIÓN 03</span><h3>JavaScript y Node.js para bots</h3>
+        <p>Instala Node, aprende a usar la terminal y repasa solo el JavaScript que necesita un bot: arrays, funciones puras, async/await, JSON, fetch y pruebas.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="04-primer-bot-en-consola/" data-leccion="bot-04">
+        <span class="lesson-num">LECCIÓN 04</span><h3>Tu primer bot en la consola</h3>
+        <p>Construye un bot funcional en la terminal con readline, separa el cerebro de la entrada y salida, y escribe su primera prueba automática.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 3 · Motor de reglas</h3><p style="color:var(--muted);margin:.2rem 0 0">El cerebro del bot: estado, texto libre, catálogo, carrito y pedido completo.</p></li>
+      <li><a class="lesson-card" href="05-estado-de-la-conversacion/" data-leccion="bot-05">
+        <span class="lesson-num">LECCIÓN 05</span><h3>El estado de la conversación</h3>
+        <p>Cómo un bot recuerda en qué punto va cada cliente con una sesión y una máquina de estados, y por qué su cerebro debe ser una función pura.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="06-entender-texto-libre/" data-leccion="bot-06">
+        <span class="lesson-num">LECCIÓN 06</span><h3>Entender texto libre</h3>
+        <p>Cómo un bot de reglas entiende frases como «quiero dos leches» con normalización, cantidades, sinónimos, tolerancia a errores de tipeo e intenciones, sin usar IA.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="07-catalogo-y-carrito/" data-leccion="bot-07">
+        <span class="lesson-num">LECCIÓN 07</span><h3>Catálogo y carrito</h3>
+        <p>Modela el catálogo del minimarket como datos, respeta los límites de botones y listas de WhatsApp y construye un carrito puro e inmutable que suma en céntimos.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="08-flujo-de-pedido/" data-leccion="bot-08">
+        <span class="lesson-num">LECCIÓN 08</span><h3>Flujo de pedido</h3>
+        <p>Cierra el pedido de punta a punta, con entrega o recojo, mínimo de delivery, dirección, pago y confirmación, y aprende a probar todo el recorrido.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 4 · Servidor y webhook</h3><p style="color:var(--muted);margin:.2rem 0 0">Pasar de la terminal a un servidor que recibe mensajes por HTTP y vive en la nube.</p></li>
+      <li><a class="lesson-card" href="09-webhooks-y-json-de-whatsapp/" data-leccion="bot-09">
+        <span class="lesson-num">LECCIÓN 09</span><h3>Webhooks y JSON de WhatsApp</h3>
+        <p>Cómo Meta te entrega los mensajes: forma del JSON, parser que lo convierte en eventos simples, verificación GET del webhook y firma HMAC-SHA256.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="10-servidor-del-bot/" data-leccion="bot-10">
+        <span class="lesson-num">LECCIÓN 10</span><h3>El servidor del bot</h3>
+        <p>Cómo un Cloudflare Worker une webhook, motor y KV: rutas, firma, idempotencia, respuesta rápida con ctx.waitUntil y pruebas locales con wrangler dev.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="11-despliegue-en-cloudflare/" data-leccion="bot-11">
+        <span class="lesson-num">LECCIÓN 11</span><h3>Despliegue en Cloudflare</h3>
+        <p>Publicar el bot en Cloudflare Workers paso a paso: cuenta, Wrangler, KV, secretos, wrangler.toml, dry-run, deploy, logs con tail y cómo volver atrás.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 5 · Conectar con WhatsApp</h3><p style="color:var(--muted);margin:.2rem 0 0">Cuenta de Meta, número, tokens, recibir mensajes reales y enviar texto, botones y listas.</p></li>
+      <li><a class="lesson-card" href="12-cuenta-y-app-de-meta/" data-leccion="bot-12">
+        <span class="lesson-num">LECCIÓN 12</span><h3>Cuenta y app de Meta</h3>
+        <p>Crea tu cuenta de desarrollador, la app de negocio, la cuenta de WhatsApp Business y el número de prueba, y entiende qué token usar y cuál guardar.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="13-recibir-mensajes-reales/" data-leccion="bot-13">
+        <span class="lesson-num">LECCIÓN 13</span><h3>Recibir mensajes reales</h3>
+        <p>Conecta el webhook de tu Worker con Meta, verifica la URL, suscríbete al campo de mensajes y mira llegar un mensaje real de tu celular.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="14-enviar-mensajes/" data-leccion="bot-14">
+        <span class="lesson-num">LECCIÓN 14</span><h3>Enviar mensajes</h3>
+        <p>Envía texto, botones y listas con la Graph API usando las funciones del código del curso, respeta los límites de WhatsApp y diagnostica los errores comunes.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="27-practica-con-telegram/" data-leccion="bot-27">
+        <span class="lesson-num">LECCIÓN 27</span><h3>Practica con Telegram sin cuenta de Meta</h3>
+        <p>Conecta el mismo motor de reglas a un bot de Telegram para practicar webhooks, botones y sesiones sin esperar aprobaciones de Meta ni gastar un sol.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="28-otros-proveedores/" data-leccion="bot-28">
+        <span class="lesson-num">LECCIÓN 28</span><h3>Otros proveedores y alternativas a la API directa</h3>
+        <p>Compara la Cloud API directa de Meta con proveedores como Twilio y 360dialog y con librerías no oficiales, para elegir con criterio y sin riesgos para el negocio.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 6 · Memoria y datos</h3><p style="color:var(--muted);margin:.2rem 0 0">Guardar sesiones y pedidos, y darle al dueño un panel con Google Sheets.</p></li>
+      <li><a class="lesson-card" href="15-memoria-con-kv/" data-leccion="bot-15">
+        <span class="lesson-num">LECCIÓN 15</span><h3>Memoria con Cloudflare KV</h3>
+        <p>Guarda sesiones, pedidos e ids de mensajes en Cloudflare KV con vencimiento automático (TTL) y aprende sus límites reales para no perder datos.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="16-panel-con-google-sheets/" data-leccion="bot-16">
+        <span class="lesson-num">LECCIÓN 16</span><h3>Panel del dueño con Google Sheets</h3>
+        <p>Guarda cada pedido del bot como una fila en Google Sheets mediante una aplicación web de Apps Script protegida con secreto, y arma un panel sencillo para el dueño.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 7 · Plantillas y automatización</h3><p style="color:var(--muted);margin:.2rem 0 0">Escribir primero: plantillas aprobadas, recordatorios programados y formularios con Flows.</p></li>
+      <li><a class="lesson-card" href="17-plantillas/" data-leccion="bot-17">
+        <span class="lesson-num">LECCIÓN 17</span><h3>Plantillas de mensaje</h3>
+        <p>Crea plantillas de WhatsApp, entiende sus categorías y su aprobación, envíalas con variables y botones de respuesta rápida usando whatsapp.js, y recibe lo que el cliente toca.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="18-recordatorios-y-seguimiento/" data-leccion="bot-18">
+        <span class="lesson-num">LECCIÓN 18</span><h3>Recordatorios y seguimiento automático</h3>
+        <p>Cómo enviar avisos útiles a tiempo con un cron, elegir entre texto libre y plantilla según la ventana de 24 horas, y respetar la baja del cliente.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="19-whatsapp-flows/" data-leccion="bot-19">
+        <span class="lesson-num">LECCIÓN 19</span><h3>Formularios dentro de WhatsApp con Flows</h3>
+        <p>Qué son los WhatsApp Flows, cómo es su JSON, cómo se envían y se leen sus respuestas, cuándo hace falta un endpoint y cuándo bastan botones.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 8 · Marketing y costos</h3><p style="color:var(--muted);margin:.2rem 0 0">Promociones sin spam, permisos de los clientes y cuánto cuesta cada mensaje.</p></li>
+      <li><a class="lesson-card" href="20-marketing-responsable/" data-leccion="bot-20">
+        <span class="lesson-num">LECCIÓN 20</span><h3>Marketing responsable por WhatsApp</h3>
+        <p>Cómo conseguir y registrar el permiso de tus clientes, respetar la baja al instante, enviar promociones útiles y cuidar la calidad de tu número para no ser limitado.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="21-costos-y-metricas/" data-leccion="bot-21">
+        <span class="lesson-num">LECCIÓN 21</span><h3>Costos y métricas de tu bot</h3>
+        <p>Cómo cobra Meta cada mensaje, cuánto cuesta realmente un bot pequeño con su infraestructura y qué métricas registrar para saber si el bot le sirve al negocio.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 9 · Inteligencia artificial</h3><p style="color:var(--muted);margin:.2rem 0 0">Cuándo y cómo añadir IA a un bot de reglas sin perder el control.</p></li>
+      <li><a class="lesson-card" href="22-ia-como-complemento/" data-leccion="bot-22">
+        <span class="lesson-num">LECCIÓN 22</span><h3>IA como complemento, no como cerebro</h3>
+        <p>Cuándo y cómo sumar inteligencia artificial a un bot de reglas: clasificar texto libre, validar su salida, controlar costos y no dejarla inventar precios.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 10 · Producción y negocio</h3><p style="color:var(--muted);margin:.2rem 0 0">Pruebas, errores, seguridad, atención humana y cómo ofrecer tu bot a un negocio.</p></li>
+      <li><a class="lesson-card" href="23-pruebas-y-errores/" data-leccion="bot-23">
+        <span class="lesson-num">LECCIÓN 23</span><h3>Pruebas, registros y errores comunes</h3>
+        <p>Cómo probar un bot con node:test, conversaciones completas y payloads reales, qué registrar en los logs, cómo reintentar bien y qué significan los errores 131xxx de WhatsApp.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="24-seguridad-y-privacidad/" data-leccion="bot-24">
+        <span class="lesson-num">LECCIÓN 24</span><h3>Seguridad y privacidad</h3>
+        <p>Protege secretos y tokens, verifica la firma de Meta, limita el abuso y trata los datos de tus clientes con mínimo necesario, retención y borrado a petición.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="25-atencion-humana/" data-leccion="bot-25">
+        <span class="lesson-num">LECCIÓN 25</span><h3>Atención humana y traspaso</h3>
+        <p>Cómo pasar una conversación a una persona sin que el bot interfiera, respetar horarios, avisar al dueño y devolverle la conversación al bot cuando corresponde.</p><span class="tag open">Disponible</span></a></li>
+      <li><a class="lesson-card" href="26-vender-tu-bot/" data-leccion="bot-26">
+        <span class="lesson-num">LECCIÓN 26</span><h3>Vender tu bot como servicio</h3>
+        <p>Cómo convertir lo aprendido en un servicio para negocios: a quién ofrecerlo, qué prometer y qué no, cómo cotizar, hacer la demo, acordar datos y dar mantenimiento.</p><span class="tag open">Disponible</span></a></li>
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Cierre del curso</h3></li>
+      <li><a class="lesson-card" href="proyecto-bot-minimarket/" data-leccion="bot-P">
+        <span class="lesson-num">PROYECTO FINAL</span><h3>Proyecto final: el bot del minimarket</h3>
+        <p>Arma de punta a punta el bot de Minimarket La Esquina reutilizando el código de referencia: pruebas, atención humana, despliegue, conexión con WhatsApp, checklist de entrega y criterios de evaluación.</p><span class="tag open">Disponible</span></a></li>
     </ul>
   </main>
 

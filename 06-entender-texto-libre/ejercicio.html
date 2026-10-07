@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Entender texto libre · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Entender texto libre.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Entender texto libre · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Entender texto libre.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 6</a> › Ejercicio</div>
+        <h1>Ejercicio: Entender texto libre</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Construir una versión reducida de <code>src/texto.js</code>: normalizar lo que escribe el cliente, extraer cantidades, buscar productos por sinónimos y detectar la intención de un mensaje. Son las herramientas con las que el bot entiende «quiero dos leches» sin necesitar inteligencia artificial.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> se hace en tu terminal con el código de referencia; la <strong>parte B</strong> son cuatro funciones de JavaScript puro que se comprueban en esta página. Trabajas con textos cortos del minimarket y con un catálogo de tres productos que las comprobaciones te pasan como argumento.</p>
+<p>Reglas que debes implementar:</p>
+<ul>
+<li><code>normalizar</code>: minúsculas, sin tildes, todo lo que no sea letra o número se vuelve espacio, espacios colapsados y recortados. Si no recibe un texto, devuelve <code>""</code>.</li>
+<li><code>extraerCantidad</code>: busca el primer número escrito en cifras (<code>2</code>) o en palabras (<code>un</code>, <code>uno</code>, <code>una</code>, <code>dos</code>, <code>tres</code>, <code>cuatro</code>, <code>cinco</code>, <code>seis</code>, <code>diez</code>). <code>media docena</code> vale 6; <code>docena</code> multiplica por 12 (<code>dos docenas</code> son 24; <code>una docena</code> son 12; <code>docena</code> sola son 12). Si no hay nada, devuelve 1.</li>
+<li><code>buscarProductos(texto, productos)</code>: cada producto tiene <code>id</code> y <code>sinonimos</code> (frases ya normalizadas). Una frase coincide solo si <strong>todas</strong> sus palabras aparecen en lo escrito (se acepta el plural simple con <code>s</code> o <code>es</code>). Gana la frase con más palabras; si hay empate, se devuelven todos los ids empatados.</li>
+<li><code>detectarIntencion</code>: tabla de frases por intención, probadas en este orden: <code>cancelar</code>, <code>humano</code>, <code>horario</code>, <code>catalogo</code>, <code>confirmar</code>, <code>saludo</code>. Se buscan <strong>palabras completas</strong>. <code>confirmar</code> y <code>saludo</code> solo valen si el mensaje tiene 4 palabras o menos. Si nada coincide, <code>"desconocida"</code>.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Intención</th>
+<th>Frases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cancelar</code></td>
+<td><code>cancelar</code>, <code>ya no quiero</code></td>
+</tr>
+<tr>
+<td><code>humano</code></td>
+<td><code>persona</code>, <code>asesor</code></td>
+</tr>
+<tr>
+<td><code>horario</code></td>
+<td><code>horario</code>, <code>a que hora</code></td>
+</tr>
+<tr>
+<td><code>catalogo</code></td>
+<td><code>catalogo</code>, <code>que venden</code></td>
+</tr>
+<tr>
+<td><code>confirmar</code></td>
+<td><code>si</code>, <code>ok</code>, <code>listo</code></td>
+</tr>
+<tr>
+<td><code>saludo</code></td>
+<td><code>hola</code>, <code>buenas</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade tolerancia a errores de tipeo con la distancia de Levenshtein: acepta que «mantequila» coincida con «mantequilla», pero <strong>solo</strong> en palabras de 5 letras o más, para no confundir «sal» con «sol». Compara tu resultado con <code>buscarProductos</code> de <code>src/texto.js</code>.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En <code>codigo/</code> crea un script <code>probar-texto.mjs</code> que importe <code>buscarProductos</code> de <code>src/texto.js</code> y <code>PRODUCTOS</code> de <code>src/catalogo.js</code>, y pruébalo con cinco frases tuyas (con errores de tipeo, plurales y sinónimos como «papitas» o «tallarines»). Anota en <code>notas.md</code> cuáles funcionaron y cuáles no.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Busca una frase que el bot real <strong>no</strong> entienda y piensa qué sinónimo agregarías al catálogo para resolverlo (los sinónimos están en <code>src/catalogo.js</code>).</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>normalizar(texto)</code> según las reglas.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>extraerCantidad(texto)</code> (usa <code>normalizar</code> primero).</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>buscarProductos(texto, productos)</code> que devuelva un arreglo de ids.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>detectarIntencion(texto)</code> con la tabla de frases y la regla de los mensajes cortos.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Quitar tildes</summary><p><code>texto.normalize("NFD")</code> separa cada letra de su tilde. Luego <code>.replace(/[̀-ͯ]/g, "")</code> borra las tildes sueltas. Después reemplaza lo que no sea <code>a-z</code>, <code>0-9</code> o espacio por un espacio.</p></details>
+      <details><summary>💡 Pista 2: Palabras completas, no pedazos</summary><p>Para saber si una frase aparece como palabras completas, rodea el texto con espacios y busca la frase también rodeada de espacios: <code>(" " + t + " ").includes(" " + frase + " ")</code>. Así <code>si</code> no coincide dentro de <code>simple</code>.</p></details>
+      <details><summary>💡 Pista 3: Buscar productos</summary><p>Divide lo escrito con <code>split(" ")</code>. Para cada sinónimo, divídelo en palabras y verifica con <code>every</code> que cada una esté en lo escrito (igual, o con <code>s</code>/<code>es</code> al final). El puntaje es el número de palabras de la frase; guarda el máximo y los ids que lo alcanzan.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`normalizar` pasa a minúsculas, quita tildes y signos", "h": "Usa toLowerCase, normalize(\"NFD\") y reemplaza lo que no sea letra o número por espacio.", "t": "return normalizar('¡Quiero DOS Leches!')==='quiero dos leches' && normalizar('  Atún   en LATA  ')==='atun en lata' && normalizar('Azúcar')==='azucar'"}, {"d": "`normalizar` devuelve cadena vacía si no recibe texto", "h": "Comprueba `typeof texto !== \"string\"` al inicio.", "t": "return normalizar(null)==='' && normalizar(undefined)==='' && normalizar(42)==='' && normalizar('')===''"}, {"d": "`extraerCantidad` entiende cifras y palabras", "h": "Recorre las palabras normalizadas: si es solo dígitos usa Number; si está en el diccionario de palabras, usa su valor.", "t": "return extraerCantidad('2 leches')===2 && extraerCantidad('dos leches')===2 && extraerCantidad('quiero tres panes')===3 && extraerCantidad('10 pan frances')===10 && extraerCantidad('una gaseosa')===1"}, {"d": "`extraerCantidad` entiende docenas y devuelve 1 si no hay número", "h": "`media docena` es 6; `docena` multiplica por 12 (por defecto 1 docena).", "t": "return extraerCantidad('media docena de huevos')===6 && extraerCantidad('una docena de huevos')===12 && extraerCantidad('dos docenas de huevos')===24 && extraerCantidad('docena de huevos')===12 && extraerCantidad('quiero leche')===1"}, {"d": "`buscarProductos` encuentra por sinónimo, con plural", "h": "Cada palabra de la frase del catálogo debe estar en lo escrito; acepta `s` o `es` al final.", "t": "var P=[{id:'leche',sinonimos:['leche','leche entera']},{id:'arroz',sinonimos:['arroz']},{id:'papas',sinonimos:['papas fritas','papitas']}];return JSON.stringify(buscarProductos('quiero 2 leches',P))==='[\"leche\"]' && JSON.stringify(buscarProductos('un arroz',P))==='[\"arroz\"]' && JSON.stringify(buscarProductos('papitas',P))==='[\"papas\"]' && buscarProductos('quiero un carro',P).length===0"}, {"d": "`buscarProductos` prefiere la frase más específica", "h": "Compara el número de palabras que coincidieron y quédate con el máximo.", "t": "var P=[{id:'agua',sinonimos:['agua']},{id:'agua-gas',sinonimos:['agua con gas']}];return JSON.stringify(buscarProductos('agua con gas',P))==='[\"agua-gas\"]' && JSON.stringify(buscarProductos('un agua',P))==='[\"agua\"]'"}, {"d": "`buscarProductos` devuelve todos los empatados si hay ambigüedad", "h": "Si dos productos alcanzan el mismo puntaje máximo, devuelve ambos ids.", "t": "var P=[{id:'cola',sinonimos:['gaseosa','gaseosa cola','cola']},{id:'naranja',sinonimos:['gaseosa','gaseosa naranja','naranja']}];var r=buscarProductos('2 gaseosas',P);return r.length===2 && r.indexOf('cola')>=0 && r.indexOf('naranja')>=0 && JSON.stringify(buscarProductos('gaseosa naranja',P))==='[\"naranja\"]'"}, {"d": "`detectarIntencion` reconoce las intenciones de la tabla", "h": "Normaliza y busca cada frase como palabras completas, en el orden indicado.", "t": "return detectarIntencion('Hola!')==='saludo' && detectarIntencion('quiero hablar con una persona')==='humano' && detectarIntencion('A qué hora cierran')==='horario' && detectarIntencion('qué venden')==='catalogo' && detectarIntencion('quiero cancelar')==='cancelar' && detectarIntencion('ya no quiero')==='cancelar'"}, {"d": "`detectarIntencion` solo acepta `confirmar` y `saludo` en mensajes cortos, y busca palabras completas", "h": "Si el mensaje tiene más de 4 palabras, sáltate `confirmar` y `saludo`. Y `si` no debe coincidir dentro de `simple`.", "t": "return detectarIntencion('si')==='confirmar' && detectarIntencion('ok listo')==='confirmar' && detectarIntencion('si quiero dos leches y un arroz')==='desconocida' && detectarIntencion('es simple')==='desconocida' && detectarIntencion('')==='desconocida' && detectarIntencion('asdf')==='desconocida'"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>texto.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function normalizar(texto) {
+  if (typeof texto !== &quot;string&quot;) return &quot;&quot;;
+  return texto
+    .toLowerCase()
+    .normalize(&quot;NFD&quot;)
+    .replace(/[̀-ͯ]/g, &quot;&quot;)
+    .replace(/[^a-z0-9\s]/g, &quot; &quot;)
+    .replace(/\s+/g, &quot; &quot;)
+    .trim();
+}
+
+const NUMEROS = { un: 1, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, diez: 10 };
+
+function extraerCantidad(texto) {
+  const t = normalizar(texto);
+  if (/\bmedia docena\b/.test(t)) return 6;
+  let n = null;
+  for (const palabra of t.split(&quot; &quot;)) {
+    if (/^\d+$/.test(palabra)) { n = Number(palabra); break; }
+    if (palabra in NUMEROS) { n = NUMEROS[palabra]; break; }
+  }
+  if (/\bdocenas?\b/.test(t)) return (n ?? 1) * 12;
+  return n ?? 1;
+}
+
+function mismaPalabra(escrita, deCatalogo) {
+  return escrita === deCatalogo || escrita === deCatalogo + &quot;s&quot; || escrita === deCatalogo + &quot;es&quot;;
+}
+
+function buscarProductos(texto, productos) {
+  const escritas = normalizar(texto).split(&quot; &quot;).filter(Boolean);
+  let mejor = 0;
+  let ids = [];
+  for (const producto of productos) {
+    let puntaje = 0;
+    for (const frase of producto.sinonimos) {
+      const palabras = frase.split(&quot; &quot;);
+      const coincide = palabras.every((p) =&gt; escritas.some((e) =&gt; mismaPalabra(e, p)));
+      if (coincide) puntaje = Math.max(puntaje, palabras.length);
+    }
+    if (puntaje === 0) continue;
+    if (puntaje &gt; mejor) { mejor = puntaje; ids = [producto.id]; }
+    else if (puntaje === mejor) ids.push(producto.id);
+  }
+  return ids;
+}
+
+const FRASES = {
+  cancelar: [&quot;cancelar&quot;, &quot;ya no quiero&quot;],
+  humano: [&quot;persona&quot;, &quot;asesor&quot;],
+  horario: [&quot;horario&quot;, &quot;a que hora&quot;],
+  catalogo: [&quot;catalogo&quot;, &quot;que venden&quot;],
+  confirmar: [&quot;si&quot;, &quot;ok&quot;, &quot;listo&quot;],
+  saludo: [&quot;hola&quot;, &quot;buenas&quot;],
+};
+const ORDEN = [&quot;cancelar&quot;, &quot;humano&quot;, &quot;horario&quot;, &quot;catalogo&quot;, &quot;confirmar&quot;, &quot;saludo&quot;];
+const SOLO_CORTOS = [&quot;confirmar&quot;, &quot;saludo&quot;];
+
+function detectarIntencion(texto) {
+  const t = normalizar(texto);
+  if (!t) return &quot;desconocida&quot;;
+  const palabras = t.split(&quot; &quot;).length;
+  for (const intencion of ORDEN) {
+    if (SOLO_CORTOS.includes(intencion) &amp;&amp; palabras &gt; 4) continue;
+    if (FRASES[intencion].some((f) =&gt; (&quot; &quot; + t + &quot; &quot;).includes(&quot; &quot; + f + &quot; &quot;))) return intencion;
+  }
+  return &quot;desconocida&quot;;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 6</a>
+        <a class="next" href="../07-catalogo-y-carrito/"><small>Siguiente →</small>Catálogo y carrito</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 6 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Entender%20texto%20libre&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

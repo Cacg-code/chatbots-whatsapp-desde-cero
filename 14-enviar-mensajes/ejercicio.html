@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Enviar mensajes · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Enviar mensajes.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Enviar mensajes · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Enviar mensajes.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 14</a> › Ejercicio</div>
+        <h1>Ejercicio: Enviar mensajes</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Enviar de verdad un texto, botones y una lista a tu celular, y practicar con JavaScript puro las tres decisiones que toma el código de envío: validar botones, armar el cuerpo de un texto y decidir qué hacer ante un código de error.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> usa tu cuenta de pruebas de la lección 12 y el código del curso. La <strong>parte B</strong> son tres funciones que se comprueban en esta página; son versiones reducidas de <code>construirEnvio</code> y de la tabla de errores. <strong>No pegues tokens reales aquí.</strong></p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade <code>validarLista(secciones)</code> con las reglas de la lección (máximo 10 filas en total, títulos de fila de hasta 24 caracteres y descripción de hasta 72) y compárala con <code>envioLista</code> de <code>src/whatsapp.js</code>.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En <code>codigo/</code>, crea un script <code>enviar-prueba.mjs</code> que importe <code>construirEnvio</code> y <code>enviarMensaje</code> de <code>./src/whatsapp.js</code>, lea <code>WA_TOKEN</code> y <code>WA_PHONE_ID</code> de <code>process.env</code> y envíe un texto a tu celular de prueba.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Ejecútalo con tu token temporal en variables de entorno (no en el archivo). Si tu ventana de 24 horas está cerrada, responde <code>hola</code> desde el celular y repite.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Envía un mensaje de botones con dos opciones (<code>entrega:recojo</code> y <code>entrega:delivery</code>) y toca uno desde el celular. Mira en los registros qué <code>id</code> llega.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte A. Provoca un error a propósito (token falso o título de botón de 30 letras) y anota el mensaje que ves.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>validarBotones(botones)</code>: recibe un arreglo de <code>{id, titulo}</code> y devuelve un arreglo de textos con los problemas encontrados (vacío si todo está bien). Problemas: <code>"entre 1 y 3 botones"</code> si hay 0 o más de 3; <code>"titulo largo: &lt;titulo&gt;"</code> si un título pasa de 20 caracteres; <code>"titulo repetido: &lt;titulo&gt;"</code> si un título ya apareció; <code>"id vacio"</code> si falta un id.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>cuerpoTexto(to, texto)</code>: devuelve el cuerpo de la API <code>{ messaging_product: "whatsapp", recipient_type: "individual", to, type: "text", text: { preview_url: false, body: texto } }</code>. Si el texto está vacío o pasa de 4096 caracteres, lanza un <code>Error</code>.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>accionParaError(codigo)</code>: devuelve <code>"renovar-token"</code> para 190; <code>"usar-plantilla"</code> para 131047; <code>"revisar-cuerpo"</code> para 100, 131051 y 132000; <code>"esperar"</code> para 130429 y 131056; <code>"pedir-revision-cliente"</code> para 131026; y <code>"leer-documentacion"</code> para cualquier otro código.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Validar sin repetir</summary><p>Para detectar títulos repetidos usa un <code>Set</code>: si ya lo contiene, agrega el problema; si no, añádelo. Para el largo, compara <code>titulo.length &gt; 20</code>.</p></details>
+      <details><summary>💡 Pista 2: Cuerpo de texto</summary><p>Valida primero (<code>if (!texto || texto.length &gt; 4096) throw new Error(...)</code>) y luego devuelve el objeto literal. Cuida el nombre <code>preview_url</code> y su valor <code>false</code>.</p></details>
+      <details><summary>💡 Pista 3: Tabla de códigos</summary><p>Un <code>switch</code> o un objeto <code>{ 190: "renovar-token", ... }</code> con <code>?? "leer-documentacion"</code> resuelve todo. Los números del código pueden venir como número; no hace falta convertirlos.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`validarBotones` acepta una lista correcta", "h": "Devuelve un arreglo vacío cuando no hay problemas.", "t": "return validarBotones([{id:\"a\",titulo:\"Recojo\"},{id:\"b\",titulo:\"Delivery\"}]).length===0"}, {"d": "`validarBotones` rechaza 0 o más de 3 botones", "h": "Mensaje exacto: entre 1 y 3 botones.", "t": "var cuatro=[1,2,3,4].map(function(n){return {id:\"i\"+n,titulo:\"B\"+n}});return validarBotones([]).includes(\"entre 1 y 3 botones\") && validarBotones(cuatro).includes(\"entre 1 y 3 botones\")"}, {"d": "`validarBotones` detecta títulos de más de 20 caracteres", "h": "20 caracteres exactos son válidos; 21 no.", "t": "var t20=\"12345678901234567890\";var t21=t20+\"1\";return validarBotones([{id:\"a\",titulo:t20}]).length===0 && validarBotones([{id:\"a\",titulo:t21}]).includes(\"titulo largo: \"+t21)"}, {"d": "`validarBotones` detecta títulos repetidos e ids vacíos", "h": "Usa un Set para los títulos y revisa que id no esté vacío.", "t": "var r=validarBotones([{id:\"a\",titulo:\"Si\"},{id:\"\",titulo:\"Si\"}]);return r.includes(\"titulo repetido: Si\") && r.includes(\"id vacio\")"}, {"d": "`cuerpoTexto` arma el cuerpo de la API", "h": "Revisa los nombres: messaging_product, recipient_type, type, text.preview_url y text.body.", "t": "var c=cuerpoTexto(\"51999000111\",\"Hola\");return c.messaging_product===\"whatsapp\" && c.recipient_type===\"individual\" && c.to===\"51999000111\" && c.type===\"text\" && c.text.preview_url===false && c.text.body===\"Hola\""}, {"d": "`cuerpoTexto` lanza error con texto vacío o demasiado largo", "h": "Lanza un Error si no hay texto o si length > 4096. 4096 exactos sí se permite.", "t": "var f=function(x){try{cuerpoTexto(\"1\",x);return false}catch(e){return e instanceof Error}};return f(\"\")===true && f(\"a\".repeat(4097))===true && f(\"a\".repeat(4096))===false"}, {"d": "`accionParaError` clasifica los códigos conocidos", "h": "190 renueva token, 131047 plantilla, 100/131051/132000 revisar cuerpo, 130429/131056 esperar, 131026 pedir revisión.", "t": "return accionParaError(190)===\"renovar-token\" && accionParaError(131047)===\"usar-plantilla\" && accionParaError(100)===\"revisar-cuerpo\" && accionParaError(131051)===\"revisar-cuerpo\" && accionParaError(132000)===\"revisar-cuerpo\" && accionParaError(130429)===\"esperar\" && accionParaError(131056)===\"esperar\" && accionParaError(131026)===\"pedir-revision-cliente\""}, {"d": "`accionParaError` devuelve leer-documentacion ante códigos desconocidos", "h": "Usa un valor por defecto para lo que no esté en la tabla.", "t": "return accionParaError(999999)===\"leer-documentacion\" && accionParaError(undefined)===\"leer-documentacion\""}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function validarBotones(botones) {
+  const problemas = [];
+  if (!Array.isArray(botones) || botones.length &lt; 1 || botones.length &gt; 3) {
+    problemas.push(&quot;entre 1 y 3 botones&quot;);
+  }
+  const titulos = new Set();
+  for (const b of botones ?? []) {
+    if (!b.id) problemas.push(&quot;id vacio&quot;);
+    if (b.titulo.length &gt; 20) problemas.push(&quot;titulo largo: &quot; + b.titulo);
+    if (titulos.has(b.titulo)) problemas.push(&quot;titulo repetido: &quot; + b.titulo);
+    titulos.add(b.titulo);
+  }
+  return problemas;
+}
+
+function cuerpoTexto(to, texto) {
+  if (!texto || texto.length &gt; 4096) throw new Error(&quot;texto vacio o de mas de 4096 caracteres&quot;);
+  return {
+    messaging_product: &quot;whatsapp&quot;,
+    recipient_type: &quot;individual&quot;,
+    to,
+    type: &quot;text&quot;,
+    text: { preview_url: false, body: texto },
+  };
+}
+
+const ACCIONES = {
+  190: &quot;renovar-token&quot;,
+  131047: &quot;usar-plantilla&quot;,
+  100: &quot;revisar-cuerpo&quot;,
+  131051: &quot;revisar-cuerpo&quot;,
+  132000: &quot;revisar-cuerpo&quot;,
+  130429: &quot;esperar&quot;,
+  131056: &quot;esperar&quot;,
+  131026: &quot;pedir-revision-cliente&quot;,
+};
+
+function accionParaError(codigo) {
+  return ACCIONES[codigo] ?? &quot;leer-documentacion&quot;;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 14</a>
+        <a class="next" href="../27-practica-con-telegram/"><small>Siguiente →</small>Practica con Telegram sin cuenta de Meta</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 14 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Enviar%20mensajes&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

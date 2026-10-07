@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Proyecto final: el bot del minimarket · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Proyecto final: el bot del minimarket.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Proyecto final: el bot del minimarket · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Proyecto final: el bot del minimarket.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Proyecto final</a> › Ejercicio</div>
+        <h1>Ejercicio: Proyecto final: el bot del minimarket</h1>
+        <ul class="meta"><li>⏱ 180 minutos</li><li>📶 Nivel: avanzado</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Entregar el bot completo de Minimarket La Esquina, funcionando en consola, probado con pruebas automáticas, desplegado en Cloudflare y comprobado con tu teléfono, con la lista de entrega y la rúbrica del proyecto.</p>
+<h3>Cómo se trabaja</h3>
+<p>Este ejercicio no tiene comprobaciones automáticas en la página: tu evidencia son los resultados de <code>npm test</code>, los logs de <code>wrangler tail</code> y tu README. Avanza en el orden de la lección y haz un commit pequeño por paso. Usa solo datos ficticios.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Haz que el mensaje de fuera de horario diga exactamente cuándo atenderán («hoy a las 17:00» o «mañana a las 9:00») con una función <code>proximaApertura</code>, y cúbrela con pruebas para viernes por la noche y sábado.</p></div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Copia <code>codigo/</code> a <code>mi-bot-minimarket</code>, ejecuta <code>npm install</code> y <code>npm test</code>. Anota cuántas pruebas pasan antes de cambiar nada.</span></label></li><li><label><input type="checkbox" id="p2"><span>Corre el recorrido de la consola con <code>printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js</code> y explica con tus palabras qué estado atraviesa la sesión en cada mensaje.</span></label></li><li><label><input type="checkbox" id="p3"><span>Personaliza <code>src/catalogo.js</code>: cambia horario, dirección ficticia y zonas, y agrega 3 productos con categoría, unidad y varios sinónimos. Vuelve a correr <code>npm test</code>.</span></label></li><li><label><input type="checkbox" id="p4"><span>Crea <code>test/aceptacion.test.js</code> con los escenarios A1 a A6 de la lección y agrega 2 escenarios propios, uno de ellos con un producto que tú agregaste.</span></label></li><li><label><input type="checkbox" id="p5"><span>Crea <code>src/humano.js</code> con las funciones de la lección 25, conecta <code>procesarConHumano</code> y <code>liberarHumanosVencidos</code> en <code>src/worker.js</code> y añade las pruebas de humano. Escribe una prueba de extremo a extremo con un POST firmado.</span></label></li><li><label><input type="checkbox" id="p6"><span>Crea <code>src/fiabilidad.js</code> con <code>registrar</code>, <code>ocultarSecretos</code>, <code>ocultarTelefono</code> y <code>enviarConReintentos</code>, y úsalo en el Worker para los envíos y los errores de estado.</span></label></li><li><label><input type="checkbox" id="p7"><span>Crea el KV y los secretos con <code>wrangler</code>, edita <code>wrangler.toml</code> (id del KV, <code>WA_PHONE_ID</code>, <code>DUENO_TEL</code>) y corre <code>npx wrangler deploy --dry-run</code>. Si todo está bien, despliega y abre <code>/salud</code>.</span></label></li><li><label><input type="checkbox" id="p8"><span>En Meta configura el webhook (<code>/webhook</code>, el <code>VERIFY_TOKEN</code> y el campo <code>messages</code>), agrega tu teléfono como destinatario permitido y envía «hola» desde tu teléfono.</span></label></li><li><label><input type="checkbox" id="p9"><span>Crea o solicita las plantillas <code>recordatorio_pedido</code>, <code>carrito_pendiente</code> y <code>aviso_atencion</code> y anota su estado de aprobación en tu README.</span></label></li><li><label><input type="checkbox" id="p10"><span>Ejecuta el guion del paso 9 con <code>npx wrangler tail</code> abierto y anota qué salió bien y qué no.</span></label></li><li><label><input type="checkbox" id="p11"><span>Revisa la checklist de entrega, autoevalúate con la rúbrica de 100 puntos y escribe el README con los pendientes declarados.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Si una prueba nueva falla</summary><p>Lee el mensaje con calma antes de tocar el código: muchas veces el bot tiene razón. Mi escenario de delivery falló porque el subtotal quedaba bajo el mínimo de S/ 25.00; había que corregir la prueba, no el bot.</p></details>
+      <details><summary>💡 Pista 2: Dos módulos que se importan entre sí</summary><p><code>worker.js</code> importa <code>humano.js</code> y <code>humano.js</code> importa <code>procesarMensaje</code> de <code>worker.js</code>. Funciona porque ambos solo exportan funciones que se llaman después de cargar los módulos. Si ves un error de inicialización, comprueba que no ejecutas nada en el nivel superior del archivo.</p></details>
+      <details><summary>💡 Pista 3: Si el bot no responde en WhatsApp</summary><p>Revisa en este orden: que el webhook esté verificado, que el campo <code>messages</code> esté suscrito, que tu teléfono esté en la lista de destinatarios permitidos (<code>131030</code>), que <code>WA_TOKEN</code> no haya vencido y qué dicen los logs de <code>wrangler tail</code>.</p></details>
+      <details><summary>💡 Pista 4: Plantillas sin aprobar</summary><p>No es un fallo de tu código. Declara el pendiente en el README y verifica que el cron registre el error sin tumbar el Worker.</p></details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a proyecto final</a>
+        <a class="next" href="../"><small>Fin →</small>Volver al temario</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de proyecto final · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Proyecto%20final:%20el%20bot%20del%20minimarket&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

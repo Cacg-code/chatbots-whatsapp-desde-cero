@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de WhatsApp</title>
+<meta name="description" content="Chatea con el bot de referencia del curso, sin cuenta ni internet, y mira el JSON de cada paso.">
+<style>
+:root {
+  /* Cambia aquí los colores del simulador (tema claro por defecto) */
+  --fondo: #e9edf1;
+  --superficie: #ffffff;
+  --texto: #1b2a33;
+  --texto-suave: #5b6b75;
+  --borde: #cfd8de;
+  --acento: #128c7e;
+  --acento-texto: #ffffff;
+  --cabecera: #075e54;
+  --cabecera-texto: #ffffff;
+  --chat-fondo: #efe7dd;
+  --burbuja-bot: #ffffff;
+  --burbuja-usuario: #d9fdd3;
+  --burbuja-texto: #111b21;
+  --boton-chat: #ffffff;
+  --boton-chat-texto: #027eb5;
+  --codigo-fondo: #14202a;
+  --codigo-texto: #cfe3f1;
+  --aviso: #b45309;
+  --ok: #15803d;
+  --marco-telefono: #1d2a33;
+  --sombra: 0 10px 40px rgba(0,0,0,.18);
+}
+:root[data-tema="oscuro"] {
+  --fondo: #0b141a; --superficie: #17242d; --texto: #e6eef2; --texto-suave: #92a4ae;
+  --borde: #2b3b45; --acento: #25d366; --acento-texto: #06210f; --cabecera: #1f2c34;
+  --cabecera-texto: #e9edef; --chat-fondo: #0b141a; --burbuja-bot: #1f2c34;
+  --burbuja-usuario: #005c4b; --burbuja-texto: #e9edef; --boton-chat: #1f2c34;
+  --boton-chat-texto: #53bdeb; --codigo-fondo: #070d11; --codigo-texto: #bfd6e4;
+  --aviso: #fbbf24; --ok: #4ade80; --marco-telefono: #000; --sombra: 0 10px 40px rgba(0,0,0,.6);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fondo: #0b141a; --superficie: #17242d; --texto: #e6eef2; --texto-suave: #92a4ae;
+    --borde: #2b3b45; --acento: #25d366; --acento-texto: #06210f; --cabecera: #1f2c34;
+    --cabecera-texto: #e9edef; --chat-fondo: #0b141a; --burbuja-bot: #1f2c34;
+    --burbuja-usuario: #005c4b; --burbuja-texto: #e9edef; --boton-chat: #1f2c34;
+    --boton-chat-texto: #53bdeb; --codigo-fondo: #070d11; --codigo-texto: #bfd6e4;
+    --aviso: #fbbf24; --ok: #4ade80; --marco-telefono: #000; --sombra: 0 10px 40px rgba(0,0,0,.6);
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--fondo); color: var(--texto);
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh; overflow-x: hidden;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px; }
+
+.barra {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--borde); background: var(--superficie);
+}
+.barra h1 { font-size: 1rem; margin: 0; }
+.barra .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  border: 1px solid var(--borde); background: var(--superficie); border-radius: 8px;
+  padding: 8px 12px; min-height: 40px;
+}
+.btn:hover { border-color: var(--acento); }
+.btn.primario { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); font-weight: 600; }
+
+.disposicion {
+  display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px;
+  max-width: 1200px; margin: 0 auto; padding: 20px 16px; align-items: start;
+}
+.telefono {
+  background: var(--marco-telefono); border-radius: 36px; padding: 12px; box-shadow: var(--sombra);
+  width: 100%; max-width: 400px; margin: 0 auto;
+}
+.pantalla {
+  background: var(--chat-fondo); border-radius: 26px; overflow: hidden; display: flex; flex-direction: column;
+  height: min(720px, calc(100vh - 110px)); min-height: 480px;
+}
+.cabecera-chat { background: var(--cabecera); color: var(--cabecera-texto); padding: 10px 14px; display: flex; gap: 10px; align-items: center; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--acento); color: var(--acento-texto); display: grid; place-items: center; font-weight: 700; flex: none; }
+.cabecera-chat .nombre { font-weight: 600; line-height: 1.2; }
+.cabecera-chat .estado { font-size: .78rem; opacity: .8; }
+.ventana {
+  font-size: .78rem; padding: 5px 12px; text-align: center; background: var(--superficie);
+  border-bottom: 1px solid var(--borde); color: var(--ok);
+}
+.ventana.cerrada { color: var(--aviso); }
+
+.mensajes { flex: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+.burbuja {
+  max-width: 85%; padding: 7px 10px; border-radius: 10px; background: var(--burbuja-bot); color: var(--burbuja-texto);
+  white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 1px 1px rgba(0,0,0,.12); font-size: .95rem;
+  align-self: flex-start; border-top-left-radius: 2px;
+}
+.burbuja.usuario { align-self: flex-end; background: var(--burbuja-usuario); border-top-left-radius: 10px; border-top-right-radius: 2px; }
+.burbuja .hora { display: block; text-align: right; font-size: .68rem; opacity: .6; margin-top: 2px; }
+.opciones { align-self: flex-start; width: 85%; display: flex; flex-direction: column; gap: 4px; }
+.opciones .btn-chat {
+  background: var(--boton-chat); color: var(--boton-chat-texto); border: 0; border-radius: 10px; padding: 10px;
+  text-align: center; font-weight: 600; box-shadow: 0 1px 1px rgba(0,0,0,.12); min-height: 44px;
+}
+.opciones .btn-chat:disabled { opacity: .45; cursor: default; }
+.lista-filas { background: var(--burbuja-bot); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 1px rgba(0,0,0,.12); }
+.lista-filas[hidden] { display: none; }
+.lista-filas h3 { margin: 0; padding: 8px 12px; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); }
+.fila { display: block; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--borde); padding: 9px 12px; min-height: 44px; color: var(--burbuja-texto); }
+.fila:disabled { opacity: .5; cursor: default; }
+.fila:not(:disabled):hover { background: rgba(127,127,127,.12); }
+.fila b { display: block; font-weight: 600; }
+.fila small { color: var(--texto-suave); }
+
+.entrada { display: flex; gap: 8px; padding: 8px; background: var(--superficie); border-top: 1px solid var(--borde); }
+.entrada input {
+  flex: 1; min-width: 0; border: 1px solid var(--borde); border-radius: 22px; padding: 10px 14px; font: inherit;
+  background: var(--fondo); color: var(--texto);
+}
+.entrada button { border: 0; border-radius: 50%; width: 44px; height: 44px; background: var(--acento); color: var(--acento-texto); font-weight: 700; flex: none; }
+
+.panel { background: var(--superficie); border: 1px solid var(--borde); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+.panel h2 { margin: 0 0 4px; font-size: 1.05rem; }
+.panel p.ayuda { margin: 0 0 12px; color: var(--texto-suave); font-size: .9rem; }
+.panel h3 { margin: 14px 0 6px; font-size: .9rem; }
+pre {
+  margin: 0; background: var(--codigo-fondo); color: var(--codigo-texto); border-radius: 10px; padding: 12px;
+  font: .8rem/1.45 ui-monospace, Consolas, monospace; overflow: auto; max-height: 300px; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.reloj { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: .85rem; color: var(--texto-suave); }
+.toggle-panel { display: none; }
+
+@media (max-width: 860px) {
+  .disposicion { grid-template-columns: minmax(0, 1fr); padding: 10px 16px; gap: 14px; }
+  .pantalla { height: calc(100vh - 150px); height: calc(100dvh - 150px); min-height: 420px; border-radius: 22px; }
+  .telefono { padding: 8px; border-radius: 28px; }
+  .toggle-panel { display: inline-block; }
+  .panel.oculto-movil { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .burbuja, .opciones { animation: aparece .18s ease-out; }
+  @keyframes aparece { from { opacity: 0; transform: translateY(6px); } }
+}
+</style>
+</head>
+<body>
+<header class="barra">
+  <h1>Simulador de WhatsApp · Minimarket La Esquina</h1>
+  <div class="acciones">
+    <button class="btn toggle-panel" id="btnPanel" aria-expanded="false" aria-controls="panel">Ver JSON</button>
+    <button class="btn" id="btnTema" title="Cambiar tema">Tema</button>
+    <button class="btn primario" id="btnReiniciar">Reiniciar</button>
+  </div>
+</header>
+
+<main class="disposicion">
+  <section class="telefono" aria-label="Teléfono simulado">
+    <div class="pantalla">
+      <div class="cabecera-chat">
+        <div class="avatar" aria-hidden="true">LE</div>
+        <div><div class="nombre">Minimarket La Esquina</div><div class="estado">cuenta de empresa (ficticia)</div></div>
+      </div>
+      <div class="ventana" id="ventana" role="status"></div>
+      <div class="mensajes" id="mensajes" aria-live="polite"></div>
+      <form class="entrada" id="form" autocomplete="off">
+        <input id="texto" type="text" placeholder="Escribe un mensaje" aria-label="Mensaje" maxlength="500">
+        <button type="submit" aria-label="Enviar">&#10148;</button>
+      </form>
+    </div>
+  </section>
+
+  <aside class="panel oculto-movil" id="panel">
+    <h2>Lo que ve el programador</h2>
+    <p class="ayuda">Cada mensaje entra al motor como JSON y sale como otro JSON. Aquí lo ves en vivo.</p>
+    <h3>Última entrada (lo que llega del webhook)</h3>
+    <pre id="jsonEntrada">(aún nada)</pre>
+    <h3>Respuestas del motor</h3>
+    <pre id="jsonRespuesta">(aún nada)</pre>
+    <h3>Sesión (lo que se guarda por cliente)</h3>
+    <pre id="jsonSesion"></pre>
+    <h3>Ventana de 24 horas</h3>
+    <p class="ayuda" style="margin:0">Pasadas 24 h desde el último mensaje del cliente, solo puedes escribirle con una plantilla aprobada. Avanza el reloj para verlo.</p>
+    <div class="reloj">
+      <span>Reloj simulado:</span>
+      <button class="btn" data-avanzar="1">+1 h</button>
+      <button class="btn" data-avanzar="12">+12 h</button>
+      <button class="btn" data-avanzar="25">+25 h</button>
+    </div>
+  </aside>
+</main>
+
+<script src="bot.bundle.js"></script>
+<script>
+(function () {
+  var HORA = 3600000, VENTANA = 24 * HORA;
+  var $ = function (id) { return document.getElementById(id); };
+  var elMsgs = $('mensajes'), elTexto = $('texto');
+  var sesion, desfase = 0, grupoActivo = [];
+
+  function ahora() { return Date.now() + desfase; }
+  function mostrarJSON(el, v) { el.textContent = JSON.stringify(v, null, 2); }
+  function hora() {
+    var d = new Date(ahora());
+    return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+  }
+  function bajar() { elMsgs.scrollTop = elMsgs.scrollHeight; }
+
+  function burbuja(texto, usuario) {
+    var b = document.createElement('div');
+    b.className = 'burbuja' + (usuario ? ' usuario' : '');
+    b.textContent = texto;
+    var h = document.createElement('span'); h.className = 'hora'; h.textContent = hora();
+    b.appendChild(h);
+    elMsgs.appendChild(b);
+    return b;
+  }
+
+  function desactivarAnteriores() {
+    grupoActivo.forEach(function (b) { b.disabled = true; });
+    grupoActivo = [];
+  }
+
+  function pintarRespuesta(r) {
+    burbuja(r.texto, false);
+    if (r.tipo === 'texto') return;
+    var cont = document.createElement('div'); cont.className = 'opciones';
+    if (r.tipo === 'botones') {
+      r.botones.forEach(function (bt) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn-chat'; b.textContent = bt.titulo;
+        b.addEventListener('click', function () { enviar({ tipo: 'interactivo', id: bt.id }, bt.titulo); });
+        cont.appendChild(b); grupoActivo.push(b);
+      });
+    } else if (r.tipo === 'lista') {
+      var abrir = document.createElement('button');
+      abrir.type = 'button'; abrir.className = 'btn-chat'; abrir.textContent = '☰ ' + r.boton;
+      abrir.setAttribute('aria-expanded', 'false');
+      var caja = document.createElement('div'); caja.className = 'lista-filas'; caja.hidden = true;
+      r.secciones.forEach(function (s) {
+        if (s.titulo) { var h = document.createElement('h3'); h.textContent = s.titulo; caja.appendChild(h); }
+        s.filas.forEach(function (f) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'fila';
+          var t = document.createElement('b'); t.textContent = f.titulo; b.appendChild(t);
+          if (f.descripcion) { var d = document.createElement('small'); d.textContent = f.descripcion; b.appendChild(d); }
+          b.addEventListener('click', function () { enviar({ tipo: 'interactivo', id: f.id }, f.titulo); });
+          caja.appendChild(b); grupoActivo.push(b);
+        });
+      });
+      abrir.addEventListener('click', function () {
+        caja.hidden = !caja.hidden; abrir.setAttribute('aria-expanded', String(!caja.hidden)); bajar();
+      });
+      grupoActivo.push(abrir);
+      cont.appendChild(abrir); cont.appendChild(caja);
+    }
+    elMsgs.appendChild(cont);
+  }
+
+  function actualizarVentana() {
+    var el = $('ventana');
+    var restante = VENTANA - (ahora() - sesion.ultimoMensajeCliente);
+    if (restante > 0) {
+      var h = Math.floor(restante / HORA), m = Math.floor((restante % HORA) / 60000);
+      el.className = 'ventana';
+      el.textContent = 'Ventana de 24 h abierta: quedan ' + h + ' h ' + m + ' min para responder con texto libre';
+    } else {
+      el.className = 'ventana cerrada';
+      el.textContent = 'Ventana de 24 h cerrada: solo plantillas aprobadas hasta que el cliente escriba';
+    }
+  }
+
+  function enviar(entrada, etiqueta) {
+    desactivarAnteriores();
+    var t = ahora();
+    burbuja(entrada.tipo === 'texto' ? entrada.texto : etiqueta, true);
+    var res;
+    try { res = Bot.procesar(sesion, entrada, t); }
+    catch (e) { burbuja('Error del motor: ' + e.message, false); return; }
+    sesion = res.sesion;
+    res.respuestas.forEach(pintarRespuesta);
+    mostrarJSON($('jsonEntrada'), entrada);
+    mostrarJSON($('jsonRespuesta'), res.respuestas);
+    mostrarJSON($('jsonSesion'), sesion);
+    actualizarVentana(); bajar();
+  }
+
+  function reiniciar() {
+    desfase = 0; grupoActivo = []; elMsgs.textContent = '';
+    sesion = Bot.crearSesion('51999000111', ahora());
+    $('jsonEntrada').textContent = '(aún nada)';
+    $('jsonRespuesta').textContent = '(aún nada)';
+    mostrarJSON($('jsonSesion'), sesion);
+    actualizarVentana();
+    enviar({ tipo: 'texto', texto: 'hola' });
+  }
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = elTexto.value.trim();
+    if (!v) return;
+    elTexto.value = '';
+    enviar({ tipo: 'texto', texto: v });
+  });
+  $('btnReiniciar').addEventListener('click', reiniciar);
+  document.querySelectorAll('[data-avanzar]').forEach(function (b) {
+    b.addEventListener('click', function () { desfase += Number(b.dataset.avanzar) * HORA; actualizarVentana(); });
+  });
+  $('btnPanel').addEventListener('click', function () {
+    var p = $('panel'), oculto = p.classList.toggle('oculto-movil');
+    this.setAttribute('aria-expanded', String(!oculto));
+    this.textContent = oculto ? 'Ver JSON' : 'Ocultar JSON';
+  });
+  $('btnTema').addEventListener('click', function () {
+    var r = document.documentElement;
+    var oscuro = r.dataset.tema ? r.dataset.tema === 'oscuro' : matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.tema = oscuro ? 'claro' : 'oscuro';
+    try { localStorage.setItem('sim-tema', r.dataset.tema); } catch (e) {}
+  });
+  try { var g = localStorage.getItem('sim-tema'); if (g) document.documentElement.dataset.tema = g; } catch (e) {}
+  setInterval(function () { if (sesion) actualizarVentana(); }, 30000);
+  reiniciar();
+})();
+</script>
+</body>
+</html>

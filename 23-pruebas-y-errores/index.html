@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pruebas, registros y errores comunes · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo probar un bot con node:test, conversaciones completas y payloads reales, qué registrar en los logs, cómo reintentar bien y qué significan los errores 131xxx de WhatsApp.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Pruebas, registros y errores comunes · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo probar un bot con node:test, conversaciones completas y payloads reales, qué registrar en los logs, cómo reintentar bien y qué significan los errores 131xxx de WhatsApp.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-probar-un-bot-es-distinto">Por qué probar un bot es distinto</a></li><li><a href="#node-test-pruebas-sin-instalar-nada">node:test: pruebas sin instalar nada</a></li><li><a href="#probar-una-conversacion-completa">Probar una conversación completa</a></li><li><a href="#probar-el-webhook-con-payloads-reales">Probar el webhook con payloads reales</a></li><li><a href="#que-registrar-en-los-logs-y-que-nunca">Qué registrar en los logs (y qué nunca)</a></li><li><a href="#reintentos-cuando-si-y-cuando-no">Reintentos: cuándo sí y cuándo no</a></li><li><a href="#errores-131xxx-de-whatsapp">Errores 131xxx de WhatsApp</a></li><li><a href="#una-lista-de-pruebas-antes-de-publicar">Una lista de pruebas antes de publicar</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 23</div>
+        <h1>Pruebas, registros y errores comunes</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Escribir pruebas con node:test que recorran una conversación completa del bot sin usar WhatsApp.</li><li>Probar el parser del webhook con payloads de ejemplo, incluidos los de basura y los de estado fallido.</li><li>Registrar eventos útiles en el log sin filtrar tokens ni teléfonos completos.</li><li>Reintentar un envío fallido con espera creciente, y saber cuándo no conviene reintentar.</li><li>Interpretar los errores 131xxx más comunes y decidir qué hacer con cada uno.</li></ul>
+</div>
+
+<h2 id="por-que-probar-un-bot-es-distinto"><span class="n">1.</span>Por qué probar un bot es distinto</h2>
+<p>Un bot es un programa que <strong>otros</strong> usan a cualquier hora y de maneras que no imaginaste. Si lo cambias a las 11 de la noche para arreglar el texto de la dirección y sin querer rompes el paso del pago, lo descubrirás cuando un cliente real te escriba. Las pruebas automáticas son tu red de seguridad: las ejecutas en un segundo y te dicen si lo que funcionaba sigue funcionando.</p>
+<p>La buena noticia es que en este curso diseñaste el bot para que sea fácil de probar. Recuerda la idea central de la <a href="../05-estado-de-la-conversacion/">lección 5</a>: <code>procesar(sesion, entrada, ahora)</code> es una <strong>función pura</strong>. No envía nada, no lee archivos y no usa red. Le das una sesión y un mensaje, y te devuelve la sesión nueva y las respuestas. Probarlo es llamar a una función y mirar el resultado: no necesitas WhatsApp, ni internet, ni un teléfono.</p>
+<p>Hay tres capas que conviene probar, de la más barata a la más cara:</p>
+<div class="flow"><div class="node"><strong>Motor</strong><span>conversaciones completas</span></div><div class="arrow">→<code>payloads de ejemplo</code></div><div class="node"><strong>Traductor</strong><span>parser y envío a WhatsApp</span></div><div class="arrow">→<code>fetch falso</code></div><div class="node"><strong>Servidor</strong><span>Worker, firma y reintentos</span></div></div>
+<ol>
+<li><strong>El motor</strong>: simulas a un cliente que escribe y toca botones.</li>
+<li><strong>El traductor</strong> (<code>whatsapp.js</code>): le das JSON reales de Meta y compruebas qué eventos salen; le das respuestas del motor y compruebas que respetan los límites de WhatsApp.</li>
+<li><strong>El servidor</strong>: usas un <code>fetch</code> y un KV falsos para ver qué enviaría el Worker sin salir a internet.</li>
+</ol>
+<h2 id="node-test-pruebas-sin-instalar-nada"><span class="n">2.</span>node:test: pruebas sin instalar nada</h2>
+<p>Node trae su propio ejecutor de pruebas, <code>node:test</code>, desde hace años. No necesitas Jest ni Vitest. Una prueba es una función con un nombre, y dentro usas <code>assert</code> para afirmar lo que esperas:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import test from &#x27;node:test&#x27;;
+import assert from &#x27;node:assert/strict&#x27;;
+
+test(&#x27;sumar soles sin decimales raros&#x27;, () =&gt; {
+  assert.equal(0.1 + 0.2 === 0.3, false); // JavaScript guarda decimales en binario
+  assert.equal(Math.round((0.1 + 0.2) * 100) / 100, 0.3);
+});</code></pre>
+</div>
+<p>Se ejecuta con <code>node --test</code> (busca solo los archivos <code>*.test.js</code>) o con <code>npm test</code> si lo definiste en <code>package.json</code>. El código de referencia del curso ya trae sus pruebas. Si corres <code>npm test</code> en la carpeta <code>codigo/</code>, el final de la salida es:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ℹ tests 112
+ℹ suites 0
+ℹ pass 112
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0</code></pre>
+</div>
+<p>Tres reglas que ahorran dolores de cabeza:</p>
+<ul>
+<li><strong>Una prueba, una idea.</strong> Si falla, el nombre te dice qué se rompió.</li>
+<li><strong>Nombres en lenguaje de negocio</strong>: «delivery bajo el mínimo no avanza» es mejor que «test 7».</li>
+<li><strong>Sin sorpresas externas.</strong> Nada de relojes reales ni redes: el tiempo (<code>ahora</code>) y el <code>fetch</code> se pasan como parámetros, justamente para poder falsearlos.</li>
+</ul>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Dónde se corre todo esto</p>
+<p>Los ejemplos de esta lección importan los módulos del código de referencia (<code>src/motor.js</code>, <code>src/whatsapp.js</code>). En tu proyecto, guarda tus pruebas en <code>test/</code> y ajusta las rutas <code>../src/...</code>. Todo lo que ves aquí se ejecutó con Node 24.</p></div>
+<h2 id="probar-una-conversacion-completa"><span class="n">3.</span>Probar una conversación completa</h2>
+<p>El código de referencia incluye una ayuda en <code>test/ayudas.js</code>: <code>conversacion(telefono)</code> crea un «cliente falso» con métodos <code>decir(texto)</code> y <code>tocar(id)</code>. Cada respuesta del bot se valida además contra los límites de WhatsApp (por ejemplo, títulos de botón de 20 caracteres como máximo): si el bot responde algo que Meta rechazaría, la prueba falla aunque la lógica esté bien.</p>
+<p>Escribamos dos pruebas del minimarket y una tercera que falle a propósito, para ver cómo se ve un fallo:</p>
+<div class="code">
+  <div class="code-head"><span>pedido.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import test from &#x27;node:test&#x27;;
+import assert from &#x27;node:assert/strict&#x27;;
+import { conversacion } from &#x27;./ayudas.js&#x27;;
+
+test(&#x27;pedido completo con recojo y efectivo&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.decir(&#x27;hola&#x27;);
+  c.decir(&#x27;quiero 2 leches&#x27;);
+  c.tocar(&#x27;cerrar&#x27;);
+  c.tocar(&#x27;entrega:recojo&#x27;);
+  c.tocar(&#x27;pago:efectivo&#x27;);
+  assert.match(c.texto, /Total a pagar: S\/ 8\.60/);
+  c.tocar(&#x27;pedido_confirmar&#x27;);
+  assert.match(c.texto, /Pedido LE-[A-Z0-9]+ recibido/);
+  assert.equal(c.sesion.pedidoNuevo.total, 8.6);
+});
+
+test(&#x27;delivery bajo el mínimo no avanza&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.decir(&#x27;1 arroz&#x27;);
+  c.tocar(&#x27;cerrar&#x27;);
+  c.tocar(&#x27;entrega:delivery&#x27;);
+  assert.match(c.texto, /pedido mínimo S\/ 25\.00/);
+  assert.equal(c.sesion.estado, &#x27;TIPO_ENTREGA&#x27;);
+});</code></pre>
+</div>
+<p>Al ejecutarla, una de las dos falla. Lee con calma el informe, porque es el que verás cuando algo se rompa de verdad:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>✔ pedido completo con recojo y efectivo (5.0089ms)
+✖ delivery bajo el mínimo no avanza (1.2161ms)
+...
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pedido mínimo S\/ 25\.00/. Input:
+
+&#x27;Para delivery el pedido mínimo es S/ 25.00 y llevas S/ 4.20. Te faltan S/ 20.80. Puedes agregar más productos o elegir recojo en tienda.&#x27;</code></pre>
+</div>
+<p>Node te muestra el texto real que dijo el bot. El error era mío: el mensaje dice «pedido mínimo <strong>es</strong> S/ 25.00». Corrijo la expresión regular a <code>/pedido mínimo es S\/ 25\.00/</code> y la prueba pasa. Fíjate en lo útil del informe: ves <strong>lo esperado y lo recibido</strong> lado a lado.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Prueba el texto con moderación</p>
+<p>Comprobar frases exactas hace que la prueba se rompa cada vez que mejoras la redacción. Verifica lo importante (el total, el estado, que se mencione el mínimo) y deja libre el resto. Si algún día cambias «Te faltan» por «Faltan», tus pruebas no deberían enterarse.</p></div>
+<h3>Recorrer todos los botones</h3>
+<p>Una prueba muy rentable es la «de humo»: tocar <strong>todo</strong> lo que el bot ofrece y confirmar que nada explota. Parte del saludo, anota los ids de botones y filas que aparecen, tócalos uno por uno (en una conversación nueva con un producto en el carrito) y repite con los ids nuevos que vayan saliendo:</p>
+<div class="code">
+  <div class="code-head"><span>recorrido.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>test(&#x27;todo lo que el bot ofrece se puede tocar sin que nada se rompa&#x27;, () =&gt; {
+  const vistos = new Set();
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.decir(&#x27;hola&#x27;);
+  const pendientes = [...c.idsOfrecidos()];
+  let toques = 0;
+  while (pendientes.length &amp;&amp; toques &lt; 100) {
+    const id = pendientes.shift();
+    if (vistos.has(id)) continue;
+    vistos.add(id);
+    const c2 = conversacion(&#x27;51999000111&#x27;);
+    c2.decir(&#x27;hola&#x27;); c2.decir(&#x27;2 leches&#x27;);
+    c2.tocar(id); // lanza si el bot responde algo que WhatsApp rechazaría
+    assert.ok(c2.respuestas.length &gt; 0 || c2.sesion.estado === &#x27;ESPERANDO_HUMANO&#x27;, id);
+    pendientes.push(...c2.idsOfrecidos());
+    toques++;
+  }
+  console.log(&#x27;ids probados:&#x27;, toques);
+  assert.ok(toques &gt;= 30);
+});</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ids probados: 43
+✔ todo lo que el bot ofrece se puede tocar sin que nada se rompa (28.5662ms)</code></pre>
+</div>
+<p>Con 43 ids distintos (categorías, productos, entrega, pago, confirmación) el bot respondió siempre algo válido. Si mañana agregas una categoría con un nombre de 30 caracteres, esta prueba lo detecta antes que Meta.</p>
+<h3>Entradas hostiles</h3>
+<p>Los clientes escriben cosas absurdas: vacío, emojis, 5.000 letras, cantidades negativas o código HTML. El bot no debe lanzar errores:</p>
+<div class="code">
+  <div class="code-head"><span>recorrido.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>test(&#x27;mensajes raros no tumban al bot&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  for (const t of [&#x27;&#x27;, &#x27;   &#x27;, &#x27;🙂&#x27;, &#x27;a&#x27;.repeat(5000), &#x27;&lt;script&gt;&#x27;, &#x27;0&#x27;, &#x27;-5 leches&#x27;, &#x27;999999 leches&#x27;, &#x27;null&#x27;, &#x27;{&quot;x&quot;:1}&#x27;]) {
+    c.decir(t);
+  }
+  assert.ok(c.sesion.estado);
+});</code></pre>
+</div>
+<p>Pasó a la primera. Si hubiera fallado, habrías encontrado un error que un cliente real habría encontrado por ti.</p>
+<h2 id="probar-el-webhook-con-payloads-reales"><span class="n">4.</span>Probar el webhook con payloads reales</h2>
+<p>El segundo tipo de prueba usa <strong>JSON de ejemplo</strong> copiados de la documentación de Meta. En <code>test/payloads/</code> el código de referencia trae siete: <code>texto.json</code>, <code>boton.json</code>, <code>lista.json</code>, <code>imagen.json</code>, <code>no-soportado.json</code>, <code>estado-entregado.json</code> y <code>estado-fallido.json</code>. Cada uno es el cuerpo exacto que Meta te enviaría (con números falsos).</p>
+<p>Con ellos pruebas que <code>parsearWebhook</code> entiende lo que debe y que <strong>ignora sin romperse</strong> lo que no entiende. Esto último es vital: Meta puede añadir campos nuevos o enviar eventos que no esperabas, y tu servidor debe seguir respondiendo <code>200</code>.</p>
+<div class="code">
+  <div class="code-head"><span>fiabilidad.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { readFileSync } from &#x27;node:fs&#x27;;
+import { parsearWebhook } from &#x27;../src/whatsapp.js&#x27;;
+
+const cargar = (n) =&gt; JSON.parse(readFileSync(new URL(&#x27;./payloads/&#x27; + n, import.meta.url), &#x27;utf8&#x27;));
+
+test(&#x27;payload de estado fallido se interpreta&#x27;, () =&gt; {
+  const [ev] = parsearWebhook(cargar(&#x27;estado-fallido.json&#x27;));
+  assert.equal(ev.tipo, &#x27;estado&#x27;);
+  assert.equal(ev.estado, &#x27;failed&#x27;);
+  assert.equal(ev.errores[0].code, 131047);
+});
+
+test(&#x27;basura no rompe el parser&#x27;, () =&gt; {
+  for (const x of [null, {}, &#x27;hola&#x27;, { object: &#x27;otra&#x27;, entry: 5 }, { object: &#x27;whatsapp_business_account&#x27;, entry: [null, {}] }]) {
+    assert.deepEqual(parsearWebhook(x), []);
+  }
+});</code></pre>
+</div>
+<p>Ambas pasan. Mira el primer caso: el payload <code>estado-fallido.json</code> trae <code>"code": 131047</code>. Es un error real y muy común, que descifrarás en la sección de errores más abajo.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Guarda payloads reales</p>
+<p>Cuando conectes tu número de prueba (<a href="../13-recibir-mensajes-reales/">lección 13</a>), copia los JSON que realmente llegan (reemplazando los datos personales por números falsos) a <code>test/payloads/</code>. Cada vez que Meta te sorprenda con un formato nuevo, ese archivo se vuelve una prueba permanente.</p></div>
+<h2 id="que-registrar-en-los-logs-y-que-nunca"><span class="n">5.</span>Qué registrar en los logs (y qué nunca)</h2>
+<p>Cuando algo falla en producción no tienes un depurador: tienes <strong>registros</strong> (<em>logs</em>). En Cloudflare los ves con <code>npx wrangler tail</code> mientras el Worker corre. Para que sirvan, necesitan estructura. Una línea JSON por evento es fácil de leer y de filtrar:</p>
+<div class="code">
+  <div class="code-head"><span>fiabilidad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const BEARER = /(Bearer\s+)[A-Za-z0-9_\-.]+/gi;
+const CLAVES = /(&quot;?(?:token|app_secret|verify_token)&quot;?\s*[:=]\s*&quot;?)[^&quot;\s,}]+/gi;
+
+export function ocultarSecretos(texto) {
+  return String(texto).replace(BEARER, &#x27;$1***&#x27;).replace(CLAVES, &#x27;$1***&#x27;);
+}
+
+export function ocultarTelefono(tel) {
+  const s = String(tel);
+  return s.length &lt;= 6 ? &#x27;***&#x27; : `${s.slice(0, 3)}***${s.slice(-3)}`;
+}
+
+export function registrar(nivel, evento, datos = {}, salida = console.log) {
+  const linea = { ts: new Date().toISOString(), nivel, evento, ...datos };
+  if (linea.de) linea.de = ocultarTelefono(linea.de);
+  salida(ocultarSecretos(JSON.stringify(linea)));
+}</code></pre>
+</div>
+<p>Y su prueba. Mi primera versión de <code>ocultarSecretos</code> tenía un solo patrón y la prueba <strong>falló</strong>: la expresión se comió <code>Authorization:</code> como si fuera una clave y dejó pasar el token tras la palabra <code>Bearer</code>. Es justo el tipo de error que las pruebas encuentran. La versión de arriba separa los dos patrones, y con ella:</p>
+<div class="code">
+  <div class="code-head"><span>fiabilidad.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>test(&#x27;el log no deja pasar tokens ni teléfonos completos&#x27;, () =&gt; {
+  const lineas = [];
+  registrar(&#x27;error&#x27;, &#x27;envio_fallido&#x27;, { de: &#x27;51999000111&#x27;, detalle: &#x27;Authorization: Bearer EAAGexample123&#x27; }, (l) =&gt; lineas.push(l));
+  console.log(lineas[0]);
+  assert.ok(!lineas[0].includes(&#x27;EAAG&#x27;));
+  assert.ok(!lineas[0].includes(&#x27;51999000111&#x27;));
+});</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;ts&quot;:&quot;2026-10-07T19:02:19.674Z&quot;,&quot;nivel&quot;:&quot;error&quot;,&quot;evento&quot;:&quot;envio_fallido&quot;,&quot;de&quot;:&quot;519***111&quot;,&quot;detalle&quot;:&quot;Authorization: Bearer ***&quot;}</code></pre>
+</div>
+<p><strong>Qué sí registrar:</strong> el tipo de evento (mensaje recibido, respuesta enviada, estado fallido), el id del mensaje (<code>wamid...</code>), el estado de la conversación, la duración y los códigos de error. <strong>Qué no:</strong> tokens, el App Secret, ni el texto completo de los mensajes de los clientes ni sus teléfonos enteros (los datos personales no deben vivir en un log; verás el porqué en la <a href="../24-seguridad-y-privacidad/">lección 24</a>). El código de referencia ya cuida lo mínimo: <code>enviarMensaje</code> nunca incluye el token en sus errores.</p>
+<h2 id="reintentos-cuando-si-y-cuando-no"><span class="n">6.</span>Reintentos: cuándo sí y cuándo no</h2>
+<p>Las redes fallan. Una petición a la API de Meta puede devolver un <code>500</code> porque sus servidores están ocupados un segundo. Reintentar suele resolverlo, pero hacerlo mal empeora las cosas. Reglas:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Respuesta</th>
+<th>¿Reintentar?</th>
+<th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>429</code> (demasiadas peticiones)</td>
+<td>Sí, con espera</td>
+<td>Es temporal: Meta te pide bajar el ritmo.</td>
+</tr>
+<tr>
+<td><code>500</code>, <code>502</code>, <code>503</code></td>
+<td>Sí, con espera</td>
+<td>Fallo del servidor, normalmente pasajero.</td>
+</tr>
+<tr>
+<td><code>400</code>, <code>401</code>, <code>403</code>, <code>404</code></td>
+<td><strong>No</strong></td>
+<td>Tu petición está mal o te falta permiso; repetirla da el mismo error.</td>
+</tr>
+</tbody>
+</table></div>
+<p>La espera debe <strong>crecer</strong> en cada intento (500 ms, 1 s, 2 s...), con un tope, para no martillar a un servidor que ya está en problemas. A eso se le llama <em>backoff exponencial</em>:</p>
+<div class="code">
+  <div class="code-head"><span>fiabilidad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function esReintentable(estadoHttp) {
+  return estadoHttp === 429 || estadoHttp &gt;= 500;
+}
+
+export function esperaReintento(intento, baseMs = 500, maxMs = 8000) {
+  return Math.min(baseMs * 2 ** (intento - 1), maxMs);
+}
+
+export async function conReintentos(tarea, { intentos = 3, baseMs = 500, dormir = (ms) =&gt; new Promise((r) =&gt; setTimeout(r, ms)), alFallar = () =&gt; {} } = {}) {
+  let ultimo;
+  for (let n = 1; n &lt;= intentos; n++) {
+    try {
+      return await tarea(n);
+    } catch (e) {
+      ultimo = e;
+      const reintentable = e.estado === undefined || esReintentable(e.estado);
+      alFallar(n, e, reintentable);
+      if (!reintentable || n === intentos) break;
+      await dormir(esperaReintento(n, baseMs));
+    }
+  }
+  throw ultimo;
+}</code></pre>
+</div>
+<p>Fíjate en el parámetro <code>dormir</code>: en producción espera de verdad, pero en las pruebas le pasas una función vacía y el test no tarda ni medio segundo.</p>
+<p>Hay un detalle del código de referencia: <code>enviarMensaje</code> lanza un <code>Error</code> cuyo texto es <code>WhatsApp respondió 500: ...</code> pero <strong>no</strong> guarda el número en una propiedad. Lo extraemos del mensaje con una función pequeña y envolvemos el envío:</p>
+<div class="code">
+  <div class="code-head"><span>fiabilidad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function estadoDeError(e) {
+  const m = /respondió (\d{3})/.exec(e?.message ?? &#x27;&#x27;);
+  return m ? Number(m[1]) : undefined;
+}
+
+export function enviarConReintentos(env, cuerpo, llamar = fetch, opciones = {}) {
+  return conReintentos(async () =&gt; {
+    try {
+      return await enviarMensaje(env, cuerpo, llamar);
+    } catch (e) {
+      e.estado = estadoDeError(e);
+      throw e;
+    }
+  }, opciones);
+}</code></pre>
+</div>
+<p>Con un <code>fetch</code> falso que responde <code>500</code>, <code>503</code> y por fin <code>200</code>, comprobamos los tres casos de la tabla:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>intentos usados: 3
+✔ 500, 500, 200: entrega al tercer intento (10.4468ms)
+✔ 400 no se reintenta (2.8786ms)
+✔ 429 se reintenta y al final se rinde (1.3067ms)</code></pre>
+</div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Reintentar no es lo mismo que duplicar</p>
+<p>Si un <code>500</code> ocurre <strong>después</strong> de que Meta entregó el mensaje, el reintento enviará el texto dos veces. Tampoco hay forma perfecta de evitarlo: por eso conviene reintentar pocas veces (2 o 3) y registrar cada intento. Y del lado de la <strong>entrada</strong>, recuerda la idempotencia del Worker (<code>visto:&lt;wamid&gt;</code>): Meta también reintenta sus webhooks si no le respondes <code>200</code> rápido, y el código ya ignora los mensajes repetidos.</p></div>
+<h2 id="errores-131xxx-de-whatsapp"><span class="n">7.</span>Errores 131xxx de WhatsApp</h2>
+<p>Cuando un envío falla, la API devuelve un JSON con un <code>code</code> y un <code>message</code>. También los verás en los eventos de estado <code>failed</code> del webhook. Esta es la guía de los más frecuentes, con la acción que casi siempre corresponde:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Qué significa</th>
+<th>Qué hacer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>131047</code></td>
+<td>Pasaron más de 24 horas desde el último mensaje del cliente (<em>re-engagement</em>)</td>
+<td>Enviar una <strong>plantilla</strong> aprobada en lugar de texto libre (<a href="../17-plantillas/">lección 17</a>).</td>
+</tr>
+<tr>
+<td><code>131030</code></td>
+<td>El destinatario no está en la lista de permitidos</td>
+<td>Con el número de prueba, agrega el teléfono en la lista de Meta o usa un número real verificado.</td>
+</tr>
+<tr>
+<td><code>131026</code></td>
+<td>Mensaje no entregable (el número no tiene WhatsApp, usa una versión muy vieja o no aceptó las condiciones)</td>
+<td>No reintentar; anotar al cliente como inalcanzable.</td>
+</tr>
+<tr>
+<td><code>131056</code></td>
+<td>Demasiados mensajes seguidos entre tu número y ese cliente</td>
+<td>Esperar y bajar el ritmo.</td>
+</tr>
+<tr>
+<td><code>131048</code></td>
+<td>Límite por calidad o posible spam</td>
+<td>Revisar tu contenido y tu lista de opt-in (<a href="../20-marketing-responsable/">lección 20</a>).</td>
+</tr>
+<tr>
+<td><code>131008</code> / <code>131009</code></td>
+<td>Falta un parámetro obligatorio / un parámetro tiene un valor inválido</td>
+<td>Corregir tu código: revisa el JSON que construiste.</td>
+</tr>
+<tr>
+<td><code>131031</code></td>
+<td>Cuenta bloqueada o restringida</td>
+<td>Revisar el estado de la cuenta en el administrador de Meta.</td>
+</tr>
+<tr>
+<td><code>131051</code></td>
+<td>Tipo de mensaje no soportado</td>
+<td>Revisar que el tipo y el formato del mensaje existan.</td>
+</tr>
+<tr>
+<td><code>190</code></td>
+<td>Token de acceso vencido o inválido (no empieza por 131, pero es muy común)</td>
+<td>Generar un token nuevo (<a href="../12-cuenta-y-app-de-meta/">lección 12</a>).</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los códigos y sus descripciones los define Meta y se amplían con el tiempo. Esta tabla sirve de orientación, no de contrato. La lista oficial y vigente está en la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes">documentación de códigos de error de la Cloud API</a>. Si el enlace cambia de sitio, búscala dentro de <code>developers.facebook.com</code> por «WhatsApp Cloud API error codes».</p></div>
+<p>Convertimos la tabla en código para que el bot (o tú, al leer los logs) sepa qué hacer sin consultar nada:</p>
+<div class="code">
+  <div class="code-head"><span>fiabilidad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const ERRORES = {
+  131047: { accion: &#x27;plantilla&#x27;, causa: &#x27;Pasaron más de 24 h desde el último mensaje del cliente.&#x27; },
+  131030: { accion: &#x27;corregir&#x27;, causa: &#x27;El destinatario no está en la lista de permitidos (número de prueba).&#x27; },
+  131026: { accion: &#x27;ignorar&#x27;, causa: &#x27;Mensaje no entregable.&#x27; },
+  131056: { accion: &#x27;esperar&#x27;, causa: &#x27;Demasiados mensajes seguidos al mismo cliente.&#x27; },
+  131048: { accion: &#x27;esperar&#x27;, causa: &#x27;Límite por calidad: Meta frena tus envíos por posible spam.&#x27; },
+  190: { accion: &#x27;corregir&#x27;, causa: &#x27;Token de acceso vencido o inválido.&#x27; },
+};
+
+export function clasificarError(codigo) {
+  return ERRORES[codigo] ?? { accion: &#x27;revisar&#x27;, causa: &#x27;Código desconocido: búscalo en la documentación oficial.&#x27; };
+}</code></pre>
+</div>
+<p>Con el payload de ejemplo, <code>clasificarError(ev.errores[0].code).accion</code> devuelve <code>'plantilla'</code>, y la prueba lo confirma. Un error <code>131047</code> en el estado de un mensaje del Worker de la <a href="../18-recordatorios-y-seguimiento/">lección 18</a> significa que tu recordatorio salió como texto cuando la ventana ya estaba cerrada: el código de referencia evita eso decidiendo con <code>puedeEnviarTexto</code>, pero la ventana puede cerrarse justo entre la decisión y el envío.</p>
+<h2 id="una-lista-de-pruebas-antes-de-publicar"><span class="n">8.</span>Una lista de pruebas antes de publicar</h2>
+<p>Antes de cada despliegue, repasa esta lista. Las primeras líneas las automatizan tus pruebas; las últimas son manuales con tu número de prueba:</p>
+<ol>
+<li><code>npm test</code> pasa completo.</li>
+<li>Una conversación de punta a punta (recojo y delivery) con pago en efectivo, Yape y transferencia.</li>
+<li>Entradas raras: vacío, emoji, audio, imagen. El bot responde sin romperse.</li>
+<li>El mismo webhook enviado dos veces no duplica el pedido.</li>
+<li>Un POST con firma incorrecta devuelve <code>401</code>.</li>
+<li>En tu teléfono real, un pedido completo y la lectura de los logs con <code>wrangler tail</code>.</li>
+</ol>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Probar solo el «camino feliz».</strong> El cliente que escribe «dos lehces» o manda una nota de voz es el normal, no el raro.</li>
+<li><strong>Pruebas que dependen del reloj o de internet.</strong> Pasa <code>ahora</code> y el <code>fetch</code> como parámetros para que cualquiera pueda repetirlas.</li>
+<li><strong>Comprobar frases exactas.</strong> Cualquier mejora de redacción rompe las pruebas; verifica datos y estados.</li>
+<li><strong>Reintentar errores <code>4xx</code>.</strong> Si el cuerpo está mal, el segundo intento falla igual y solo gastas tiempo.</li>
+<li><strong>Registrar tokens o mensajes completos en el log.</strong> Los logs se comparten y se guardan: trátalos como datos sensibles.</li>
+<li><strong>Ignorar los eventos <code>failed</code>.</strong> Son la única forma de enterarte de que un mensaje no llegó. Al menos regístralos.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>El motor es una función pura, así que se prueba sin WhatsApp: simula una conversación y comprueba estado, totales y textos clave.</li>
+<li>Las pruebas de humo (tocar todos los botones, mandar entradas raras) encuentran errores de forma barata.</li>
+<li>Guarda payloads reales de Meta en <code>test/payloads/</code> y haz que el parser ignore lo desconocido.</li>
+<li>Los logs deben ser estructurados y <strong>sin secretos</strong> ni teléfonos completos.</li>
+<li>Reintenta solo <code>429</code> y <code>5xx</code>, con espera creciente y pocos intentos; nunca los <code>4xx</code>.</li>
+<li>Aprende los códigos <code>131047</code>, <code>131030</code>, <code>131026</code>, <code>131056</code> y <code>190</code>, y consulta la lista oficial de Meta para el resto.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>node:test</td>
+<td>Ejecutor de pruebas incluido en Node; se usa con <code>node --test</code>.</td>
+</tr>
+<tr>
+<td>Aserción</td>
+<td>Afirmación dentro de una prueba (<code>assert.equal</code>); si no se cumple, la prueba falla.</td>
+</tr>
+<tr>
+<td>Prueba de humo</td>
+<td>Prueba rápida que recorre lo principal para ver que nada explota.</td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>Cuerpo JSON que Meta envía a tu webhook.</td>
+</tr>
+<tr>
+<td>Log</td>
+<td>Registro de lo que ocurre en el servidor, útil para depurar.</td>
+</tr>
+<tr>
+<td>Backoff exponencial</td>
+<td>Esperar cada vez más entre reintentos (500 ms, 1 s, 2 s...).</td>
+</tr>
+<tr>
+<td>Idempotencia</td>
+<td>Procesar dos veces el mismo evento da el mismo resultado que procesarlo una vez.</td>
+</tr>
+<tr>
+<td>Código 131xxx</td>
+<td>Familia de códigos de error de la Cloud API de WhatsApp para fallos de envío.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Por qué se puede probar el motor del bot sin conectarlo a WhatsApp?</p><ul class="opts"><li><button type="button" class="opt">Porque Meta ofrece un simulador oficial dentro de Node</button></li><li><button type="button" class="opt" data-ok>Porque <code>procesar</code> es una función pura: recibe sesión y mensaje y devuelve sesión y respuestas, sin red ni archivos</button></li><li><button type="button" class="opt">Porque las pruebas se hacen siempre con el teléfono real</button></li><li><button type="button" class="opt">Porque el motor guarda los datos en KV automáticamente</button></li></ul><p class="explain" hidden>Al no tener entrada/salida, basta llamar a la función y comprobar el resultado.</p></div>
+<div class="quiz-q"><p>Una petición de envío devuelve 400. ¿Qué haces?</p><ul class="opts"><li><button type="button" class="opt">Reintentas tres veces con espera creciente</button></li><li><button type="button" class="opt" data-ok>No reintentas: el cuerpo o los permisos están mal y repetirlo dará el mismo error</button></li><li><button type="button" class="opt">Esperas 24 horas y repites</button></li><li><button type="button" class="opt">Cambias el token por uno nuevo siempre</button></li></ul><p class="explain" hidden>Los 4xx indican un problema de tu petición; solo se reintentan 429 y 5xx.</p></div>
+<div class="quiz-q"><p>Un estado <code>failed</code> trae el código 131047. ¿Qué significa?</p><ul class="opts"><li><button type="button" class="opt" data-ok>Pasaron más de 24 horas desde el último mensaje del cliente y hay que usar una plantilla</button></li><li><button type="button" class="opt">El número de teléfono no tiene WhatsApp</button></li><li><button type="button" class="opt">El token de acceso venció</button></li><li><button type="button" class="opt">El cliente bloqueó tu número</button></li></ul><p class="explain" hidden>131047 es el error de re-engagement: fuera de la ventana solo valen las plantillas.</p></div>
+<div class="quiz-q"><p>¿Qué NO debe aparecer en tus logs?</p><ul class="opts"><li><button type="button" class="opt">El id del mensaje (<code>wamid...</code>)</button></li><li><button type="button" class="opt">El código de error de Meta</button></li><li><button type="button" class="opt" data-ok>El token de acceso y los teléfonos de los clientes completos</button></li><li><button type="button" class="opt">El tipo de evento</button></li></ul><p class="explain" hidden>Los logs se comparten y se guardan: los secretos y los datos personales no van ahí.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve guardar payloads reales en <code>test/payloads/</code>?</p><ul class="opts"><li><button type="button" class="opt">Para aumentar la velocidad del servidor</button></li><li><button type="button" class="opt">Para no necesitar el App Secret</button></li><li><button type="button" class="opt" data-ok>Para convertir cada formato inesperado de Meta en una prueba permanente del parser</button></li><li><button type="button" class="opt">Para enviar mensajes sin firma</button></li></ul><p class="explain" hidden>Los payloads reales son la mejor documentación viva de lo que Meta envía.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-23">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../22-ia-como-complemento/"><small>← Anterior</small>IA como complemento, no como cerebro</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 23 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2023:%20Pruebas,%20registros%20y%20errores%20comunes&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

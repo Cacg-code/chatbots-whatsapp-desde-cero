@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enviar mensajes · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Envía texto, botones y listas con la Graph API usando las funciones del código del curso, respeta los límites de WhatsApp y diagnostica los errores comunes.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Enviar mensajes · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Envía texto, botones y listas con la Graph API usando las funciones del código del curso, respeta los límites de WhatsApp y diagnostica los errores comunes.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#la-peticion-basica">La petición básica</a></li><li><a href="#texto-simple">Texto simple</a></li><li><a href="#botones-de-respuesta">Botones de respuesta</a></li><li><a href="#listas">Listas</a></li><li><a href="#enviar-varias-respuestas-en-orden">Enviar varias respuestas en orden</a></li><li><a href="#cuando-algo-falla-errores-comunes">Cuando algo falla: errores comunes</a></li><li><a href="#una-respuesta-200-no-significa-entregado">Una respuesta 200 no significa «entregado»</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 14</div>
+        <h1>Enviar mensajes</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Describir la petición POST a /{PHONE_NUMBER_ID}/messages y sus cabeceras.</li><li>Construir cuerpos de texto, botones y lista con construirEnvio y respetar los límites de cada tipo.</li><li>Enviar un mensaje con enviarMensaje sin filtrar el token en los errores.</li><li>Interpretar los códigos de error más comunes de la API y decidir qué hacer en cada caso.</li><li>Explicar por qué una respuesta 200 no garantiza que el cliente recibió el mensaje.</li></ul>
+</div>
+
+<h2 id="la-peticion-basica"><span class="n">1.</span>La petición básica</h2>
+<p>Enviar un mensaje con la Cloud API es una sola petición HTTPS. Tu bot ya sabe <strong>qué</strong> responder (el motor devuelve una lista de respuestas); esta lección es la última pieza: <strong>cómo</strong> se convierten esas respuestas en peticiones a Meta.</p>
+<div class="flow"><div class="node"><strong>Motor</strong><span>respuestas del bot</span></div><div class="arrow">→<code>construirEnvio</code></div><div class="node"><strong>Cuerpo JSON</strong><span>formato de la API</span></div><div class="arrow">→<code>enviarMensaje (POST)</code></div><div class="node"><strong>Graph API</strong><span>graph.facebook.com</span></div><div class="arrow">→<code>mensaje</code></div><div class="node"><strong>Cliente</strong><span>WhatsApp</span></div></div>
+<p>Según la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages">documentación oficial de envío de mensajes</a>:</p>
+<ul>
+<li>El método y la ruta son <code>POST /&lt;PHONE_NUMBER_ID&gt;/messages</code> sobre <code>graph.facebook.com</code>, con la versión de la API en la ruta (por ejemplo <code>v26.0</code>).</li>
+<li>La cabecera <code>Authorization: Bearer &lt;token&gt;</code> lleva tu token.</li>
+<li>La cabecera <code>Content-Type: application/json</code> indica el formato.</li>
+<li>El cuerpo siempre incluye <code>messaging_product: "whatsapp"</code>, el destinatario en <code>to</code> y el <code>type</code> del mensaje.</li>
+</ul>
+<p>Lo que el código del curso aplica en <code>src/whatsapp.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>src/whatsapp.js (fragmento)</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export const GRAPH_VERSION = &#x27;v26.0&#x27;;
+
+export async function enviarMensaje(env, cuerpo, llamar = fetch) {
+  const url = `https://graph.facebook.com/${GRAPH_VERSION}/${env.WA_PHONE_ID}/messages`;
+  const respuesta = await llamar(url, {
+    method: &#x27;POST&#x27;,
+    headers: { Authorization: `Bearer ${env.WA_TOKEN}`, &#x27;Content-Type&#x27;: &#x27;application/json&#x27; },
+    body: JSON.stringify(cuerpo),
+  });
+  const datos = await respuesta.json().catch(() =&gt; ({}));
+  if (!respuesta.ok) {
+    // Nunca incluimos el token en el error.
+    throw new Error(`WhatsApp respondió ${respuesta.status}: ${datos?.error?.message ?? &#x27;sin detalle&#x27;}`);
+  }
+  return datos;
+}</code></pre>
+</div>
+<p>Tres decisiones merecen atención:</p>
+<ol>
+<li><strong><code>llamar = fetch</code></strong>: la función recibe como parámetro el <code>fetch</code> que usará. En producción es el real; en las pruebas es uno falso, así pruebas el envío sin tocar internet ni gastar mensajes (lo verás en la <a href="../23-pruebas-y-errores/">lección 23</a>).</li>
+<li><strong>El mensaje de error nunca contiene el token.</strong> Un error registrado en la consola o en un panel de logs no debe filtrar una credencial.</li>
+<li><strong>Se lee el <code>error.message</code> de la respuesta de Meta</strong>, que suele explicar el problema.</li>
+</ol>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>La versión de la Graph API cambia y cada versión tiene fecha de retiro. El ejemplo de la documentación de envío usa una versión distinta a la del código del curso: ambas existen y funcionan, pero conviene revisar el <a href="https://developers.facebook.com/docs/graph-api/changelog/">registro de cambios</a> y actualizar <code>GRAPH_VERSION</code> antes de desplegar.</p></div>
+<h2 id="texto-simple"><span class="n">2.</span>Texto simple</h2>
+<p>El tipo más simple. El motor devuelve <code>{ tipo: 'texto', texto: '...' }</code> y <code>construirEnvio</code> lo transforma:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { construirEnvio } from &#x27;./src/whatsapp.js&#x27;;
+
+const cuerpo = construirEnvio(&#x27;51999000111&#x27;, {
+  tipo: &#x27;texto&#x27;,
+  texto: &#x27;Hola, bienvenido a Minimarket La Esquina.&#x27;,
+});
+console.log(JSON.stringify(cuerpo));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;messaging_product&quot;:&quot;whatsapp&quot;,&quot;recipient_type&quot;:&quot;individual&quot;,&quot;to&quot;:&quot;51999000111&quot;,&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:{&quot;preview_url&quot;:false,&quot;body&quot;:&quot;Hola, bienvenido a Minimarket La Esquina.&quot;}}</code></pre>
+</div>
+<p><code>preview_url: false</code> evita que WhatsApp genere una vista previa de enlaces. Si quieres que un enlace muestre su vista previa, tendrías que ponerlo en <code>true</code> (la documentación oficial usa <code>true</code> en su ejemplo cuando el texto incluye un enlace). Respecto al límite, el código impone 4096 caracteres de texto.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los límites de caracteres (4096 en texto, 1024 en el cuerpo de botones, 20 en el título de un botón, etc.) son los que figuran en las páginas oficiales de cada tipo de mensaje al escribir este curso. Confírmalos en la documentación de <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/messages/interactive-reply-buttons-messages">mensajes interactivos con botones</a> y de <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/messages/interactive-list-messages">listas</a>.</p></div>
+<p>Una respuesta exitosa contiene el id del mensaje (<code>wamid...</code>) y el contacto:</p>
+<div class="code">
+  <div class="code-head"><span>JSON</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;messaging_product&quot;: &quot;whatsapp&quot;,
+  &quot;contacts&quot;: [{ &quot;input&quot;: &quot;51999000111&quot;, &quot;wa_id&quot;: &quot;51999000111&quot; }],
+  &quot;messages&quot;: [{ &quot;id&quot;: &quot;wamid.EJEMPLO123&quot; }]
+}</code></pre>
+</div>
+<p>Guarda ese id si más adelante quieres relacionarlo con los estados <code>sent</code>, <code>delivered</code> o <code>read</code> que llegarán a tu webhook (<a href="../13-recibir-mensajes-reales/">lección 13</a>).</p>
+<h2 id="botones-de-respuesta"><span class="n">3.</span>Botones de respuesta</h2>
+<p>Los <strong>botones de respuesta</strong> (<em>reply buttons</em>) muestran hasta tres opciones tocables bajo el mensaje. Son ideales para decisiones cortas: «Recojo» o «Delivery», «Confirmar» o «Cancelar». Cuando el cliente toca uno, tu webhook recibe un mensaje <code>interactive</code> con el <code>id</code> del botón, no con su texto. Por eso el motor usa ids como <code>entrega:recojo</code> y <code>pedido_confirmar</code>: son identificadores estables, mientras el título es solo lo que se ve.</p>
+<p>Reglas que valida <code>construirEnvio</code> antes de enviar (si se rompe una, lanza un error claro <strong>antes</strong> de llamar a Meta):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Regla</th>
+<th>Valor en el código</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cantidad de botones</td>
+<td>de 1 a 3</td>
+</tr>
+<tr>
+<td>Título del botón</td>
+<td>hasta 20 caracteres, único dentro del mensaje</td>
+</tr>
+<tr>
+<td>Id del botón</td>
+<td>hasta 256 caracteres</td>
+</tr>
+<tr>
+<td>Cuerpo del mensaje</td>
+<td>de 1 a 1024 caracteres</td>
+</tr>
+</tbody>
+</table></div>
+<p>Estas validaciones producen mensajes como los siguientes (reales, ejecutados con el código del curso):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Respuesta inválida para WhatsApp: título de botón de más de 20 caracteres: &quot;Un titulo demasiado largo para boton&quot;
+Respuesta inválida para WhatsApp: entre 1 y 3 botones</code></pre>
+</div>
+<p>Y un envío válido de dos botones produce este cuerpo:</p>
+<div class="code">
+  <div class="code-head"><span>JSON</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;messaging_product&quot;: &quot;whatsapp&quot;,
+  &quot;recipient_type&quot;: &quot;individual&quot;,
+  &quot;to&quot;: &quot;51999000111&quot;,
+  &quot;type&quot;: &quot;interactive&quot;,
+  &quot;interactive&quot;: {
+    &quot;type&quot;: &quot;button&quot;,
+    &quot;body&quot;: { &quot;text&quot;: &quot;¿Cómo quieres recibir tu pedido?&quot; },
+    &quot;action&quot;: {
+      &quot;buttons&quot;: [
+        { &quot;type&quot;: &quot;reply&quot;, &quot;reply&quot;: { &quot;id&quot;: &quot;entrega:recojo&quot;, &quot;title&quot;: &quot;Recojo en tienda&quot; } },
+        { &quot;type&quot;: &quot;reply&quot;, &quot;reply&quot;: { &quot;id&quot;: &quot;entrega:delivery&quot;, &quot;title&quot;: &quot;Delivery&quot; } }
+      ]
+    }
+  }
+}</code></pre>
+</div>
+<div class="callout consejo">
+<p class="callout-title">💡 Falla antes, no después</p>
+<p>Validar en tu código ahorra una ida y vuelta a Meta y te da un error legible en tus pruebas. Si dejaras que la API rechace un título largo, recibirías un error genérico de parámetros (código 100, como verás abajo) y tendrías que adivinar cuál campo falló.</p></div>
+<h2 id="listas"><span class="n">4.</span>Listas</h2>
+<p>Cuando tienes más de tres opciones, usa una <strong>lista</strong>: un mensaje con un botón que abre un menú con filas. Es lo que usa el bot para mostrar las categorías del catálogo. Límites del código:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Regla</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Texto del botón que abre la lista</td>
+<td>hasta 20 caracteres</td>
+</tr>
+<tr>
+<td>Secciones</td>
+<td>de 1 a 10</td>
+</tr>
+<tr>
+<td>Filas en total</td>
+<td>de 1 a 10</td>
+</tr>
+<tr>
+<td>Título de sección</td>
+<td>hasta 24 caracteres (obligatorio si hay más de una)</td>
+</tr>
+<tr>
+<td>Título de fila</td>
+<td>hasta 24 caracteres</td>
+</tr>
+<tr>
+<td>Descripción de fila</td>
+<td>hasta 72 caracteres (opcional)</td>
+</tr>
+<tr>
+<td>Id de fila</td>
+<td>hasta 200 caracteres</td>
+</tr>
+</tbody>
+</table></div>
+<p>Un ejemplo mínimo con el estilo del minimarket:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const cuerpo = construirEnvio(&#x27;51999000111&#x27;, {
+  tipo: &#x27;lista&#x27;,
+  texto: &#x27;Elige una categoria&#x27;,
+  boton: &#x27;Ver categorias&#x27;,
+  secciones: [{
+    titulo: &#x27;Categorias&#x27;,
+    filas: [{ id: &#x27;cat:abarrotes&#x27;, titulo: &#x27;Abarrotes&#x27;, descripcion: &#x27;Arroz, azucar, aceite&#x27; }],
+  }],
+});</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{
+  &quot;messaging_product&quot;: &quot;whatsapp&quot;,
+  &quot;recipient_type&quot;: &quot;individual&quot;,
+  &quot;to&quot;: &quot;51999000111&quot;,
+  &quot;type&quot;: &quot;interactive&quot;,
+  &quot;interactive&quot;: {
+    &quot;type&quot;: &quot;list&quot;,
+    &quot;body&quot;: { &quot;text&quot;: &quot;Elige una categoria&quot; },
+    &quot;action&quot;: {
+      &quot;button&quot;: &quot;Ver categorias&quot;,
+      &quot;sections&quot;: [{
+        &quot;title&quot;: &quot;Categorias&quot;,
+        &quot;rows&quot;: [{ &quot;id&quot;: &quot;cat:abarrotes&quot;, &quot;title&quot;: &quot;Abarrotes&quot;, &quot;description&quot;: &quot;Arroz, azucar, aceite&quot; }]
+      }]
+    }
+  }
+}</code></pre>
+</div>
+<p>(El bloque de salida está reformateado en menos líneas para ahorrar espacio; el contenido es el mismo.)</p>
+<p>Nota la diferencia de nombres entre el motor y la API: el motor usa <code>botones</code>, <code>titulo</code>, <code>secciones</code> y <code>filas</code>; la API usa <code>buttons</code>, <code>title</code>, <code>sections</code> y <code>rows</code>. <code>construirEnvio</code> es precisamente el traductor, y ese es el motivo por el que el motor no sabe nada de Meta: si Meta cambia un campo, solo tocas <code>whatsapp.js</code>.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Cuando el cliente responde</p>
+<p>Al tocar un botón o una fila, el cliente genera un mensaje entrante de tipo <code>interactive</code> con <code>button_reply</code> o <code>list_reply</code>. <code>parsearEntrada</code> lo convierte en <code>{ tipo: 'interactivo', id, titulo }</code>, y el motor decide según el <code>id</code>. Así cierras el ciclo completo: enviar opciones, recibir la elección.</p></div>
+<h2 id="enviar-varias-respuestas-en-orden"><span class="n">5.</span>Enviar varias respuestas en orden</h2>
+<p>Un turno del motor puede producir varias respuestas (por ejemplo, un texto y luego un menú). El Worker las envía <strong>una por una, esperando cada una</strong>, para que lleguen en el orden correcto:</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js (fragmento)</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>await enviarMensaje(env, construirLeido(evento.id), llamar).catch((e) =&gt; console.error(e.message));
+for (const respuesta of respuestas) {
+  await enviarMensaje(env, construirEnvio(evento.de, respuesta), llamar);
+}</code></pre>
+</div>
+<p>Antes marca el mensaje del cliente como leído (los dos checks azules) con <code>construirLeido</code>; si eso falla, solo se registra y no se interrumpe la respuesta, porque es un detalle cosmético. Si lanzaras todas las peticiones a la vez con <code>Promise.all</code>, podrían llegar desordenadas.</p>
+<h2 id="cuando-algo-falla-errores-comunes"><span class="n">6.</span>Cuando algo falla: errores comunes</h2>
+<p>Cuando la API rechaza una petición, responde con un código HTTP y un JSON con un objeto <code>error</code> que incluye <code>message</code> y un <code>code</code>. La <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes">página oficial de códigos de error de WhatsApp</a> lista cientos; estos son los que más verás al empezar:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Qué significa (según la documentación)</th>
+<th>Qué hacer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>190</code></td>
+<td>El token de acceso venció o no es válido</td>
+<td>Genera un token nuevo (lección 12)</td>
+</tr>
+<tr>
+<td><code>100</code></td>
+<td>Parámetros no admitidos o mal escritos</td>
+<td>Revisa nombres y formato del cuerpo</td>
+</tr>
+<tr>
+<td><code>131047</code></td>
+<td>Pasaron más de 24 horas desde la última respuesta del cliente</td>
+<td>Envía una plantilla (<a href="../17-plantillas/">lección 17</a>)</td>
+</tr>
+<tr>
+<td><code>131026</code></td>
+<td>El mensaje no se pudo entregar (número sin WhatsApp, términos sin aceptar, cliente desactualizado)</td>
+<td>Pide al cliente que confirme que puede escribirte</td>
+</tr>
+<tr>
+<td><code>131051</code></td>
+<td>Tipo de mensaje no soportado</td>
+<td>Usa un tipo admitido</td>
+</tr>
+<tr>
+<td><code>130429</code></td>
+<td>Alcanzaste el límite de velocidad de la Cloud API</td>
+<td>Espera o reduce el ritmo</td>
+</tr>
+<tr>
+<td><code>131056</code></td>
+<td>Demasiados mensajes en poco tiempo al mismo destinatario</td>
+<td>Espera y reintenta solo para ese cliente</td>
+</tr>
+<tr>
+<td><code>132000</code></td>
+<td>Faltan o sobran valores de variables en la plantilla</td>
+<td>Pasa todos los parámetros que la plantilla define</td>
+</tr>
+</tbody>
+</table></div>
+<p>El error de token lo viste en la lección 13. Esto fue lo que el código del curso registró con un token falso (real, ejecutado con el Worker):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>WhatsApp respondió 401: Invalid OAuth access token - Cannot parse access token</code></pre>
+</div>
+<p>Nota que muestra el <strong>estado HTTP</strong> y el <strong>mensaje</strong>, pero ni rastro del token.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Hay otro error muy frecuente al usar el número de prueba: intentar escribir a un destinatario que no registraste en el panel. En muchos tutoriales aparece como código <code>131030</code>, pero la página de errores que consulté al escribir esta lección no lo detallaba. Búscalo en la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes">lista oficial</a> antes de basarte en él, y si tu error trae otro código, confía en el <code>message</code> de la respuesta.</p></div>
+<p>Una regla práctica para decidir qué hacer con un error:</p>
+<ul>
+<li><strong>No reintentes</strong> los errores de petición (<code>100</code>, <code>131051</code>, <code>132000</code>): el cuerpo está mal y fallará siempre.</li>
+<li><strong>No reintentes</strong> <code>190</code> hasta renovar el token.</li>
+<li><strong>Reintenta con espera</strong> los de límite de velocidad (<code>130429</code>, <code>131056</code>).</li>
+<li><strong>Cambia de estrategia</strong> con <code>131047</code>: pasa de texto libre a plantilla.</li>
+</ul>
+<h2 id="una-respuesta-200-no-significa-entregado"><span class="n">7.</span>Una respuesta 200 no significa «entregado»</h2>
+<p>Cuando <code>enviarMensaje</code> devuelve datos sin lanzar error, solo sabes que Meta <strong>aceptó</strong> tu petición. La documentación oficial lo dice así: la respuesta únicamente confirma que la API aceptó el pedido, y la entrega real se informa por webhook. Un mensaje aceptado puede fallar después (por ejemplo, el cliente cambió de número o no tiene conexión mucho tiempo). Por eso el Worker registra los eventos de estado <code>failed</code> con su lista de errores:</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js (fragmento)</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>else if (evento.tipo === &#x27;estado&#x27; &amp;&amp; evento.estado === &#x27;failed&#x27;) console.error(&#x27;Mensaje fallido&#x27;, evento.id, evento.errores);</code></pre>
+</div>
+<p>Más adelante, las lecciones de <a href="../15-memoria-con-kv/">memoria</a> y <a href="../23-pruebas-y-errores/">pruebas y errores</a> usarán estos estados para reintentar o avisar al dueño.</p>
+<h2 id="errores-frecuentes"><span class="n">8.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Mandar más de tres botones.</strong> Pasa a una lista: el límite es de 3 botones de respuesta.</li>
+<li><strong>Títulos demasiado largos.</strong> 20 caracteres en botones y 24 en filas de lista; acorta o mueve el detalle a la descripción.</li>
+<li><strong>Usar el título del botón como identificador.</strong> El título cambia con el idioma o el diseño; decide siempre por el <code>id</code>.</li>
+<li><strong>Enviar en paralelo varias respuestas.</strong> Pueden llegar desordenadas; envíalas en secuencia.</li>
+<li><strong>Reintentar a ciegas.</strong> Un error de formato o de token se repetirá infinitamente; clasifica antes de reintentar.</li>
+<li><strong>Dar por entregado un 200.</strong> Revisa los estados del webhook.</li>
+<li><strong>Registrar el token en logs.</strong> Al construir mensajes de error, nunca incluyas cabeceras ni credenciales.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">9.</span>Apuntes para llevar</h2>
+<ul>
+<li>Enviar es un <code>POST</code> a <code>graph.facebook.com/&lt;versión&gt;/&lt;PHONE_NUMBER_ID&gt;/messages</code> con <code>Authorization: Bearer</code>.</li>
+<li><code>construirEnvio</code> traduce las respuestas del motor (texto, botones, lista) al cuerpo de la API y valida los límites antes de enviar.</li>
+<li>Máximo 3 botones de respuesta; para más opciones, una lista (hasta 10 filas).</li>
+<li>Decide por el <strong>id</strong> de botones y filas, no por su título.</li>
+<li>Envía las respuestas en orden, una por una.</li>
+<li>Clasifica los errores: algunos se corrigen, otros se reintentan y otros piden una plantilla.</li>
+<li>Un <code>200</code> solo significa que Meta aceptó el mensaje; la entrega la dicen los estados del webhook.</li>
+</ul>
+<h2 id="glosario"><span class="n">10.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Graph API</td>
+<td>API de Meta a la que se envían los mensajes de WhatsApp.</td>
+</tr>
+<tr>
+<td>Phone Number ID</td>
+<td>Identificador del número que envía; va en la ruta de la petición.</td>
+</tr>
+<tr>
+<td>Bearer token</td>
+<td>Esquema de la cabecera Authorization que lleva el token de acceso.</td>
+</tr>
+<tr>
+<td>Botón de respuesta</td>
+<td>Opción tocable (máximo 3) bajo un mensaje interactivo.</td>
+</tr>
+<tr>
+<td>Lista</td>
+<td>Mensaje con un botón que despliega hasta 10 filas organizadas en secciones.</td>
+</tr>
+<tr>
+<td>wamid</td>
+<td>Identificador que WhatsApp asigna a cada mensaje.</td>
+</tr>
+<tr>
+<td>Estado de mensaje</td>
+<td>Aviso posterior de entrega: sent, delivered, read o failed.</td>
+</tr>
+<tr>
+<td>Límite de velocidad</td>
+<td>Tope de mensajes por periodo que Meta permite a tu número.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Dónde viaja el token de acceso en la petición de envío?</p><ul class="opts"><li><button type="button" class="opt">En la URL como parámetro público</button></li><li><button type="button" class="opt" data-ok>En la cabecera Authorization: Bearer</button></li><li><button type="button" class="opt">Dentro del texto del mensaje</button></li><li><button type="button" class="opt">En el nombre del número</button></li></ul><p class="explain" hidden>La API usa el esquema Bearer en la cabecera Authorization.</p></div>
+<div class="quiz-q"><p>Quieres ofrecer 6 categorías de productos. ¿Qué tipo de mensaje usas?</p><ul class="opts"><li><button type="button" class="opt">Seis botones de respuesta</button></li><li><button type="button" class="opt" data-ok>Una lista, porque los botones admiten máximo 3</button></li><li><button type="button" class="opt">Un texto largo sin interacción</button></li><li><button type="button" class="opt">Una plantilla de autenticación</button></li></ul><p class="explain" hidden>Los botones de respuesta están limitados a tres; la lista admite hasta 10 filas.</p></div>
+<div class="quiz-q"><p>Tu código lanza "título de botón de más de 20 caracteres". ¿Qué ocurrió?</p><ul class="opts"><li><button type="button" class="opt">Meta rechazó el mensaje</button></li><li><button type="button" class="opt" data-ok>construirEnvio detectó el límite antes de llamar a la API</button></li><li><button type="button" class="opt">El token venció</button></li><li><button type="button" class="opt">El cliente bloqueó el número</button></li></ul><p class="explain" hidden>La validación local evita una llamada inútil y da un error legible.</p></div>
+<div class="quiz-q"><p>Recibes el error 131047. ¿Qué significa y qué haces?</p><ul class="opts"><li><button type="button" class="opt">El token venció; generas otro</button></li><li><button type="button" class="opt" data-ok>Pasaron más de 24 horas desde la última respuesta del cliente; envías una plantilla</button></li><li><button type="button" class="opt">Hay demasiados mensajes; esperas un minuto</button></li><li><button type="button" class="opt">El tipo de mensaje no existe</button></li></ul><p class="explain" hidden>Fuera de la ventana de 24 horas solo se permiten plantillas aprobadas.</p></div>
+<div class="quiz-q"><p>enviarMensaje devolvió un id wamid sin errores. ¿Qué garantiza?</p><ul class="opts"><li><button type="button" class="opt">Que el cliente leyó el mensaje</button></li><li><button type="button" class="opt" data-ok>Solo que Meta aceptó la petición; la entrega se confirma con los estados del webhook</button></li><li><button type="button" class="opt">Que el cliente respondió</button></li><li><button type="button" class="opt">Que no habrá más errores</button></li></ul><p class="explain" hidden>Un mensaje aceptado puede fallar después; escucha los estados sent, delivered, read y failed.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-14">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../13-recibir-mensajes-reales/"><small>← Anterior</small>Recibir mensajes reales</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 14 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2014:%20Enviar%20mensajes&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

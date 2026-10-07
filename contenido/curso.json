@@ -1,142 +1,144 @@
 {
- "sitio": "Chatbots de WhatsApp desde cero",
- "url": "https://cacg-code.github.io/chatbots-whatsapp-desde-cero/",
- "repo": "Cacg-code/chatbots-whatsapp-desde-cero",
- "portada": {
-  "titulo": "Chatbots de WhatsApp desde cero",
-  "descripcion": "Aprende a crear un bot de WhatsApp para cualquier negocio: del primer mensaje en consola a un bot real en la nube con pedidos, recordatorios y marketing responsable. Todo con un minimarket como proyecto guía.",
-  "demo_lineas": [
-   "const msg = \"quiero 2 gaseosas\";",
-   "const r = bot(msg);",
-   "console.log(r);"
+  "sitio": "Chatbots de WhatsApp desde cero",
+  "url": "https://cacg-code.github.io/chatbots-whatsapp-desde-cero/",
+  "repo": "Cacg-code/chatbots-whatsapp-desde-cero",
+  "portada": {
+    "titulo": "Chatbots de WhatsApp desde cero",
+    "descripcion": "Aprende a crear un bot de WhatsApp para cualquier negocio: del primer mensaje en consola a un bot real en la nube con pedidos, recordatorios y marketing responsable. Todo con un minimarket como proyecto guía.",
+    "demo_lineas": [
+      "const msg = \"quiero 2 gaseosas\";",
+      "const r = bot(msg);",
+      "console.log(r);"
+    ],
+    "demo_salidas": [
+      "",
+      "",
+      "Agregué 2 × Gaseosa 500 ml (S/ 5.00 c/u). ¿Algo más?"
+    ],
+    "rasgos": [
+      [
+        "🧩",
+        "Del cero al bot real",
+        "Empiezas en tu consola, sin cuentas ni tarjetas, y terminas con un bot conectado a WhatsApp."
+      ],
+      [
+        "🛒",
+        "Un proyecto de verdad",
+        "Un minimarket: catálogo, carrito, pedidos, delivery, recordatorios y promociones."
+      ],
+      [
+        "✅",
+        "Ejercicios que se comprueban",
+        "Funciones de JavaScript que revisa tu navegador y práctica real en tu computadora."
+      ],
+      [
+        "🛡️",
+        "Hecho para el mundo real",
+        "Costos por mensaje, plantillas, permisos, privacidad y cómo no ser bloqueado."
+      ]
+    ],
+    "antes": [
+      "Saber **JavaScript** básico (variables, funciones, arrays y objetos). Si no, haz primero el [curso de JavaScript](https://cacg-code.github.io/web-desde-cero/javascript/).",
+      "Una computadora con **Node.js** instalado (la lección 3 te guía).",
+      "Un celular con **WhatsApp** para probar al final. Hasta el módulo 4 no necesitas ni eso."
+    ],
+    "construiras": [
+      "Un **motor de conversación** con menús, estado y lenguaje natural básico.",
+      "Un **servidor** con webhook desplegado en la nube, gratis.",
+      "Un bot conectado a la **API oficial de WhatsApp** que recibe y envía mensajes.",
+      "**Recordatorios** y seguimiento automáticos con plantillas.",
+      "Las bases para **vender** bots a negocios: costos, privacidad y alcance."
+    ]
+  },
+  "modulos": [
+    {
+      "nombre": "Fundamentos",
+      "descripcion": "Qué es un bot de WhatsApp, qué puede hacer y cómo se diseña antes de programarlo.",
+      "lecciones": [
+        "01-como-funciona-un-bot",
+        "02-disenar-la-conversacion"
+      ]
+    },
+    {
+      "nombre": "Herramientas",
+      "descripcion": "Lo mínimo de JavaScript y Node para construir un bot, y tu primer bot en la terminal.",
+      "lecciones": [
+        "03-javascript-y-node-para-bots",
+        "04-primer-bot-en-consola"
+      ]
+    },
+    {
+      "nombre": "Motor de reglas",
+      "descripcion": "El cerebro del bot: estado, texto libre, catálogo, carrito y pedido completo.",
+      "lecciones": [
+        "05-estado-de-la-conversacion",
+        "06-entender-texto-libre",
+        "07-catalogo-y-carrito",
+        "08-flujo-de-pedido"
+      ]
+    },
+    {
+      "nombre": "Servidor y webhook",
+      "descripcion": "Pasar de la terminal a un servidor que recibe mensajes por HTTP y vive en la nube.",
+      "lecciones": [
+        "09-webhooks-y-json-de-whatsapp",
+        "10-servidor-del-bot",
+        "11-despliegue-en-cloudflare"
+      ]
+    },
+    {
+      "nombre": "Conectar con WhatsApp",
+      "descripcion": "Cuenta de Meta, número, tokens, recibir mensajes reales y enviar texto, botones y listas.",
+      "lecciones": [
+        "12-cuenta-y-app-de-meta",
+        "13-recibir-mensajes-reales",
+        "14-enviar-mensajes",
+        "27-practica-con-telegram",
+        "28-otros-proveedores"
+      ]
+    },
+    {
+      "nombre": "Memoria y datos",
+      "descripcion": "Guardar sesiones y pedidos, y darle al dueño un panel con Google Sheets.",
+      "lecciones": [
+        "15-memoria-con-kv",
+        "16-panel-con-google-sheets"
+      ]
+    },
+    {
+      "nombre": "Plantillas y automatización",
+      "descripcion": "Escribir primero: plantillas aprobadas, recordatorios programados y formularios con Flows.",
+      "lecciones": [
+        "17-plantillas",
+        "18-recordatorios-y-seguimiento",
+        "19-whatsapp-flows"
+      ]
+    },
+    {
+      "nombre": "Marketing y costos",
+      "descripcion": "Promociones sin spam, permisos de los clientes y cuánto cuesta cada mensaje.",
+      "lecciones": [
+        "20-marketing-responsable",
+        "21-costos-y-metricas"
+      ]
+    },
+    {
+      "nombre": "Inteligencia artificial",
+      "descripcion": "Cuándo y cómo añadir IA a un bot de reglas sin perder el control.",
+      "lecciones": [
+        "22-ia-como-complemento"
+      ]
+    },
+    {
+      "nombre": "Producción y negocio",
+      "descripcion": "Pruebas, errores, seguridad, atención humana y cómo ofrecer tu bot a un negocio.",
+      "lecciones": [
+        "23-pruebas-y-errores",
+        "24-seguridad-y-privacidad",
+        "25-atencion-humana",
+        "26-vender-tu-bot"
+      ]
+    }
   ],
-  "demo_salidas": [
-   "",
-   "",
-   "Agregué 2 × Gaseosa 500 ml (S/ 5.00 c/u). ¿Algo más?"
-  ],
-  "rasgos": [
-   [
-    "🧩",
-    "Del cero al bot real",
-    "Empiezas en tu consola, sin cuentas ni tarjetas, y terminas con un bot conectado a WhatsApp."
-   ],
-   [
-    "🛒",
-    "Un proyecto de verdad",
-    "Un minimarket: catálogo, carrito, pedidos, delivery, recordatorios y promociones."
-   ],
-   [
-    "✅",
-    "Ejercicios que se comprueban",
-    "Funciones de JavaScript que revisa tu navegador y práctica real en tu computadora."
-   ],
-   [
-    "🛡️",
-    "Hecho para el mundo real",
-    "Costos por mensaje, plantillas, permisos, privacidad y cómo no ser bloqueado."
-   ]
-  ],
-  "antes": [
-   "Saber **JavaScript** básico (variables, funciones, arrays y objetos). Si no, haz primero el [curso de JavaScript](https://cacg-code.github.io/web-desde-cero/javascript/).",
-   "Una computadora con **Node.js** instalado (la lección 3 te guía).",
-   "Un celular con **WhatsApp** para probar al final. Hasta el módulo 4 no necesitas ni eso."
-  ],
-  "construiras": [
-   "Un **motor de conversación** con menús, estado y lenguaje natural básico.",
-   "Un **servidor** con webhook desplegado en la nube, gratis.",
-   "Un bot conectado a la **API oficial de WhatsApp** que recibe y envía mensajes.",
-   "**Recordatorios** y seguimiento automáticos con plantillas.",
-   "Las bases para **vender** bots a negocios: costos, privacidad y alcance."
-  ]
- },
- "modulos": [
-  {
-   "nombre": "Fundamentos",
-   "descripcion": "Qué es un bot de WhatsApp, qué puede hacer y cómo se diseña antes de programarlo.",
-   "lecciones": [
-    "01-como-funciona-un-bot",
-    "02-disenar-la-conversacion"
-   ]
-  },
-  {
-   "nombre": "Herramientas",
-   "descripcion": "Lo mínimo de JavaScript y Node para construir un bot, y tu primer bot en la terminal.",
-   "lecciones": [
-    "03-javascript-y-node-para-bots",
-    "04-primer-bot-en-consola"
-   ]
-  },
-  {
-   "nombre": "Motor de reglas",
-   "descripcion": "El cerebro del bot: estado, texto libre, catálogo, carrito y pedido completo.",
-   "lecciones": [
-    "05-estado-de-la-conversacion",
-    "06-entender-texto-libre",
-    "07-catalogo-y-carrito",
-    "08-flujo-de-pedido"
-   ]
-  },
-  {
-   "nombre": "Servidor y webhook",
-   "descripcion": "Pasar de la terminal a un servidor que recibe mensajes por HTTP y vive en la nube.",
-   "lecciones": [
-    "09-webhooks-y-json-de-whatsapp",
-    "10-servidor-del-bot",
-    "11-despliegue-en-cloudflare"
-   ]
-  },
-  {
-   "nombre": "Conectar con WhatsApp",
-   "descripcion": "Cuenta de Meta, número, tokens, recibir mensajes reales y enviar texto, botones y listas.",
-   "lecciones": [
-    "12-cuenta-y-app-de-meta",
-    "13-recibir-mensajes-reales",
-    "14-enviar-mensajes"
-   ]
-  },
-  {
-   "nombre": "Memoria y datos",
-   "descripcion": "Guardar sesiones y pedidos, y darle al dueño un panel con Google Sheets.",
-   "lecciones": [
-    "15-memoria-con-kv",
-    "16-panel-con-google-sheets"
-   ]
-  },
-  {
-   "nombre": "Plantillas y automatización",
-   "descripcion": "Escribir primero: plantillas aprobadas, recordatorios programados y formularios con Flows.",
-   "lecciones": [
-    "17-plantillas",
-    "18-recordatorios-y-seguimiento",
-    "19-whatsapp-flows"
-   ]
-  },
-  {
-   "nombre": "Marketing y costos",
-   "descripcion": "Promociones sin spam, permisos de los clientes y cuánto cuesta cada mensaje.",
-   "lecciones": [
-    "20-marketing-responsable",
-    "21-costos-y-metricas"
-   ]
-  },
-  {
-   "nombre": "Inteligencia artificial",
-   "descripcion": "Cuándo y cómo añadir IA a un bot de reglas sin perder el control.",
-   "lecciones": [
-    "22-ia-como-complemento"
-   ]
-  },
-  {
-   "nombre": "Producción y negocio",
-   "descripcion": "Pruebas, errores, seguridad, atención humana y cómo ofrecer tu bot a un negocio.",
-   "lecciones": [
-    "23-pruebas-y-errores",
-    "24-seguridad-y-privacidad",
-    "25-atencion-humana",
-    "26-vender-tu-bot"
-   ]
-  }
- ],
- "proyecto": "proyecto-bot-minimarket"
+  "proyecto": "proyecto-bot-minimarket"
 }

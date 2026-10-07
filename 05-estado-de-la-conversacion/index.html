@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El estado de la conversación · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo un bot recuerda en qué punto va cada cliente con una sesión y una máquina de estados, y por qué su cerebro debe ser una función pura.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/05-estado-de-la-conversacion/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="El estado de la conversación · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo un bot recuerda en qué punto va cada cliente con una sesión y una máquina de estados, y por qué su cerebro debe ser una función pura.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/05-estado-de-la-conversacion/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-un-bot-necesita-memoria">Por qué un bot necesita memoria</a></li><li><a href="#la-sesion-la-libreta-de-cada-cliente">La sesión: la libreta de cada cliente</a></li><li><a href="#estados-eventos-y-transiciones">Estados, eventos y transiciones</a></li><li><a href="#mirar-al-motor-cambiar-de-estado">Mirar al motor cambiar de estado</a></li><li><a href="#el-cerebro-es-una-funcion-pura">El cerebro es una función pura</a></li><li><a href="#entender-primero-actuar-despues">Entender primero, actuar después</a></li><li><a href="#el-mismo-mensaje-distinto-estado">El mismo mensaje, distinto estado</a></li><li><a href="#botones-viejos-y-eventos-fuera-de-lugar">Botones viejos y eventos fuera de lugar</a></li><li><a href="#eventos-globales-cancelar-y-hablar-con-u">Eventos globales: cancelar y hablar con una persona</a></li><li><a href="#cuando-no-entiendes-el-contador-de-fallo">Cuando no entiendes: el contador de fallos</a></li><li><a href="#donde-vive-la-sesion">Dónde vive la sesión</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 5</div>
+        <h1>El estado de la conversación</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar por qué un bot necesita memoria (estado) y qué guarda una sesión por cliente.</li><li>Leer y dibujar una máquina de estados con estados, eventos y transiciones.</li><li>Describir la firma <code>procesar(sesion, entrada) -&gt; { sesion, respuestas }</code> y por qué es una función pura.</li><li>Manejar eventos globales (cancelar, hablar con una persona) y botones viejos sin romper el flujo.</li><li>Escribir una mini máquina de estados que no muta la sesión recibida.</li></ul>
+</div>
+
+<h2 id="por-que-un-bot-necesita-memoria"><span class="n">1.</span>Por qué un bot necesita memoria</h2>
+<p>Imagina que un cliente del Minimarket La Esquina te escribe «2» a las 10:00. ¿Qué significa? Si un minuto antes el bot preguntó «¿Cuántas leches quieres?», es una cantidad. Si preguntó «¿Cómo vas a pagar?», probablemente es un error. Si es el primer mensaje del día, no significa nada. <strong>El mismo texto vale cosas distintas según el punto de la conversación en que estás.</strong></p>
+<p>Ese «punto en que estás» se llama <strong>estado</strong>. Sin estado, un bot solo puede responder a cada mensaje como si fuera el primero (un bot «sin memoria»), y eso sirve para un menú fijo, pero no para tomar un pedido de varios pasos: ¿qué pidió el cliente?, ¿ya eligió entrega?, ¿ya dio su dirección?</p>
+<p>Hay una pista importante en cómo funciona WhatsApp: <strong>cada mensaje llega a tu código por separado</strong>, como una petición independiente (lo verás en la <a href="../09-webhooks-y-json-de-whatsapp/">lección 9</a>). Tu servidor no «recuerda» al cliente entre una petición y otra. Tienes que guardar esa memoria tú, y devolverla cuando llegue el siguiente mensaje.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Estado vs. mensaje</p>
+<p>Un <strong>mensaje</strong> es lo que dice el cliente en este instante. El <strong>estado</strong> es todo lo que el bot sabe de esa conversación hasta ahora. Para decidir qué responder siempre necesitas las dos cosas.</p></div>
+<h2 id="la-sesion-la-libreta-de-cada-cliente"><span class="n">2.</span>La sesión: la libreta de cada cliente</h2>
+<p>La memoria del bot es una <strong>sesión</strong>: un objeto que guarda todo lo que sabemos de un cliente en una conversación. Hay una sesión por teléfono. En el código de referencia del curso, <code>crearSesion</code> la crea así (ejecutado en Node 24):</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { crearSesion } from &#x27;./src/motor.js&#x27;;
+
+console.log(crearSesion(&#x27;51999000111&#x27;, 0));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{
+  telefono: &#x27;51999000111&#x27;,
+  estado: &#x27;INICIO&#x27;,
+  carrito: [],
+  entrega: null,
+  direccion: null,
+  pago: null,
+  fallos: 0,
+  productoPendiente: null,
+  cantidadPendiente: null,
+  pedidoNuevo: null,
+  derivadoHumano: false,
+  recordatorioEnviado: false,
+  creadoEn: 0,
+  ultimoMensajeCliente: 0,
+  actualizadoEn: 0
+}</code></pre>
+</div>
+<p>Fíjate en cómo se agrupa lo que contiene:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Para qué sirve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>telefono</code></td>
+<td>Identifica al cliente (en el curso usamos el número falso <code>51999000111</code>).</td>
+</tr>
+<tr>
+<td><code>estado</code></td>
+<td>El punto de la conversación: <code>INICIO</code>, <code>MENU</code>, <code>ELIGIENDO</code>...</td>
+</tr>
+<tr>
+<td><code>carrito</code>, <code>entrega</code>, <code>direccion</code>, <code>pago</code></td>
+<td>Lo que el cliente va decidiendo durante el pedido.</td>
+</tr>
+<tr>
+<td><code>fallos</code></td>
+<td>Cuántos mensajes seguidos no entendimos (para ofrecer ayuda humana).</td>
+</tr>
+<tr>
+<td><code>productoPendiente</code>, <code>cantidadPendiente</code></td>
+<td>Datos a medias: «eligió leche, falta la cantidad».</td>
+</tr>
+<tr>
+<td><code>pedidoNuevo</code></td>
+<td>Lo llena el motor al confirmar; quien guarda datos lo recoge.</td>
+</tr>
+<tr>
+<td><code>derivadoHumano</code></td>
+<td>Si una persona está atendiendo (el bot debe callar).</td>
+</tr>
+<tr>
+<td><code>ultimoMensajeCliente</code>, <code>actualizadoEn</code>, <code>creadoEn</code></td>
+<td>Marcas de tiempo, en milisegundos. Sirven para la regla de las 24 horas y los recordatorios.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Las marcas de tiempo son números de la forma <code>Date.now()</code>, como en el ejercicio de la <a href="../01-como-funciona-un-bot/">lección 1</a>. El motor las recibe como parámetro (<code>ahora</code>) en lugar de leer el reloj él mismo; más adelante verás por qué.</p>
+<h2 id="estados-eventos-y-transiciones"><span class="n">3.</span>Estados, eventos y transiciones</h2>
+<p>Una <strong>máquina de estados</strong> es una forma ordenada de pensar este problema. Tiene tres ingredientes:</p>
+<ul>
+<li><strong>Estados:</strong> los puntos posibles de la conversación (en cuál estoy).</li>
+<li><strong>Eventos:</strong> lo que puede ocurrir (el cliente escribe, toca un botón).</li>
+<li><strong>Transiciones:</strong> a qué estado paso desde cada estado cuando ocurre un evento.</li>
+</ul>
+<p>Los estados del bot del minimarket están declarados en <code>src/motor.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>src/motor.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export const ESTADOS = {
+  INICIO: &#x27;INICIO&#x27;,
+  MENU: &#x27;MENU&#x27;,
+  ELIGIENDO: &#x27;ELIGIENDO&#x27;,
+  CARRITO: &#x27;CARRITO&#x27;,
+  TIPO_ENTREGA: &#x27;TIPO_ENTREGA&#x27;,
+  DIRECCION: &#x27;DIRECCION&#x27;,
+  PAGO: &#x27;PAGO&#x27;,
+  CONFIRMAR: &#x27;CONFIRMAR&#x27;,
+  FIN: &#x27;FIN&#x27;,
+  ESPERANDO_HUMANO: &#x27;ESPERANDO_HUMANO&#x27;,
+};</code></pre>
+</div>
+<p>Y el camino normal de un pedido, tal como lo dibujaste en la <a href="../02-disenar-la-conversacion/">lección 2</a>, se ve así:</p>
+<div class="flow"><div class="node"><strong>INICIO</strong><span>primer mensaje</span></div><div class="arrow">→<code>hola</code></div><div class="node"><strong>MENU</strong><span>3 botones</span></div><div class="arrow">→<code>hacer pedido</code></div><div class="node"><strong>ELIGIENDO</strong><span>categorías y productos</span></div><div class="arrow">→<code>finalizar</code></div><div class="node"><strong>TIPO_ENTREGA</strong><span>recojo o delivery</span></div><div class="arrow">→<code>delivery</code></div><div class="node"><strong>DIRECCION</strong><span>texto libre</span></div><div class="arrow">→<code>dirección</code></div><div class="node"><strong>PAGO</strong><span>efectivo, Yape, transferencia</span></div><div class="arrow">→<code>elegir</code></div><div class="node"><strong>CONFIRMAR</strong><span>resumen</span></div><div class="arrow">→<code>confirmar</code></div><div class="node"><strong>FIN</strong><span>pedido guardado</span></div></div>
+<p>Hay dos estados extra que no están en el camino principal: <code>CARRITO</code> (el cliente está viendo o editando lo que lleva) y <code>ESPERANDO_HUMANO</code> (una persona tomó la conversación). Y desde cualquier punto, «cancelar» lleva a <code>FIN</code> y «hablar con una persona» lleva a <code>ESPERANDO_HUMANO</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Dibuja antes de programar</p>
+<p>Si no puedes dibujar la máquina de estados en una hoja con cajas y flechas, todavía no entiendes tu bot. Es mucho más barato corregir un dibujo que reescribir código. Si usaste el flujo de la lección 2, ya tienes este dibujo casi hecho.</p></div>
+<h2 id="mirar-al-motor-cambiar-de-estado"><span class="n">4.</span>Mirar al motor cambiar de estado</h2>
+<p>Veámoslo funcionar. Creamos una sesión, le mandamos «hola», y luego tres toques de botón (cada toque llega como un id; cómo se envían los botones lo verás en la <a href="../14-enviar-mensajes/">lección 14</a>):</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { crearSesion, procesar } from &#x27;./src/motor.js&#x27;;
+
+const s0 = crearSesion(&#x27;51999000111&#x27;, 0);
+let r = procesar(s0, { tipo: &#x27;texto&#x27;, texto: &#x27;hola&#x27; }, 1000);
+console.log(r.sesion.estado, &#x27;| la original sigue en&#x27;, s0.estado);
+console.log(r.respuestas.map((x) =&gt; x.tipo));
+
+let s = r.sesion;
+for (const id of [&#x27;menu_pedir&#x27;, &#x27;cat:lacteos&#x27;, &#x27;prod:leche&#x27;]) {
+  const q = procesar(s, { tipo: &#x27;interactivo&#x27;, id }, 2000);
+  s = q.sesion;
+  console.log(id, &#x27;-&gt;&#x27;, s.estado, &#x27;| producto pendiente:&#x27;, s.productoPendiente, &#x27;|&#x27;, q.respuestas[0].tipo);
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>MENU | la original sigue en INICIO
+[ &#x27;texto&#x27;, &#x27;botones&#x27; ]
+menu_pedir -&gt; ELIGIENDO | producto pendiente: null | lista
+cat:lacteos -&gt; ELIGIENDO | producto pendiente: null | lista
+prod:leche -&gt; ELIGIENDO | producto pendiente: leche | botones</code></pre>
+</div>
+<p>Observa tres cosas:</p>
+<ol>
+<li>Después de «hola» la sesión pasó de <code>INICIO</code> a <code>MENU</code> y el bot respondió con <strong>dos</strong> mensajes (bienvenida + botones). Una respuesta puede ser una lista de mensajes.</li>
+<li>El estado no cambia siempre: elegir una categoría y luego un producto sigue siendo <code>ELIGIENDO</code>. Lo que cambia es el <strong>dato</strong> <code>productoPendiente</code> («elegiste leche, falta cuántas»). Un estado puede tener sub-pasos guardados en la sesión.</li>
+<li>La sesión original <code>s0</code> <strong>no cambió</strong>: sigue en <code>INICIO</code>. Ahora vemos por qué.</li>
+</ol>
+<h2 id="el-cerebro-es-una-funcion-pura"><span class="n">5.</span>El cerebro es una función pura</h2>
+<p>La firma de todo el motor es esta:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>procesar(sesion, entrada, ahora) -&gt; { sesion, respuestas }</code></pre>
+</div>
+<p>Recibe la sesión actual, lo que escribió el cliente y la hora; devuelve la sesión <strong>nueva</strong> y la lista de respuestas que hay que enviar. No envía nada por WhatsApp, no guarda archivos, no consulta una base de datos, no lee el reloj. Eso la hace una <strong>función pura</strong>: con las mismas entradas siempre devuelve lo mismo y no cambia nada fuera de sí misma.</p>
+<p>Las primeras líneas de <code>procesar</code> en <code>src/motor.js</code> muestran cómo se logra:</p>
+<div class="code">
+  <div class="code-head"><span>src/motor.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function procesar(sesionPrevia, entrada, ahora = Date.now()) {
+  const sesion = structuredClone(sesionPrevia); // nunca modificamos la sesión original
+  sesion.pedidoNuevo = null;
+  sesion.ultimoMensajeCliente = ahora;
+  sesion.actualizadoEn = ahora;
+  sesion.recordatorioEnviado = false;
+  // ...
+}</code></pre>
+</div>
+<p><code>structuredClone</code> hace una copia profunda: el motor trabaja sobre la copia y devuelve la copia. Quien lo llame decide qué hacer con ella.</p>
+<p>¿Por qué tanto empeño? Por cuatro ventajas muy concretas:</p>
+<ul>
+<li><strong>Se prueba fácil.</strong> Para probar un paso del flujo no necesitas WhatsApp ni internet: llamas a la función y comparas la salida. El proyecto trae 112 pruebas que corren en menos de un segundo con <code>npm test</code>.</li>
+<li><strong>Se reutiliza.</strong> La consola de la <a href="../04-primer-bot-en-consola/">lección 4</a> y el servidor de la <a href="../10-servidor-del-bot/">lección 10</a> son dos «carcasas» distintas alrededor del mismo motor.</li>
+<li><strong>Se depura.</strong> Si algo sale mal, guardas la sesión y la entrada y reproduces el error exactamente.</li>
+<li><strong>Se puede guardar donde sea.</strong> Como la sesión es un objeto de datos simples (texto, números, listas), cabe en un archivo, en una base de datos o en la memoria KV de Cloudflare (<a href="../15-memoria-con-kv/">lección 15</a>).</li>
+</ul>
+<p>Que <code>ahora</code> sea un parámetro y no un <code>Date.now()</code> escondido adentro también ayuda: en las pruebas y los ejemplos de esta lección pasamos <code>0</code>, <code>1000</code>, <code>2000</code>, y el resultado es siempre el mismo.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Sin entrada/salida dentro del motor</p>
+<p>Regla de oro del curso: <strong>el motor decide, la carcasa ejecuta.</strong> El motor devuelve «responde esto» y la carcasa lo envía. Si un día pones un <code>fetch</code> o un <code>console.log</code> dentro de la lógica del flujo, habrás perdido todas las ventajas de arriba.</p></div>
+<h2 id="entender-primero-actuar-despues"><span class="n">6.</span>Entender primero, actuar después</h2>
+<p>Dentro de <code>procesar</code> el trabajo está dividido en dos fases, y el código lo dice con comentarios:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>1) Entender: convertir la entrada en una &quot;acción&quot;
+2) Actuar: cambiar la sesión y preparar respuestas</code></pre>
+</div>
+<p>En la fase 1, un toque de botón (<code>{ tipo: 'interactivo', id: 'cant:2' }</code>) y un texto libre («quiero 2 leches») se convierten en un mismo vocabulario de <strong>acciones</strong>: <code>pedir</code>, <code>categoria</code>, <code>producto</code>, <code>cantidad</code>, <code>entrega</code>, <code>pago</code>, <code>cancelar</code>... En la fase 2, una función <code>ejecutar</code> mira la acción y la sesión, y decide.</p>
+<div class="code">
+  <div class="code-head"><span>src/motor.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function accionDeId(id) {
+  const [clave, valor] = String(id).split(&#x27;:&#x27;);
+  const simples = {
+    menu_pedir: &#x27;pedir&#x27;, seguir: &#x27;pedir&#x27;, menu_menu: &#x27;menu&#x27;, menu_horario: &#x27;horario&#x27;,
+    menu_humano: &#x27;humano&#x27;, ver_carrito: &#x27;carrito&#x27;, cerrar: &#x27;cerrar&#x27;, vaciar: &#x27;vaciar&#x27;,
+    pedido_confirmar: &#x27;confirmarPedido&#x27;, pedido_editar: &#x27;editar&#x27;, pedido_cancelar: &#x27;cancelar&#x27;,
+  };
+  if (simples[clave]) return { tipo: simples[clave] };
+  if (clave === &#x27;cant&#x27; &amp;&amp; Number.isInteger(Number(valor))) return { tipo: &#x27;cantidad&#x27;, cantidad: Number(valor) };
+  // ... (entrega, pago, categoría, producto)
+  return { tipo: &#x27;desconocida&#x27; };
+}</code></pre>
+</div>
+<p>Los ids de los botones tienen una convención: <code>clave:valor</code> (<code>cant:2</code>, <code>pago:yape</code>, <code>entrega:delivery</code>). Así un solo <code>split(':')</code> los descompone. Esta separación en dos fases tiene un premio enorme: el día que agregues IA para entender texto (<a href="../22-ia-como-complemento/">lección 22</a>), solo cambias la fase 1; la fase 2 queda intacta.</p>
+<h2 id="el-mismo-mensaje-distinto-estado"><span class="n">7.</span>El mismo mensaje, distinto estado</h2>
+<p>Aquí se ve el valor del estado. Cuando el cliente escribe «tres»:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>// Con &#x27;leche&#x27; pendiente de cantidad (estado ELIGIENDO):
+const q = procesar(s, { tipo: &#x27;texto&#x27;, texto: &#x27;tres&#x27; }, 3000);
+console.log(q.sesion.carrito);
+console.log(q.respuestas[0].texto);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[
+  { id: &#x27;leche&#x27;, nombre: &#x27;Leche entera 1 L&#x27;, precio: 4.3, cantidad: 3 }
+]
+Agregué 3 x Leche entera 1 L.
+Llevas 3 producto(s). Subtotal: S/ 12.90.</code></pre>
+</div>
+<p>Esto funciona porque en <code>accionDeTexto</code> hay una regla que <strong>solo existe en ese contexto</strong>:</p>
+<div class="code">
+  <div class="code-head"><span>src/motor.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>if (sesion.estado === E.ELIGIENDO &amp;&amp; sesion.productoPendiente) {
+  const n = cantidadSola(textoCliente);
+  if (n !== null) return { tipo: &#x27;cantidad&#x27;, cantidad: n };
+}</code></pre>
+</div>
+<p>Si el motor no tuviera <code>productoPendiente</code>, «tres» se interpretaría como un mensaje sin sentido. Del mismo modo, en el estado <code>TIPO_ENTREGA</code> la palabra «delivery» significa «quiero delivery», y en el estado <code>DIRECCION</code> <strong>todo</strong> lo que escribe el cliente es la dirección (incluso un «hola»). Es la misma lección una y otra vez: <strong>qué significa un mensaje lo decide el estado.</strong></p>
+<h2 id="botones-viejos-y-eventos-fuera-de-lugar"><span class="n">8.</span>Botones viejos y eventos fuera de lugar</h2>
+<p>En WhatsApp los botones de un mensaje antiguo siguen en el historial del chat. El cliente puede tocar «Confirmar pedido» <strong>una hora después</strong>, cuando el pedido ya terminó, o tocar «Yape» sin haber elegido nada. Un bot ingenuo se rompe. El motor de referencia defiende cada paso con una tabla:</p>
+<div class="code">
+  <div class="code-head"><span>src/motor.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>// Acciones que solo tienen sentido en un paso concreto (un botón viejo no debe romper el flujo).
+const SOLO_EN = {
+  entrega: E.TIPO_ENTREGA,
+  pago: E.PAGO,
+  confirmarPedido: E.CONFIRMAR,
+};</code></pre>
+</div>
+<p>Si la acción no corresponde al estado actual, el bot avisa y <strong>repite la pregunta del paso en que sí estás</strong>. Lo comprobamos en una sesión recién abierta (en <code>MENU</code>), tocando un botón de confirmación:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>let t = procesar(crearSesion(&#x27;51999000111&#x27;, 0), { tipo: &#x27;texto&#x27;, texto: &#x27;hola&#x27; }, 1).sesion;
+const g = procesar(t, { tipo: &#x27;interactivo&#x27;, id: &#x27;pedido_confirmar&#x27; }, 2);
+console.log(g.sesion.estado, g.respuestas.map((x) =&gt; x.texto));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>MENU [
+  &#x27;Esa opción ya no está disponible en este paso.&#x27;,
+  &#x27;¿Qué deseas hacer?&#x27;
+]</code></pre>
+</div>
+<p>El estado no cambia, el cliente recibe una explicación corta y vuelve a ver el menú. Esa función se llama <code>repetirPaso</code>: un <code>switch</code> sobre el estado que vuelve a mostrar la pregunta pendiente. Es una de las piezas que hacen que un bot se sienta «sólido».</p>
+<h2 id="eventos-globales-cancelar-y-hablar-con-u"><span class="n">9.</span>Eventos globales: cancelar y hablar con una persona</h2>
+<p>Algunas intenciones valen en cualquier estado y tienen prioridad sobre todo lo demás: <strong>cancelar</strong> y <strong>hablar con una persona</strong>. En <code>accionDeTexto</code> se revisan antes que nada (incluso antes de tratar el texto como dirección):</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>if (intencion === &#x27;cancelar&#x27; || intencion === &#x27;humano&#x27;) return { tipo: intencion };</code></pre>
+</div>
+<p>Cancelar reinicia la sesión y la deja en <code>FIN</code>; el siguiente mensaje empieza una conversación nueva. Probado:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>let c = procesar(t, { tipo: &#x27;texto&#x27;, texto: &#x27;2 leches&#x27; }, 8).sesion;
+console.log(&#x27;carrito antes:&#x27;, c.carrito.length);
+c = procesar(c, { tipo: &#x27;texto&#x27;, texto: &#x27;cancelar&#x27; }, 9);
+console.log(c.sesion.estado, c.sesion.carrito.length, &#x27;|&#x27;, c.respuestas[0].texto);
+c = procesar(c.sesion, { tipo: &#x27;texto&#x27;, texto: &#x27;hola&#x27; }, 10);
+console.log(c.sesion.estado);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>carrito antes: 1
+FIN 0 | Cancelé tu pedido. Cuando quieras empezar de nuevo, escribe &quot;hola&quot;.
+MENU</code></pre>
+</div>
+<p>«Hablar con una persona» es más sutil porque hay que <strong>callar</strong>. Si una persona del negocio ya está contestando en el mismo chat, un bot que sigue respondiendo es un desastre. El estado <code>ESPERANDO_HUMANO</code> resuelve eso; en <code>procesar</code> se ve la regla:</p>
+<div class="code">
+  <div class="code-head"><span>src/motor.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>// Con una persona atendiendo, el bot calla (salvo &quot;menu&quot; o &quot;cancelar&quot;).
+const quiereSalir = accion.tipo === &#x27;cancelar&#x27; || (accion.tipo === &#x27;menu&#x27; &amp;&amp; !accion.saludo);
+if (sesion.estado === E.ESPERANDO_HUMANO &amp;&amp; !quiereSalir) {
+  return { sesion, respuestas: [] };
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>let h = procesar(t, { tipo: &#x27;texto&#x27;, texto: &#x27;quiero hablar con una persona&#x27; }, 5);
+console.log(h.sesion.estado, h.sesion.derivadoHumano);
+h = procesar(h.sesion, { tipo: &#x27;texto&#x27;, texto: &#x27;hola?? alguien&#x27; }, 6);
+console.log(&#x27;respuestas mientras atiende una persona:&#x27;, h.respuestas.length);
+h = procesar(h.sesion, { tipo: &#x27;texto&#x27;, texto: &#x27;menu&#x27; }, 7);
+console.log(h.sesion.estado);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ESPERANDO_HUMANO true
+respuestas mientras atiende una persona: 0
+MENU</code></pre>
+</div>
+<p>Las respuestas son una lista <strong>vacía</strong>: callar también es una respuesta válida. Y siempre hay una salida (<code>menu</code> o <code>cancelar</code>) para que el cliente no quede atrapado. Cómo se organiza la atención humana de verdad lo verás en la <a href="../25-atencion-humana/">lección 25</a>.</p>
+<h2 id="cuando-no-entiendes-el-contador-de-fallo"><span class="n">10.</span>Cuando no entiendes: el contador de fallos</h2>
+<p>El campo <code>fallos</code> evita un clásico: el bot que responde «No te entendí» eternamente. La regla del código de referencia es simple. Primer mensaje incomprensible: «No te entendí bien» y se repite la pregunta del paso. Segundo seguido: se ofrece hablar con una persona. Si el cliente dice algo que sí se entiende, <code>fallos</code> vuelve a 0.</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>let f = procesar(t, { tipo: &#x27;texto&#x27;, texto: &#x27;asdf&#x27; }, 3);
+console.log(f.sesion.fallos, f.respuestas.map((x) =&gt; x.tipo));
+f = procesar(f.sesion, { tipo: &#x27;texto&#x27;, texto: &#x27;qwer&#x27; }, 4);
+console.log(f.sesion.fallos, f.respuestas[0].texto);
+console.log(f.respuestas[0].botones);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>1 [ &#x27;texto&#x27;, &#x27;botones&#x27; ]
+2 Sigo sin entenderte. ¿Quieres que te atienda una persona?
+[
+  { id: &#x27;menu_humano&#x27;, titulo: &#x27;Hablar con alguien&#x27; },
+  { id: &#x27;menu_menu&#x27;, titulo: &#x27;Ver el menú&#x27; }
+]</code></pre>
+</div>
+<p>Este patrón («reintenta, y luego ofrece una salida») es parte del buen diseño que viste en la lección 2. Un detalle más: si el cliente envía algo que el motor no soporta (una foto, un audio), llega como <code>{ tipo: 'no_soportado' }</code> y el bot responde «Por ahora solo entiendo texto y botones», sin tocar el estado.</p>
+<h2 id="donde-vive-la-sesion"><span class="n">11.</span>Dónde vive la sesión</h2>
+<p>El motor no guarda la sesión: la recibe y la devuelve. Alguien más debe guardarla entre un mensaje y el siguiente, y eso depende de la carcasa:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Carcasa</th>
+<th>Dónde vive la sesión</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consola (lección 4)</td>
+<td>En una variable: <code>let sesion = crearSesion(...)</code>. Se pierde al cerrar.</td>
+</tr>
+<tr>
+<td>Servidor del bot (lecciones 10 y 15)</td>
+<td>En Cloudflare KV, con la clave <code>sesion:&lt;telefono&gt;</code>; sobrevive a los reinicios y vence solo.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Así lo hace <code>consola.js</code>, el simulador de la terminal, en tres líneas:</p>
+<div class="code">
+  <div class="code-head"><span>consola.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>let sesion = crearSesion(TELEFONO);
+// ...por cada línea que escribes:
+const resultado = procesar(sesion, aEntrada(texto));
+sesion = resultado.sesion;</code></pre>
+</div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Cuando guardes sesiones en la nube, revisa los límites y el modelo de consistencia del almacenamiento que elijas (en la lección 15 usarás Cloudflare KV). Dos mensajes simultáneos del mismo cliente pueden pisarse. Consulta la <a href="https://developers.cloudflare.com/kv/">documentación oficial de Cloudflare KV</a> antes de decidir.</p></div>
+<h2 id="errores-frecuentes"><span class="n">12.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Guardar el estado en una variable global del servidor.</strong> Funciona con un cliente y se mezcla cuando escriben dos. La sesión es <strong>por teléfono</strong>.</li>
+<li><strong>Modificar la sesión recibida</strong> en lugar de una copia. Provoca errores raros: una respuesta que «recuerda» cosas del mensaje anterior. Copia primero (<code>structuredClone</code> o <code>{ ...sesion }</code>).</li>
+<li><strong>Olvidar los botones viejos.</strong> El cliente puede tocar un botón de hace una hora. Valida siempre que la acción corresponda al estado actual.</li>
+<li><strong>No tener salida.</strong> Un estado del que no se puede salir (sin «cancelar», «menu» o «hablar con una persona») frustra al cliente.</li>
+<li><strong>Dejar que el bot hable con una persona atendiendo.</strong> Hay que callar mientras <code>ESPERANDO_HUMANO</code>.</li>
+<li><strong>Guardar en la sesión datos que no son simples</strong> (funciones, clases con métodos). Una sesión debe poder convertirse en JSON y volver sin perder nada.</li>
+<li><strong>Meter entrada/salida dentro del motor.</strong> Pierdes pruebas fáciles y portabilidad.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">13.</span>Apuntes para llevar</h2>
+<ul>
+<li>El <strong>estado</strong> es lo que el bot sabe de la conversación; el significado de un mensaje depende de él.</li>
+<li>Una <strong>sesión</strong> por cliente (por teléfono) guarda estado, carrito, datos a medias, fallos y marcas de tiempo.</li>
+<li>Una <strong>máquina de estados</strong> son estados, eventos y transiciones; se dibuja antes de programarla.</li>
+<li>El motor es una <strong>función pura</strong>: <code>procesar(sesion, entrada, ahora) -&gt; { sesion, respuestas }</code>, sin entrada/salida y sin mutar lo que recibe.</li>
+<li>Separa <strong>entender</strong> (convertir texto o botón en acción) de <strong>actuar</strong> (cambiar sesión y responder).</li>
+<li>Protege cada paso: botones viejos, <strong>cancelar</strong> y <strong>hablar con una persona</strong> funcionan siempre y callar es una respuesta válida.</li>
+</ul>
+<h2 id="glosario"><span class="n">14.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Estado</td>
+<td>Punto de la conversación en que está un cliente (<code>MENU</code>, <code>PAGO</code>...).</td>
+</tr>
+<tr>
+<td>Sesión</td>
+<td>Objeto que guarda todo lo que el bot sabe de un cliente.</td>
+</tr>
+<tr>
+<td>Máquina de estados</td>
+<td>Modelo con estados, eventos y transiciones entre ellos.</td>
+</tr>
+<tr>
+<td>Transición</td>
+<td>Paso de un estado a otro provocado por un evento.</td>
+</tr>
+<tr>
+<td>Función pura</td>
+<td>Función que con las mismas entradas da la misma salida y no cambia nada fuera de ella.</td>
+</tr>
+<tr>
+<td>Mutar</td>
+<td>Modificar un objeto existente en lugar de crear uno nuevo.</td>
+</tr>
+<tr>
+<td>Acción</td>
+<td>Intención ya interpretada (<code>pedir</code>, <code>cantidad</code>, <code>cancelar</code>) que el motor ejecuta.</td>
+</tr>
+<tr>
+<td>Carcasa</td>
+<td>Capa que conecta el motor con el mundo (consola, servidor): guarda sesiones y envía respuestas.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>Un cliente escribe «2». ¿Qué decide su significado?</p><ul class="opts"><li><button type="button" class="opt">Solo el texto «2»</button></li><li><button type="button" class="opt" data-ok>El estado de la sesión: no es lo mismo si el bot preguntó una cantidad o una forma de pago</button></li><li><button type="button" class="opt">La hora a la que escribió</button></li><li><button type="button" class="opt">El número de teléfono del cliente</button></li></ul><p class="explain" hidden>El mismo mensaje significa cosas distintas según el punto de la conversación; por eso se guarda el estado.</p></div>
+<div class="quiz-q"><p>¿Qué devuelve <code>procesar(sesion, entrada, ahora)</code>?</p><ul class="opts"><li><button type="button" class="opt">Solo el texto de la respuesta</button></li><li><button type="button" class="opt" data-ok>Un objeto con la sesión nueva y la lista de respuestas por enviar</button></li><li><button type="button" class="opt">Nada: modifica la sesión directamente y envía el mensaje</button></li><li><button type="button" class="opt">Una promesa que espera la respuesta de Meta</button></li></ul><p class="explain" hidden>El motor devuelve datos; quien lo llama guarda la sesión y envía las respuestas.</p></div>
+<div class="quiz-q"><p>¿Cuál es la principal ventaja de que el motor sea una función pura?</p><ul class="opts"><li><button type="button" class="opt">Que corre más rápido en la nube</button></li><li><button type="button" class="opt" data-ok>Que se prueba y se reutiliza fácil, sin WhatsApp ni internet</button></li><li><button type="button" class="opt">Que no necesita sesión</button></li><li><button type="button" class="opt">Que evita tener estados</button></li></ul><p class="explain" hidden>Sin entrada/salida dentro del motor, las pruebas son llamadas simples y la misma lógica sirve para consola y servidor.</p></div>
+<div class="quiz-q"><p>Un cliente toca el botón «Confirmar pedido» de un mensaje viejo cuando está en el menú. ¿Qué debe hacer el bot?</p><ul class="opts"><li><button type="button" class="opt">Confirmar un pedido vacío</button></li><li><button type="button" class="opt">Cerrar la sesión</button></li><li><button type="button" class="opt" data-ok>Avisar que la opción ya no está disponible y repetir la pregunta del paso actual</button></li><li><button type="button" class="opt">Reiniciar el servidor</button></li></ul><p class="explain" hidden>Las acciones solo valen en su paso; fuera de él se explica y se repite la pregunta pendiente.</p></div>
+<div class="quiz-q"><p>¿Qué debe hacer el bot cuando el estado es <code>ESPERANDO_HUMANO</code>?</p><ul class="opts"><li><button type="button" class="opt">Responder igual que siempre</button></li><li><button type="button" class="opt">Pedir disculpas en cada mensaje</button></li><li><button type="button" class="opt" data-ok>Callar (devolver cero respuestas), salvo que el cliente escriba «menu» o «cancelar»</button></li><li><button type="button" class="opt">Borrar la sesión</button></li></ul><p class="explain" hidden>Si una persona atiende, el bot no debe interferir; siempre queda una salida para el cliente.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-05">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../04-primer-bot-en-consola/"><small>← Anterior</small>Tu primer bot en la consola</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 5 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%205:%20El%20estado%20de%20la%20conversación&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/05-estado-de-la-conversacion/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoria con Cloudflare KV · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Guarda sesiones, pedidos e ids de mensajes en Cloudflare KV con vencimiento automático (TTL) y aprende sus límites reales para no perder datos.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/15-memoria-con-kv/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Memoria con Cloudflare KV · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Guarda sesiones, pedidos e ids de mensajes en Cloudflare KV con vencimiento automático (TTL) y aprende sus límites reales para no perder datos.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/15-memoria-con-kv/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-el-worker-necesita-memoria">Por qué el Worker necesita memoria</a></li><li><a href="#que-es-kv-y-para-que-sirve">Qué es KV y para qué sirve</a></li><li><a href="#claves-con-prefijo-ordenar-el-cajon">Claves con prefijo: ordenar el cajón</a></li><li><a href="#el-ciclo-de-vida-de-una-sesion">El ciclo de vida de una sesión</a></li><li><a href="#idempotencia-meta-puede-repetir-el-mismo">Idempotencia: Meta puede repetir el mismo mensaje</a></li><li><a href="#que-le-cuesta-a-tu-cuenta-cada-conversac">Qué le cuesta a tu cuenta cada conversación</a></li><li><a href="#las-limitaciones-de-kv-las-importantes">Las limitaciones de KV (las importantes)</a></li><li><a href="#cuando-pasar-a-otra-cosa">Cuándo pasar a otra cosa</a></li><li><a href="#probar-sin-gastar-un-sol">Probar sin gastar un sol</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 15</div>
+        <h1>Memoria con Cloudflare KV</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar por qué un Worker necesita memoria externa y qué lugar ocupa KV en la arquitectura del bot.</li><li>Diseñar claves con prefijo y asignar un TTL distinto a sesiones, pedidos e ids de mensajes ya vistos.</li><li>Leer y guardar JSON en KV con <code>get</code> y <code>put</code> usando <code>expirationTtl</code>, y comprobar el vencimiento con un reloj controlado.</li><li>Reconocer las limitaciones de KV (consistencia eventual, sin atomicidad, un <code>list</code> de máximo 1000 claves, cuotas del plan gratuito).</li><li>Decidir cuándo conviene pasar a D1 o Durable Objects.</li></ul>
+</div>
+
+<h2 id="por-que-el-worker-necesita-memoria"><span class="n">1.</span>Por qué el Worker necesita memoria</h2>
+<p>En la <a href="../05-estado-de-la-conversacion/">lección 5</a> el bot recordaba el carrito porque la sesión vivía en una variable de tu programa. En la consola funciona: el programa sigue encendido mientras conversas. En la nube no.</p>
+<p>Un <strong>Cloudflare Worker</strong> se parece más a una calculadora que a un empleado sentado en el mostrador: llega una petición, se ejecuta tu código, se responde y todo lo que había en variables <strong>desaparece</strong>. La siguiente petición puede ejecutarse en otro servidor, en otra ciudad y en otro momento. Si el cliente escribe «2 leches» y dos minutos después «listo», el Worker que recibe el segundo mensaje no tiene idea del primero.</p>
+<p>Por eso el motor del curso es una función pura: <code>procesar(sesion, entrada)</code> devuelve <code>{ sesion, respuestas }</code>. Tú le entregas la sesión, él te devuelve la nueva, y <strong>tú</strong> (el Worker) te encargas de guardarla en algún lugar que sobreviva entre peticiones. Ese lugar, en el código de referencia, es <strong>Cloudflare KV</strong>.</p>
+<div class="flow"><div class="node"><strong>Mensaje</strong><span>webhook de Meta</span></div><div class="arrow">→<code>llega al Worker</code></div><div class="node"><strong>Worker</strong><span>lee sesion:&lt;tel&gt;</span></div><div class="arrow">→<code>la pasa al motor</code></div><div class="node"><strong>Motor</strong><span>procesar()</span></div><div class="arrow">→<code>sesión nueva</code></div><div class="node"><strong>Worker</strong><span>guarda en KV</span></div></div>
+<h2 id="que-es-kv-y-para-que-sirve"><span class="n">2.</span>Qué es KV y para qué sirve</h2>
+<p><strong>KV</strong> (<em>Key-Value</em>, «clave-valor») es un almacén de Cloudflare que funciona como un diccionario gigante y global: guardas un texto bajo un nombre (la <strong>clave</strong>) y después lo recuperas con ese mismo nombre. No hay tablas, ni columnas, ni consultas: solo <code>get</code>, <code>put</code>, <code>delete</code> y <code>list</code>.</p>
+<p>Se usa en el Worker a través de un <strong>binding</strong>: un nombre (en nuestro caso <code>BOT_KV</code>) que Cloudflare conecta a tu código. Lo declaras en <code>wrangler.toml</code>; así lo trae el proyecto del curso:</p>
+<div class="code">
+  <div class="code-head"><span>wrangler.toml</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>[[kv_namespaces]]
+binding = &quot;BOT_KV&quot;
+id = &quot;00000000000000000000000000000000&quot;          # id de EJEMPLO: reemplázalo
+preview_id = &quot;11111111111111111111111111111111&quot;  # id de EJEMPLO para wrangler dev</code></pre>
+</div>
+<p>El <code>id</code> real se obtiene creando el <em>namespace</em> (el «cajón» de claves) con <code>npx wrangler kv namespace create BOT_KV</code>; el comando te imprime el id que debes copiar. En el código, <code>env.BOT_KV</code> ya es el objeto con los cuatro métodos.</p>
+<p>KV es ideal para datos que <strong>se leen mucho y se escriben poco</strong>, y que toleran un pequeño retraso en verse en todo el mundo. Para el bot de un minimarket encaja bien: una sesión por cliente, pedidos que se guardan una vez, y poco más. Más abajo verás para qué NO sirve.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Las pruebas del curso usan un KV falso</p>
+<p>Las pruebas de <code>codigo/test/worker.test.js</code> no usan internet: reemplazan <code>BOT_KV</code> por un objeto con un <code>Map</code> que imita <code>get</code>, <code>put</code> y <code>list</code>. Eso permite probar todo el Worker en tu computadora. En esta lección haremos lo mismo pero agregando un reloj, para ver el vencimiento.</p></div>
+<h2 id="claves-con-prefijo-ordenar-el-cajon"><span class="n">3.</span>Claves con prefijo: ordenar el cajón</h2>
+<p>Todo lo que guardas vive en el mismo espacio de nombres, así que conviene que cada clave diga <strong>qué tipo de dato es</strong>. La convención es un prefijo seguido de dos puntos. El Worker del curso usa tres:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Clave</th>
+<th>Contenido</th>
+<th>Vive</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sesion:&lt;telefono&gt;</code></td>
+<td>La sesión completa del cliente (estado, carrito, entrega…)</td>
+<td>2 días</td>
+</tr>
+<tr>
+<td><code>pedido:&lt;id&gt;</code></td>
+<td>Un pedido confirmado</td>
+<td>30 días</td>
+</tr>
+<tr>
+<td><code>visto:&lt;wamid&gt;</code></td>
+<td>Marca de «ya procesé este mensaje»</td>
+<td>1 día</td>
+</tr>
+</tbody>
+</table></div>
+<p>Así es el código real que lee y guarda JSON (está en <code>src/worker.js</code>):</p>
+<div class="code">
+  <div class="code-head"><span>worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const SEGUNDOS_DIA = 24 * 60 * 60;
+const TTL_SESION = 2 * SEGUNDOS_DIA; // la sesión vive 2 días sin actividad
+const TTL_PEDIDO = 30 * SEGUNDOS_DIA;
+const TTL_VISTO = SEGUNDOS_DIA; // ids de mensajes ya procesados
+
+async function leerJson(kv, clave) {
+  const texto = await kv.get(clave);
+  return texto ? JSON.parse(texto) : null;
+}
+
+const guardarJson = (kv, clave, valor, ttl) =&gt; kv.put(clave, JSON.stringify(valor), { expirationTtl: ttl });</code></pre>
+</div>
+<p>Tres detalles que conviene entender:</p>
+<ul>
+<li><strong>KV guarda texto</strong> (también binario, pero para nosotros es texto). Por eso se hace <code>JSON.stringify</code> al guardar y <code>JSON.parse</code> al leer.</li>
+<li><code>kv.get</code> devuelve <code>null</code> cuando la clave no existe <strong>o ya venció</strong>. Para el bot, ambas cosas significan lo mismo: «este cliente es nuevo».</li>
+<li><code>expirationTtl</code> son <strong>segundos desde ahora</strong> hasta que la clave se borra sola. Esa es la gran ventaja de KV para un bot: la limpieza es automática.</li>
+</ul>
+<p>El teléfono entra en la clave, así que cada cliente tiene su propio cajón: <code>sesion:51999000111</code> nunca se mezcla con <code>sesion:51999000222</code>. Si el número llegara con espacios o signos, conviene normalizarlo (dejar solo dígitos) antes de armar la clave. Lo practicarás en el ejercicio.</p>
+<h2 id="el-ciclo-de-vida-de-una-sesion"><span class="n">4.</span>El ciclo de vida de una sesión</h2>
+<p>Cada vez que llega un mensaje, <code>procesarMensaje</code> hace siempre lo mismo: leer, procesar, guardar. Este es el fragmento central del código real:</p>
+<div class="code">
+  <div class="code-head"><span>worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const claveSesion = `sesion:${evento.de}`;
+const sesionPrevia = (await leerJson(kv, claveSesion)) ?? crearSesion(evento.de, ahora);
+const { sesion, respuestas } = procesar(sesionPrevia, evento.entrada, ahora);
+
+await guardarJson(kv, claveSesion, sesion, TTL_SESION);
+if (sesion.pedidoNuevo) await guardarJson(kv, `pedido:${sesion.pedidoNuevo.id}`, sesion.pedidoNuevo, TTL_PEDIDO);</code></pre>
+</div>
+<p>Observa el <code>??</code>: si no hay sesión previa (cliente nuevo, o la anterior venció), se crea una limpia. Y observa que <strong>cada escritura renueva el TTL</strong>: la sesión no vence «dos días después de crearse», sino «dos días después del último mensaje». Un cliente activo nunca pierde el carrito; uno que desaparece dos días, sí.</p>
+<p>Lo comprobamos con un script que ejecuté contra el <code>procesarMensaje</code> real, usando un KV falso con reloj y vencimiento (el KV de verdad expira a su manera, pero la lógica es la misma). Después del primer mensaje, las claves y su vida restante son:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>visto:wamid.1            vence en 24 h
+sesion:51999000111       vence en 48 h
+ELIGIENDO [ &#x27;2 x Leche entera 1 L&#x27; ]</code></pre>
+</div>
+<p>Ahora adelantamos el reloj un día, luego dos días más, y el cliente vuelve a escribir «hola»:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>--- 1 dia despues
+visto vivo? null | sesion viva? true
+--- 3 dias despues
+sesion viva? false
+MENU carrito: 0</code></pre>
+</div>
+<p>Al día siguiente, la marca <code>visto:</code> ya se borró pero la sesión sigue viva. A los tres días, la sesión venció: el cliente empieza de cero (estado <code>MENU</code>, carrito vacío). Es justo lo que queremos: un carrito de hace tres días probablemente ya no importa, y mantenerlo para siempre llenaría el almacenamiento de datos viejos (y de teléfonos de personas que no volverán).</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · El TTL mínimo es 60 segundos</p>
+<p><code>expirationTtl</code> no admite menos de 60 segundos: Cloudflare no soporta vencimientos que caigan a menos de un minuto en el futuro. No uses KV para bloqueos de 5 o 10 segundos. Fuente: <a href="https://developers.cloudflare.com/kv/api/write-key-value-pairs/">documentación de <code>put()</code></a>. <strong>Verifica este dato</strong> cuando lo uses, porque los límites de las plataformas cambian.</p></div>
+<h3>Elegir un TTL con criterio</h3>
+<p>No hay un número mágico. Pregúntate cuánto tiempo <strong>tiene sentido</strong> recordar cada cosa:</p>
+<ul>
+<li><strong>Sesión (2 días).</strong> Cubre el caso típico: el cliente armó el carrito en la mañana y decide en la noche, o al día siguiente. Coincide además con el uso de los recordatorios de la <a href="../18-recordatorios-y-seguimiento/">lección 18</a>: el cron puede avisarle por un carrito abandonado.</li>
+<li><strong>Pedido (30 días).</strong> Lo bastante para que el dueño lo consulte, lo reclame un cliente o se cuadre la caja del mes. Pero ojo: <strong>KV no es tu libro contable</strong>. Los pedidos que importan para el negocio van además a una hoja de cálculo, como verás en la <a href="../16-panel-con-google-sheets/">lección 16</a>.</li>
+<li><strong><code>visto:</code> (1 día).</strong> Su único trabajo es evitar procesar dos veces el mismo mensaje, y Meta reintenta en un lapso corto.</li>
+</ul>
+<p>Fíjate también en qué <strong>no</strong> se guarda: tokens, contraseñas ni datos de pago. La sesión contiene teléfono y dirección de entrega, que son datos personales; guardarlos por menos tiempo es una buena práctica de privacidad que retomaremos en la <a href="../24-seguridad-y-privacidad/">lección 24</a>.</p>
+<h2 id="idempotencia-meta-puede-repetir-el-mismo"><span class="n">5.</span>Idempotencia: Meta puede repetir el mismo mensaje</h2>
+<p>Meta reintenta la entrega del webhook si no recibe un 200 a tiempo, así que <strong>el mismo mensaje puede llegar dos veces</strong>. Si no haces nada, el cliente que pidió «2 leches» recibiría 4. La solución se llama <strong>idempotencia</strong>: procesar el mismo mensaje una o diez veces debe dejar el mismo resultado.</p>
+<p>El Worker lo resuelve guardando el id único del mensaje (<code>wamid...</code>) en una clave <code>visto:</code>:</p>
+<div class="code">
+  <div class="code-head"><span>worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const claveVisto = `visto:${evento.id}`;
+if (await kv.get(claveVisto)) return;
+await kv.put(claveVisto, &#x27;1&#x27;, { expirationTtl: TTL_VISTO });</code></pre>
+</div>
+<p>La primera vez no existe y el mensaje se procesa. La segunda, la clave existe y el Worker retorna sin hacer nada. El valor da igual (<code>'1'</code>): lo que importa es que la clave exista. Y como tiene TTL de un día, la lista de ids no crece sin fin.</p>
+<h2 id="que-le-cuesta-a-tu-cuenta-cada-conversac"><span class="n">6.</span>Qué le cuesta a tu cuenta cada conversación</h2>
+<p>KV cobra (o limita, en el plan gratuito) por operación. Para saber cuánto gasta tu bot, lo mejor es <strong>medirlo</strong>: contamos las llamadas a un KV falso mientras un cliente completa un pedido de cinco mensajes (<code>2 leches</code>, <code>listo</code>, <code>recojo</code>, <code>efectivo</code>, <code>confirmar</code>):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>pedido completo (5 mensajes): { get: 10, put: 11, list: 0 }</code></pre>
+</div>
+<p>Cada mensaje hace 2 lecturas (<code>visto:</code> y <code>sesion:</code>) y 2 escrituras (las mismas dos claves), y el mensaje final suma una escritura más para el pedido. Total: 11 escrituras por pedido completo.</p>
+<p>Ahora mira los límites oficiales del <a href="https://developers.cloudflare.com/kv/platform/limits/">plan gratuito</a>: 100 000 lecturas por día y <strong>1 000 escrituras por día</strong>. Con 11 escrituras por pedido, el tope teórico es de unos 90 pedidos completos al día; en la práctica, menos, porque hay clientes que solo preguntan el horario. Para un minimarket pequeño alcanza para la demo y los primeros clientes; para un negocio con mucho movimiento hay que pasar al plan de pago.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Las cuotas de Cloudflare cambian. Antes de prometerle algo a un cliente, revisa la página de <a href="https://developers.cloudflare.com/kv/platform/limits/">límites de KV</a> y la de <a href="https://developers.cloudflare.com/kv/platform/pricing/">precios</a>.</p></div>
+<p>También hay una pista de optimización a la vista: guardar la marca <code>visto:</code> <strong>antes</strong> de procesar el mensaje cuesta una escritura por mensaje. Es el precio de la seguridad frente a duplicados; si algún día sube la factura, puedes tomar esa decisión con datos, no con intuición.</p>
+<h2 id="las-limitaciones-de-kv-las-importantes"><span class="n">7.</span>Las limitaciones de KV (las importantes)</h2>
+<p>KV no es una base de datos clásica. Estas son las limitaciones que debes tener presentes, todas documentadas por Cloudflare:</p>
+<h3>1. Consistencia eventual</h3>
+<p>Un cambio es visible de inmediato <strong>en el centro de datos donde se hizo</strong>, pero en otros puede tardar hasta 60 segundos o más, porque cada lugar guarda una copia en caché. Incluso las claves que no existen se cachean: una clave recién creada puede tardar en aparecer. Fuente: <a href="https://developers.cloudflare.com/kv/concepts/how-kv-works/">cómo funciona KV</a>.</p>
+<p>Para un cliente que conversa con calma, casi nunca se nota. El problema aparecería con dos mensajes casi simultáneos atendidos por distintos centros de datos.</p>
+<h3>2. No hay operaciones atómicas</h3>
+<p>Nuestro Worker hace «leer, modificar, escribir». Si <strong>dos mensajes del mismo cliente llegan a la vez</strong>, ambos leen la misma sesión, ambos la modifican y el último en escribir pisa el cambio del otro. Lo reproduje con un KV falso que tarda 10 ms en responder, mandando «2 leches» y «1 arroz» a la vez:</p>
+<div class="code">
+  <div class="code-head"><span>carrera.mjs</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>await Promise.all([
+  procesarMensaje(env, msg(&#x27;wamid.A&#x27;, &#x27;2 leches&#x27;), ahora, llamar),
+  procesarMensaje(env, msg(&#x27;wamid.B&#x27;, &#x27;1 arroz&#x27;), ahora, llamar),
+]);
+const s = JSON.parse(datos.get(&#x27;sesion:51999000111&#x27;));
+console.log(s.carrito.map((l) =&gt; `${l.cantidad} x ${l.nombre}`));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[ &#x27;1 x Arroz extra 1 kg&#x27; ]</code></pre>
+</div>
+<p>Las leches <strong>se perdieron</strong>. Es el clásico <em>lost update</em> («actualización perdida»). En la vida real los clientes rara vez escriben dos mensajes en el mismo instante, y WhatsApp tiende a entregarlos en orden, pero sucede. Si tu bot tiene mucha concurrencia, la documentación de Cloudflare recomienda <strong>Durable Objects</strong> para esos casos (un único «portero» por cliente que atiende los mensajes de uno en uno).</p>
+<p>Fíjate que la protección <code>visto:</code> tampoco es atómica: también es «leer y luego escribir». Con ids distintos no hay problema, pero dos entregas simultáneas del mismo id podrían colarse. Con la frecuencia de reintentos de Meta, es un riesgo muy bajo para una demo y real para un volumen alto.</p>
+<h3>3. Un mismo dato no se puede escribir más de una vez por segundo</h3>
+<p>El límite oficial es <strong>1 escritura por segundo a la misma clave</strong>. Para sesiones de clientes está bien. No guardes un contador global de visitas en una sola clave.</p>
+<h3>4. <code>list</code> devuelve un máximo de 1000 claves por llamada</h3>
+<p>El cron de recordatorios (lección 18) necesita recorrer todas las sesiones. Este es el código real de <code>listarJson</code>:</p>
+<div class="code">
+  <div class="code-head"><span>worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>async function listarJson(kv, prefijo) {
+  const { keys } = await kv.list({ prefix: prefijo });
+  const valores = await Promise.all(keys.map((k) =&gt; leerJson(kv, k.name)));
+  return valores.filter(Boolean);
+}</code></pre>
+</div>
+<p>El comentario del propio archivo lo admite: «basta para una demo (hasta 1000 claves)». Según la <a href="https://developers.cloudflare.com/kv/api/list-keys/">documentación de <code>list</code></a>, si hay más claves la respuesta trae <code>list_complete: false</code> y un <code>cursor</code> para pedir la siguiente página; este código <strong>ignora el cursor</strong>. Con 1 500 sesiones activas, 500 quedarían sin recordatorio. Además, cada pasada del cron hace una lectura por sesión: 96 pasadas al día (cada 15 minutos) por 200 sesiones son 19 200 lecturas diarias, una quinta parte del tope gratuito, solo en recordatorios.</p>
+<p>La salida honesta es: <strong>KV está bien para empezar, pero cuando el bot crezca, un recorrido completo por todas las sesiones es señal de que necesitas una base de datos</strong>.</p>
+<h3>5. El tamaño no es el problema</h3>
+<p>Un valor puede pesar hasta 25 MiB y una clave hasta 512 bytes. Nuestra sesión de ejemplo pesa unos 395 bytes. Si algún día guardas conversaciones enteras en una sesión, el límite de tamaño será lo último que te preocupe: el costo en escrituras lo notarás antes.</p>
+<h2 id="cuando-pasar-a-otra-cosa"><span class="n">8.</span>Cuándo pasar a otra cosa</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Necesidad</th>
+<th>Herramienta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sesiones, pedidos, flags: leer mucho, escribir poco</td>
+<td><strong>KV</strong> (lo que usas ahora)</td>
+</tr>
+<tr>
+<td>Consultas («pedidos de hoy», «clientes de Surco»), conteos, reportes</td>
+<td><strong>D1</strong> (base SQL de Cloudflare)</td>
+</tr>
+<tr>
+<td>Un solo escritor por cliente, sin pisarse mensajes</td>
+<td><strong>Durable Objects</strong></td>
+</tr>
+<tr>
+<td>El dueño quiere ver y editar los datos sin programar</td>
+<td><strong>Google Sheets</strong> (próxima lección)</td>
+</tr>
+</tbody>
+</table></div>
+<p>No hace falta migrar hoy. Lo importante es que el código esté <strong>ordenado para poder migrar</strong>: por eso <code>leerJson</code>, <code>guardarJson</code> y <code>listarJson</code> son las únicas funciones que tocan el KV. Si mañana usas D1, cambias esas tres funciones y el motor ni se entera.</p>
+<h2 id="probar-sin-gastar-un-sol"><span class="n">9.</span>Probar sin gastar un sol</h2>
+<p>Para mirar las claves de tu KV local mientras corre <code>npx wrangler dev</code> (los comandos aceptan <code>--local</code> para usar el almacenamiento de desarrollo y <code>--remote</code> para el real):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler kv key list --binding BOT_KV --local
+npx wrangler kv key get &quot;sesion:51999000111&quot; --binding BOT_KV --local</code></pre>
+</div>
+<p>Si algún comando no coincide con tu versión de Wrangler, ejecuta <code>npx wrangler kv key --help</code>: la sintaxis de la herramienta evoluciona y la referencia oficial es la <a href="https://developers.cloudflare.com/kv/reference/kv-commands/">lista de comandos de KV</a>.</p>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Guardar objetos sin <code>JSON.stringify</code>.</strong> KV guardaría <code>[object Object]</code> y no podrías recuperar nada útil.</li>
+<li><strong>Usar un TTL menor a 60 segundos.</strong> KV no admite vencimientos a menos de un minuto; para esperas cortas guarda la hora y compárala al leer.</li>
+<li><strong>Guardar sin TTL «por si acaso».</strong> Las sesiones viejas se acumulan con teléfonos y direcciones de personas que ya no te escriben.</li>
+<li><strong>Asumir que una escritura se ve al instante en todas partes.</strong> KV es eventualmente consistente: no uses una clave como semáforo ni para decisiones que exijan el dato más reciente.</li>
+<li><strong>Un contador global en una sola clave.</strong> El límite de 1 escritura por segundo por clave te frenará.</li>
+<li><strong>Recorrer todas las claves sin paginar.</strong> <code>list</code> entrega hasta 1000 y un <code>cursor</code> para el resto.</li>
+<li><strong>Guardar secretos en KV.</strong> Los tokens van en <code>wrangler secret</code>, nunca en el almacén de datos del negocio.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Un Worker no recuerda nada entre peticiones: la memoria vive fuera, en KV, y el motor puro recibe y devuelve la sesión.</li>
+<li>Las claves llevan prefijo (<code>sesion:</code>, <code>pedido:</code>, <code>visto:</code>) y cada tipo de dato tiene su propio TTL.</li>
+<li>Cada escritura con <code>expirationTtl</code> renueva el vencimiento; la sesión vive «2 días desde el último mensaje».</li>
+<li>La marca <code>visto:&lt;wamid&gt;</code> vuelve idempotente al Worker frente a los reintentos de Meta.</li>
+<li>KV es eventualmente consistente, no es atómico, permite 1 escritura por segundo por clave y su <code>list</code> entrega hasta 1000 claves por llamada.</li>
+<li>Mide antes de prometer: un pedido completo cuesta unas 11 escrituras, y el plan gratuito permite 1 000 al día.</li>
+<li>Mantén el acceso a KV en pocas funciones para poder cambiar a D1 o Durable Objects cuando el negocio crezca.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KV</td>
+<td>Almacén clave-valor global de Cloudflare, rápido para leer y con vencimiento automático.</td>
+</tr>
+<tr>
+<td>Binding</td>
+<td>Nombre (<code>BOT_KV</code>) con el que Cloudflare conecta un recurso a tu Worker.</td>
+</tr>
+<tr>
+<td>Namespace</td>
+<td>«Cajón» de KV que agrupa un conjunto de claves.</td>
+</tr>
+<tr>
+<td>TTL</td>
+<td><em>Time to live</em>: segundos que vive un dato antes de borrarse solo.</td>
+</tr>
+<tr>
+<td>Consistencia eventual</td>
+<td>Un cambio tarda un tiempo en verse en todos los centros de datos.</td>
+</tr>
+<tr>
+<td>Idempotencia</td>
+<td>Procesar lo mismo varias veces deja el mismo resultado que procesarlo una vez.</td>
+</tr>
+<tr>
+<td>Durable Objects</td>
+<td>Servicio de Cloudflare con un solo «dueño» por dato, útil cuando se exige orden y atomicidad.</td>
+</tr>
+<tr>
+<td>D1</td>
+<td>Base de datos SQL de Cloudflare, adecuada para consultas y reportes.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>Un cliente escribió «2 leches» y dos minutos después «listo». ¿Por qué el Worker necesita KV para entender el segundo mensaje?</p><ul class="opts"><li><button type="button" class="opt">Porque Meta exige guardar todos los mensajes</button></li><li><button type="button" class="opt" data-ok>Porque el Worker no conserva variables entre peticiones y la sesión debe guardarse fuera</button></li><li><button type="button" class="opt">Porque el motor de reglas solo funciona con una base de datos</button></li><li><button type="button" class="opt">Porque WhatsApp reenvía el historial en cada mensaje</button></li></ul><p class="explain" hidden>Cada petición ejecuta el Worker desde cero; la memoria de la conversación debe vivir en un almacén externo.</p></div>
+<div class="quiz-q"><p>¿Qué hace <code>expirationTtl: 172800</code> al guardar una sesión con <code>kv.put</code>?</p><ul class="opts"><li><button type="button" class="opt">Impide que la clave se vuelva a escribir durante dos días</button></li><li><button type="button" class="opt" data-ok>Hace que la clave se borre sola 172 800 segundos (2 días) después de la última escritura</button></li><li><button type="button" class="opt">Guarda la clave en dos centros de datos distintos</button></li><li><button type="button" class="opt">Cifra el valor durante dos días</button></li></ul><p class="explain" hidden>El TTL se mide en segundos; cada nueva escritura vuelve a empezar la cuenta.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve la clave <code>visto:&lt;wamid&gt;</code>?</p><ul class="opts"><li><button type="button" class="opt">Para saber cuántos mensajes leyó el cliente</button></li><li><button type="button" class="opt">Para firmar el webhook</button></li><li><button type="button" class="opt" data-ok>Para ignorar un mensaje que Meta entregó más de una vez</button></li><li><button type="button" class="opt">Para renovar la ventana de 24 horas</button></li></ul><p class="explain" hidden>Es la marca de idempotencia: si la clave ya existe, el mensaje ya se procesó.</p></div>
+<div class="quiz-q"><p>Dos mensajes del mismo cliente llegan a la vez y el carrito pierde un producto. ¿Qué limitación de KV lo explica?</p><ul class="opts"><li><button type="button" class="opt">El TTL es demasiado corto</button></li><li><button type="button" class="opt" data-ok>KV no ofrece operaciones atómicas: ambos leen la misma sesión y el último en escribir pisa al otro</button></li><li><button type="button" class="opt">KV rechaza más de un mensaje por segundo</button></li><li><button type="button" class="opt">Las claves con prefijo no se pueden modificar</button></li></ul><p class="explain" hidden>Es la actualización perdida; para ordenar escrituras concurrentes Cloudflare recomienda Durable Objects.</p></div>
+<div class="quiz-q"><p>El cron recorre <code>list({ prefix: 'sesion:' })</code> sin cursor y tienes 1 500 sesiones. ¿Qué pasa?</p><ul class="opts"><li><button type="button" class="opt">Cloudflare devuelve las 1 500 en una sola llamada</button></li><li><button type="button" class="opt">Falla con un error de cuota</button></li><li><button type="button" class="opt" data-ok>Solo se procesan las primeras 1000 claves; las demás se ignoran porque no se usa el cursor</button></li><li><button type="button" class="opt">Se borran las sesiones sobrantes</button></li></ul><p class="explain" hidden><code>list</code> devuelve hasta 1000 claves por llamada; hay que paginar con <code>cursor</code> mientras <code>list_complete</code> sea <code>false</code>.</p></div>
+<div class="quiz-q"><p>Un cliente necesita saber cuántos pedidos hubo hoy por zona. ¿Qué herramienta encaja mejor?</p><ul class="opts"><li><button type="button" class="opt">Una clave <code>visto:</code> con un contador</button></li><li><button type="button" class="opt" data-ok>D1 (SQL) o una hoja de cálculo, porque KV no sirve para consultas</button></li><li><button type="button" class="opt">Aumentar el TTL de los pedidos</button></li><li><button type="button" class="opt">Guardar todos los pedidos en una sola clave</button></li></ul><p class="explain" hidden>KV solo busca por clave o prefijo; para consultas y reportes conviene SQL o una hoja.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-15">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../28-otros-proveedores/"><small>← Anterior</small>Otros proveedores y alternativas a la API directa</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 15 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2015:%20Memoria%20con%20Cloudflare%20KV&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/15-memoria-con-kv/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

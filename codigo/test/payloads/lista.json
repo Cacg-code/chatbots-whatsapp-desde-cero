@@ -1,0 +1,18 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "51999000222", "phone_number_id": "106540352242922" },
+            "contacts": [{ "profile": { "name": "Cliente Ejemplo" }, "wa_id": "51999000111" }], "messages": [{ "context": { "from": "51999000222", "id": "wamid.ORIGEN002" }, "from": "51999000111", "id": "wamid.LISTA001", "timestamp": "1791360020", "type": "interactive", "interactive": { "type": "list_reply", "list_reply": { "id": "prod:leche", "title": "Leche entera 1 L", "description": "S/ 4.30 por caja" } } }]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}

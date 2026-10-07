@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Formularios dentro de WhatsApp con Flows · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Formularios dentro de WhatsApp con Flows.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Formularios dentro de WhatsApp con Flows · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Formularios dentro de WhatsApp con Flows.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 19</a> › Ejercicio</div>
+        <h1>Ejercicio: Formularios dentro de WhatsApp con Flows</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Trabajar con un Flow de «datos de delivery» sin necesitar todavía una cuenta de Meta: validar su JSON, construir el mensaje que lo abre, leer la respuesta del cliente y validar los datos como lo haría el endpoint.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica con la documentación y el Flow Builder (necesitas la cuenta de la <a href="../12-cuenta-y-app-de-meta/">lección 12</a>, pero puedes leer el JSON sin ella). La <strong>parte B</strong> son cinco funciones de JavaScript puro que se comprueban en esta página. Un Flow es, al final, un objeto JSON: puedes revisarlo con código.</p>
+<p>El Flow del minimarket tiene dos pantallas: <code>DATOS</code> (zona, dirección y referencia) y <code>RESUMEN</code> (confirmación, pantalla final con <code>terminal: true</code>).</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade a <code>validarFlow</code> la comprobación de que <strong>todo</strong> <code>name</code> de los campos de entrada (<code>TextInput</code>, <code>Dropdown</code>, ...) sea único dentro de su pantalla. Dos campos con el mismo <code>name</code> se pisan al enviar el formulario.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Abre la <a href="https://developers.facebook.com/docs/whatsapp/flows/gettingstarted">guía de Flows</a> de Meta y localiza la referencia del <strong>Flow JSON</strong>. Anota en <code>notas.md</code> cuál es la versión más reciente documentada hoy y qué componentes usarías para pedir zona (lista), dirección (texto) y referencia (texto opcional).</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Si tienes cuenta de Meta, crea un Flow vacío en el Flow Builder de WhatsApp Manager, pega el JSON de la lección y míralo en la vista previa. Si algo no compila, anota el mensaje de error (Verifica este dato: la interfaz del Builder cambia).</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>validarFlow(flow)</code>: devuelve un arreglo de errores (vacío si todo está bien). Debe detectar: falta <code>version</code>, no hay pantallas, ids de pantalla repetidos, una pantalla <code>terminal</code> sin <code>Footer</code>, y un <code>navigate</code> hacia una pantalla que no existe.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>armarMensajeFlow(to, flowId, flowToken, pantalla)</code>: devuelve el cuerpo JSON de un mensaje interactivo de tipo <code>flow</code> con <code>flow_message_version</code> <code>"3"</code>, <code>flow_cta</code> <code>"Pedir delivery"</code>, <code>flow_action</code> <code>"navigate"</code> y la pantalla inicial indicada.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>leerRespuestaFlow(mensaje)</code>: recibe el mensaje entrante (<code>type: "interactive"</code>, <code>interactive.type: "nfm_reply"</code>) y devuelve el objeto que viene en <code>response_json</code> (que llega como <strong>texto</strong>). Si no es una respuesta de Flow o el JSON está roto, devuelve <code>null</code>.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>validarDatosDelivery(datos, zonas)</code>: devuelve <code>{ ok: true }</code> o <code>{ ok: false, error: "..." }</code>. Reglas: la zona debe estar en <code>zonas</code>; la dirección debe tener al menos 8 caracteres sin contar espacios sobrantes en los extremos.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>formatoRecomendado(campos, necesitaValidarEnServidor)</code>: devuelve <code>"botones"</code> si hay 1 o 2 campos y no hace falta validar nada, <code>"flow"</code> si hay 3 o más campos, y <code>"flow-con-endpoint"</code> si hay que validar en el servidor (por ejemplo, comprobar que la zona tiene cobertura).</span></label></li></ul>
+      <details><summary>💡 Pista 1: Estructura del Flow</summary><p>Cada pantalla es <code>{ id, terminal?, layout: { type: "SingleColumnLayout", children: [...] } }</code>. El <code>Footer</code> es un hijo con <code>on-click-action</code>; el <code>navigate</code> lleva <code>next: { type: "screen", name: "OTRA" }</code> y el <code>complete</code> termina el Flow.</p></details>
+      <details><summary>💡 Pista 2: response_json es texto</summary><p><code>mensaje.interactive.nfm_reply.response_json</code> es un <strong>string</strong>: hay que pasarlo por <code>JSON.parse</code>, dentro de un <code>try/catch</code>, porque un cliente (o un atacante) puede mandar texto roto.</p></details>
+      <details><summary>💡 Pista 3: Recorrer los hijos</summary><p><code>flow.screens.flatMap(p =&gt; p.layout.children)</code> junta todos los componentes. Para buscar el <code>Footer</code> de una pantalla usa <code>children.find(c =&gt; c.type === "Footer")</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`validarFlow` acepta un Flow correcto de dos pantallas", "h": "Un Flow válido devuelve un arreglo vacío `[]`.", "t": "var f={version:\"5.1\",screens:[{id:\"DATOS\",layout:{type:\"SingleColumnLayout\",children:[{type:\"Footer\",label:\"Continuar\",\"on-click-action\":{name:\"navigate\",next:{type:\"screen\",name:\"RESUMEN\"},payload:{}}}]}},{id:\"RESUMEN\",terminal:true,layout:{type:\"SingleColumnLayout\",children:[{type:\"Footer\",label:\"Enviar\",\"on-click-action\":{name:\"complete\",payload:{}}}]}}]};var r=validarFlow(f);return Array.isArray(r)&&r.length===0"}, {"d": "`validarFlow` detecta falta de `version` o de pantallas", "h": "Revisa `flow.version` y que `flow.screens` sea un arreglo con elementos.", "t": "return validarFlow({screens:[]}).length>=2 && validarFlow({version:\"5.1\"}).length>=1"}, {"d": "`validarFlow` detecta un `navigate` hacia una pantalla inexistente", "h": "Junta los ids y verifica que `next.name` esté entre ellos.", "t": "var f={version:\"5.1\",screens:[{id:\"A\",layout:{type:\"SingleColumnLayout\",children:[{type:\"Footer\",label:\"x\",\"on-click-action\":{name:\"navigate\",next:{type:\"screen\",name:\"NO_EXISTE\"},payload:{}}}]}}]};return validarFlow(f).length>=1"}, {"d": "`armarMensajeFlow` construye el mensaje interactivo de tipo flow", "h": "El cuerpo lleva `messaging_product`, `to`, `type: \"interactive\"` y `interactive.action.parameters`.", "t": "var m=armarMensajeFlow(\"51999000111\",\"123456\",\"tok-1\",\"DATOS\");var a=m.interactive.action;return m.messaging_product===\"whatsapp\" && m.to===\"51999000111\" && m.type===\"interactive\" && m.interactive.type===\"flow\" && a.name===\"flow\" && a.parameters.flow_message_version===\"3\" && a.parameters.flow_id===\"123456\" && a.parameters.flow_token===\"tok-1\" && a.parameters.flow_cta===\"Pedir delivery\" && a.parameters.flow_action===\"navigate\" && a.parameters.flow_action_payload.screen===\"DATOS\""}, {"d": "`leerRespuestaFlow` convierte `response_json` en objeto", "h": "Usa `JSON.parse(mensaje.interactive.nfm_reply.response_json)`.", "t": "var msg={type:\"interactive\",interactive:{type:\"nfm_reply\",nfm_reply:{name:\"flow\",response_json:\"{\\\"flow_token\\\":\\\"abc\\\",\\\"zona\\\":\\\"Centro\\\",\\\"direccion\\\":\\\"Av. Ejemplo 123\\\"}\"}}};var r=leerRespuestaFlow(msg);return r!==null && r.zona===\"Centro\" && r.direccion===\"Av. Ejemplo 123\" && r.flow_token===\"abc\""}, {"d": "`leerRespuestaFlow` devuelve `null` si no es Flow o el JSON está roto", "h": "Protege con `try/catch` y revisa que el tipo sea `nfm_reply`.", "t": "var roto={type:\"interactive\",interactive:{type:\"nfm_reply\",nfm_reply:{response_json:\"{no es json\"}}};var boton={type:\"interactive\",interactive:{type:\"button_reply\",button_reply:{id:\"x\",title:\"x\"}}};return leerRespuestaFlow(roto)===null && leerRespuestaFlow(boton)===null && leerRespuestaFlow({type:\"text\",text:{body:\"hola\"}})===null"}, {"d": "`validarDatosDelivery` rechaza zona desconocida y dirección corta", "h": "Devuelve `{ ok: false, error: \"...\" }` con un mensaje claro para cada caso.", "t": "var z=[\"Centro\"];var a=validarDatosDelivery({zona:\"Luna\",direccion:\"Av. Ejemplo 123\"},z);var b=validarDatosDelivery({zona:\"Centro\",direccion:\"  Av 1  \"},z);return a.ok===false && typeof a.error===\"string\" && a.error.length>0 && b.ok===false && typeof b.error===\"string\""}, {"d": "`formatoRecomendado` elige entre botones, Flow y Flow con endpoint", "h": "Si hay que validar en servidor, es `flow-con-endpoint` aunque haya pocos campos.", "t": "return formatoRecomendado(2,false)===\"botones\" && formatoRecomendado(1,false)===\"botones\" && formatoRecomendado(3,false)===\"flow\" && formatoRecomendado(6,false)===\"flow\" && formatoRecomendado(3,true)===\"flow-con-endpoint\" && formatoRecomendado(2,true)===\"flow-con-endpoint\""}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>flows.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function validarFlow(flow) {
+  const errores = [];
+  if (!flow || !flow.version) errores.push(&quot;Falta version&quot;);
+  const pantallas = Array.isArray(flow &amp;&amp; flow.screens) ? flow.screens : [];
+  if (pantallas.length === 0) errores.push(&quot;No hay pantallas&quot;);
+  const ids = pantallas.map((p) =&gt; p.id);
+  if (new Set(ids).size !== ids.length) errores.push(&quot;Hay ids de pantalla repetidos&quot;);
+  for (const p of pantallas) {
+    const hijos = (p.layout &amp;&amp; p.layout.children) || [];
+    const footer = hijos.find((c) =&gt; c.type === &quot;Footer&quot;);
+    if (p.terminal &amp;&amp; !footer) errores.push(&quot;La pantalla terminal &quot; + p.id + &quot; no tiene Footer&quot;);
+    for (const c of hijos) {
+      const accion = c[&quot;on-click-action&quot;];
+      if (accion &amp;&amp; accion.name === &quot;navigate&quot;) {
+        const destino = accion.next &amp;&amp; accion.next.name;
+        if (!ids.includes(destino)) errores.push(&quot;navigate hacia una pantalla inexistente: &quot; + destino);
+      }
+    }
+  }
+  return errores;
+}
+
+function armarMensajeFlow(to, flowId, flowToken, pantalla) {
+  return {
+    messaging_product: &quot;whatsapp&quot;,
+    recipient_type: &quot;individual&quot;,
+    to,
+    type: &quot;interactive&quot;,
+    interactive: {
+      type: &quot;flow&quot;,
+      body: { text: &quot;Completa tus datos de entrega.&quot; },
+      action: {
+        name: &quot;flow&quot;,
+        parameters: {
+          flow_message_version: &quot;3&quot;,
+          flow_token: flowToken,
+          flow_id: flowId,
+          flow_cta: &quot;Pedir delivery&quot;,
+          flow_action: &quot;navigate&quot;,
+          flow_action_payload: { screen: pantalla },
+        },
+      },
+    },
+  };
+}
+
+function leerRespuestaFlow(mensaje) {
+  try {
+    if (!mensaje || mensaje.type !== &quot;interactive&quot;) return null;
+    const i = mensaje.interactive;
+    if (!i || i.type !== &quot;nfm_reply&quot;) return null;
+    const datos = JSON.parse(i.nfm_reply.response_json);
+    return datos &amp;&amp; typeof datos === &quot;object&quot; ? datos : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function validarDatosDelivery(datos, zonas) {
+  if (!zonas.includes(datos.zona)) return { ok: false, error: &quot;Esa zona no tiene reparto.&quot; };
+  const direccion = String(datos.direccion || &quot;&quot;).trim();
+  if (direccion.length &lt; 8) return { ok: false, error: &quot;La direccion es muy corta.&quot; };
+  return { ok: true };
+}
+
+function formatoRecomendado(campos, necesitaValidarEnServidor) {
+  if (necesitaValidarEnServidor) return &quot;flow-con-endpoint&quot;;
+  return campos &gt;= 3 ? &quot;flow&quot; : &quot;botones&quot;;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 19</a>
+        <a class="next" href="../20-marketing-responsable/"><small>Siguiente →</small>Marketing responsable por WhatsApp</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 19 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Formularios%20dentro%20de%20WhatsApp%20con%20Flows&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Cuenta y app de Meta · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Cuenta y app de Meta.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Cuenta y app de Meta · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Cuenta y app de Meta.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 12</a> › Ejercicio</div>
+        <h1>Ejercicio: Cuenta y app de Meta</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: básico</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Dejar lista tu cuenta de pruebas: app de Meta, número de prueba, destinatario, token temporal y secretos guardados, y comprobar con un mensaje real que todo está conectado.</p>
+<h3>Cómo se trabaja</h3>
+<p>Este ejercicio es práctica real en el sitio de Meta y en tu terminal. No hay funciones que comprobar en el navegador porque nada aquí es código verificable sin tus credenciales: lo que importa es que llegues a ver el mensaje en tu celular. <strong>No pegues tus tokens en esta página, en capturas ni en ningún repositorio.</strong> Si los menús de Meta se ven distintos a lo descrito, usa la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started">guía oficial</a>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Crea el usuario del sistema en <strong>Business Settings</strong>, asígnale tu app y tu cuenta de WhatsApp, genera el token estable y reemplaza el temporal en <code>.dev.vars</code>. Revoca el temporal cuando termines.</p></div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Entra en developers.facebook.com con tu cuenta, acepta los términos y crea una app con el caso de uso <strong>Connect with customers through WhatsApp</strong>. Llámala <code>Bot Minimarket La Esquina (pruebas)</code>.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. En el panel de WhatsApp (<strong>API Setup</strong>) anota en un archivo local <code>notas-meta.txt</code> (fuera de git) el <strong>WhatsApp Business Account ID</strong> y el <strong>Phone Number ID</strong> del número de prueba.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Registra tu celular en el campo <strong>To</strong> y confirma el código que te llegue.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte A. Pulsa <strong>Generate access token</strong> y copia el token temporal a un gestor de contraseñas (no al archivo de notas).</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte A. Busca el <strong>App Secret</strong> en <strong>App settings &gt; Basic</strong> y guárdalo también en el gestor de contraseñas.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. En la carpeta <code>codigo/</code>, copia <code>.dev.vars.example</code> a <code>.dev.vars</code> y rellénalo con tus valores; inventa un <code>VERIFY_TOKEN</code> largo y aleatorio.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Comprueba con <code>git status</code> que <code>.dev.vars</code> no aparece como archivo nuevo (debe estar ignorado).</span></label></li><li><label><input type="checkbox" id="p8"><span>Parte B. Envía el mensaje de prueba con el botón <strong>Send message</strong> del panel o con <code>curl</code> y confirma que llega a tu celular.</span></label></li><li><label><input type="checkbox" id="p9"><span>Parte B. Responde desde tu celular con la palabra <code>hola</code>. Anota la hora: desde ahí tienes 24 horas de ventana abierta.</span></label></li><li><label><input type="checkbox" id="p10"><span>Parte B. Escribe en <code>notas-meta.txt</code> cuándo caduca tu token temporal según tu panel y en qué fecha vas a generar el permanente de usuario del sistema.</span></label></li></ul>
+      <details><summary>💡 Pista 1: No encuentro el App Secret</summary><p>Suele estar en <strong>App settings &gt; Basic</strong> (Configuración de la app &gt; Básica). Si Meta cambió el menú, busca «App Secret» en la documentación oficial del panel de apps.</p></details>
+      <details><summary>💡 Pista 2: El mensaje no llega</summary><p>Revisa tres cosas: que el celular esté registrado en <strong>To</strong>, que hayas confirmado el código, y que uses el <strong>Phone Number ID</strong> (no el teléfono) en la URL. Si el error menciona el token, genera uno nuevo.</p></details>
+      <details><summary>💡 Pista 3: Mi pantalla es distinta</summary><p>Meta renombra menús con frecuencia. Ubica el concepto: app, cuenta de WhatsApp Business, número de prueba, destinatario, token. La guía oficial de inicio siempre está actualizada.</p></details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 12</a>
+        <a class="next" href="../13-recibir-mensajes-reales/"><small>Siguiente →</small>Recibir mensajes reales</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 12 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Cuenta%20y%20app%20de%20Meta&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

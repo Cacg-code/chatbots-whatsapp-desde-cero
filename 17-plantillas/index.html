@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plantillas de mensaje · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Crea plantillas de WhatsApp, entiende sus categorías y su aprobación, envíalas con variables y botones de respuesta rápida usando whatsapp.js, y recibe lo que el cliente toca.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Plantillas de mensaje · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Crea plantillas de WhatsApp, entiende sus categorías y su aprobación, envíalas con variables y botones de respuesta rápida usando whatsapp.js, y recibe lo que el cliente toca.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-existen-las-plantillas">Por qué existen las plantillas</a></li><li><a href="#las-tres-categorias">Las tres categorías</a></li><li><a href="#anatomia-de-una-plantilla">Anatomía de una plantilla</a></li><li><a href="#disenar-las-plantillas-del-minimarket">Diseñar las plantillas del minimarket</a></li><li><a href="#crear-la-plantilla">Crear la plantilla</a></li><li><a href="#la-aprobacion">La aprobación</a></li><li><a href="#enviar-una-plantilla-con-parametros">Enviar una plantilla con parámetros</a></li><li><a href="#botones-de-respuesta-rapida">Botones de respuesta rápida</a></li><li><a href="#cuidado-con-el-uso">Cuidado con el uso</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 17</div>
+        <h1>Plantillas de mensaje</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar para qué sirve una plantilla y cuándo es obligatoria (fuera de la ventana de 24 horas).</li><li>Distinguir las categorías de utilidad, marketing y autenticación y elegir la correcta para cada mensaje del minimarket.</li><li>Redactar una plantilla con variables y botones respetando sus límites, y crearla desde el panel o con la API.</li><li>Enviar una plantilla con parámetros usando <code>construirPlantilla</code> y manejar el error de una plantilla inexistente.</li><li>Recibir la respuesta de un botón de respuesta rápida y diseñar los textos para que el bot los entienda.</li></ul>
+</div>
+
+<h2 id="por-que-existen-las-plantillas"><span class="n">1.</span>Por qué existen las plantillas</h2>
+<p>Recuerda la regla más importante de la plataforma, que viste en la <a href="../01-como-funciona-un-bot/">lección 1</a>: cuando un cliente te escribe, se abre una <strong>ventana de 24 horas</strong> en la que puedes enviar mensajes libres. Fuera de ella, el único mensaje que la API te deja enviar es una <strong>plantilla</strong>: un texto de formato fijo que <strong>Meta revisa y aprueba antes</strong> de que puedas usarlo.</p>
+<p>¿Para qué tanto control? Porque escribirle primero a alguien es lo más cercano al spam. Con las plantillas, Meta puede revisar qué le mandan a sus usuarios antes de que lo reciban, y los usuarios no reciben mensajes de formato arbitrario de negocios con los que no hablaron en el día.</p>
+<p>En tu minimarket las plantillas aparecen en situaciones muy concretas:</p>
+<ul>
+<li>«Tu pedido LE-1 está en camino» (el cliente escribió ayer, hoy ya salió el delivery).</li>
+<li>«Tu pedido sigue pendiente. ¿Quieres confirmarlo?» (recordatorio fuera de las 24 h).</li>
+<li>«Este fin de semana, S/ 2 de descuento en gaseosas» (promoción, solo a quienes aceptaron recibirla).</li>
+</ul>
+<p>El código del curso ya las usa. En <code>src/worker.js</code>, el cron de recordatorios decide así:</p>
+<div class="code">
+  <div class="code-head"><span>worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const ventanaAbierta = puedeEnviarTexto(sesionDe(pedido.telefono)?.ultimoMensajeCliente, ahora);
+const cuerpo = ventanaAbierta
+  ? construirEnvio(pedido.telefono, { tipo: &#x27;texto&#x27;, texto: `Tu pedido ${pedido.id} sigue en preparación. Si necesitas algo, escríbenos por aquí.` })
+  : construirPlantilla(pedido.telefono, &#x27;recordatorio_pedido&#x27;, &#x27;es&#x27;, [pedido.id]); // plantilla aprobada previamente</code></pre>
+</div>
+<p>Si la ventana está abierta, texto libre (gratis de crear, sin aprobación). Si no, la plantilla <code>recordatorio_pedido</code>, que <strong>debe existir y estar aprobada</strong>. En esta lección crearás esa plantilla.</p>
+<h2 id="las-tres-categorias"><span class="n">2.</span>Las tres categorías</h2>
+<p>Cada plantilla se declara en una de tres categorías, y la categoría determina las reglas y el precio (<a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/overview">documentación de plantillas</a>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Categoría</th>
+<th>Para qué sirve</th>
+<th>Ejemplo en el minimarket</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Utilidad</strong> (<em>utility</em>)</td>
+<td>Mensajes sobre algo que el cliente ya hizo o pidió</td>
+<td>«Tu pedido LE-1 está en camino», confirmaciones, recordatorios de un pedido</td>
+</tr>
+<tr>
+<td><strong>Marketing</strong></td>
+<td>Promociones, ofertas, novedades, cualquier intento de vender o promover</td>
+<td>«Este sábado, 2 x 1 en galletas»</td>
+</tr>
+<tr>
+<td><strong>Autenticación</strong></td>
+<td>Códigos de un solo uso para verificar identidad</td>
+<td>«Tu código es 483920»</td>
+</tr>
+</tbody>
+</table></div>
+<p>Dos ideas claves:</p>
+<ul>
+<li><strong>El contenido manda, no la intención.</strong> Si mezclas un recordatorio de pedido con una oferta («Tu pedido está listo y mira nuestras promociones»), Meta puede considerarla de marketing aunque tú la creaste como utilidad. Mantén cada plantilla enfocada en una sola cosa.</li>
+<li><strong>La categoría cambia lo que pagas y cómo se envía.</strong> Las plantillas de marketing suelen costar más y exigen que el cliente haya dado permiso (<em>opt-in</em>), tema de la <a href="../20-marketing-responsable/">lección 20</a>. Además, Meta puede limitar cuántos mensajes de marketing recibe un mismo usuario.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Las definiciones exactas de cada categoría, los precios y qué ocurre cuando Meta recategoriza una plantilla cambian con frecuencia. Lee siempre las páginas oficiales antes de prometer algo: <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/overview">plantillas de mensaje</a> y <a href="https://developers.facebook.com/docs/whatsapp/pricing">precios</a>. La lección 21 profundiza en los costos.</p></div>
+<h2 id="anatomia-de-una-plantilla"><span class="n">3.</span>Anatomía de una plantilla</h2>
+<p>Una plantilla se compone de <strong>componentes</strong>. Según la <a href="https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates/components">guía de componentes de Meta</a>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>¿Obligatorio?</th>
+<th>Límite documentado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cuerpo</strong> (<em>body</em>)</td>
+<td>Sí</td>
+<td>Solo texto, hasta 1 024 caracteres</td>
+</tr>
+<tr>
+<td><strong>Encabezado</strong> (<em>header</em>)</td>
+<td>No</td>
+<td>Texto de hasta 60 caracteres (con una variable), o imagen, video o documento</td>
+</tr>
+<tr>
+<td><strong>Pie</strong> (<em>footer</em>)</td>
+<td>No</td>
+<td>Solo texto, hasta 60 caracteres</td>
+</tr>
+<tr>
+<td><strong>Botones</strong></td>
+<td>No</td>
+<td>Hasta 10 de respuesta rápida; cada texto, hasta 25 caracteres</td>
+</tr>
+</tbody>
+</table></div>
+<p>El cuerpo es el mensaje en sí. El pie sirve para aclaraciones cortas («Minimarket La Esquina»). Los botones facilitan la respuesta del cliente, como verás más adelante.</p>
+<h3>Variables</h3>
+<p>Las partes que cambian de un envío a otro se escriben como <strong>variables</strong>: marcadores entre llaves dobles que llenas al enviar. Existen dos estilos:</p>
+<ul>
+<li><strong>Posicionales:</strong> <code>{{1}}</code>, <code>{{2}}</code>, numeradas desde 1, que se llenan en ese orden. Es el formato por defecto y el que usa nuestro código.</li>
+<li><strong>Con nombre:</strong> <code>{{nombre_cliente}}</code>, en minúsculas y guion bajo. Al enviar, cada parámetro lleva además su <code>parameter_name</code>.</li>
+</ul>
+<p>Cuando creas la plantilla, <strong>debes dar un ejemplo para cada variable</strong> (para que el revisor entienda qué se enviará). Y las variables posicionales deben ir completas y en orden: <code>{{1}}</code> y <code>{{3}}</code> sin <code>{{2}}</code> es un error.</p>
+<p>Una buena práctica, que también practicas en el ejercicio, es <strong>validar la plantilla antes de enviarla a revisión</strong>. Con las funciones del ejercicio, la plantilla que diseñamos para el minimarket pasa sin problemas, y una plantilla mal armada muestra todos sus defectos de una vez (salida real):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[]
+[
+  &#x27;Nombre inválido: solo minúsculas sin tilde, números y guion bajo&#x27;,
+  &#x27;Las variables deben ser consecutivas desde {{1}}&#x27;,
+  &#x27;Texto de botón de 1 a 25 caracteres: &quot;Quiero la oferta del fin de semana ahora&quot;&#x27;
+]</code></pre>
+</div>
+<p>Ahorrarte una ida y vuelta con el revisor de Meta ya justifica la función.</p>
+<h2 id="disenar-las-plantillas-del-minimarket"><span class="n">4.</span>Diseñar las plantillas del minimarket</h2>
+<p>Antes de abrir el panel, redacta. Estas son las tres plantillas que usaremos (todas ficticias, con el negocio ficticio «Minimarket La Esquina» y sin emojis):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Categoría</th>
+<th>Texto del cuerpo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recordatorio_pedido</code></td>
+<td>Utilidad</td>
+<td>Hola, tu pedido {{1}} en Minimarket La Esquina sigue en preparación. Total: {{2}}. ¿Quieres que lo confirmemos?</td>
+</tr>
+<tr>
+<td><code>pedido_en_camino</code></td>
+<td>Utilidad</td>
+<td>Tu pedido {{1}} salió en delivery y llegará en unos 30 minutos.</td>
+</tr>
+<tr>
+<td><code>promo_fin_de_semana</code></td>
+<td>Marketing</td>
+<td>Este fin de semana en Minimarket La Esquina: {{1}}. Responde STOP si ya no quieres recibir novedades.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Reglas de redacción que ayudan a que te aprueben:</p>
+<ul>
+<li><strong>Sé específico y claro.</strong> El cliente debe entender de qué trata sin contexto.</li>
+<li><strong>No pongas datos sensibles</strong> (contraseñas, números de tarjeta) en una plantilla.</li>
+<li><strong>Un propósito por plantilla.</strong> No mezcles pedido y promoción.</li>
+<li><strong>Evita variables al principio o al final del cuerpo y evita un cuerpo que sea solo variables.</strong> Meta suele rechazarlas por ambiguas. <strong>Verifica este dato</strong> en la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/overview">guía de revisión de plantillas</a>, porque las reglas de revisión se actualizan.</li>
+<li><strong>Escribe en el idioma que declares.</strong> Meta no traduce: si la plantilla se declara en español, el texto y los ejemplos van en español.</li>
+</ul>
+<h3>El nombre</h3>
+<p>Un nombre de plantilla puede tener hasta 512 caracteres y <strong>solo letras minúsculas, números y guiones bajos</strong>. Por eso <code>recordatorio_pedido</code> es válido, y <code>Recordatorio Pedido</code> o <code>confirmación</code> no. El mismo nombre puede existir en varios idiomas (y cada idioma cuenta contra tu límite de plantillas).</p>
+<h3>El idioma</h3>
+<p>Cada plantilla se crea en un idioma, con un código. En el código del curso usamos <code>'es'</code> por defecto (<code>construirPlantilla(to, nombre, idioma = 'es', ...)</code>). <strong>Verifica este dato:</strong> Meta ofrece códigos genéricos y regionales (por ejemplo, variantes para Perú o México). Consulta la lista de idiomas admitidos en la documentación y usa en el envío exactamente el mismo código con el que creaste la plantilla.</p>
+<h2 id="crear-la-plantilla"><span class="n">5.</span>Crear la plantilla</h2>
+<p>Hay dos caminos. Para empezar, el más cómodo es el <strong>panel de plantillas</strong> de WhatsApp Manager (menú de tu cuenta de WhatsApp Business en Meta): eliges categoría, idioma, escribes el cuerpo, agregas ejemplos y botones, y envías a revisión. Los nombres de los menús cambian, así que sigue la <a href="https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates">documentación oficial</a> si algo no coincide.</p>
+<p>El segundo es la <strong>API</strong>, que sirve para automatizar o crear muchas. Se hace un <code>POST</code> a <code>/{WABA_ID}/message_templates</code>, donde <code>WABA_ID</code> es el identificador de tu cuenta de WhatsApp Business (lo ubicaste en la <a href="../12-cuenta-y-app-de-meta/">lección 12</a>). Meta limita la creación a 100 plantillas por hora por cuenta. Esta es la definición de nuestra plantilla de recordatorio, tal como la armé y serialicé con Node:</p>
+<div class="code">
+  <div class="code-head"><span>recordatorio_pedido.json</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;name&quot;: &quot;recordatorio_pedido&quot;,
+  &quot;language&quot;: &quot;es&quot;,
+  &quot;category&quot;: &quot;UTILITY&quot;,
+  &quot;components&quot;: [
+    {
+      &quot;type&quot;: &quot;BODY&quot;,
+      &quot;text&quot;: &quot;Hola, tu pedido {{1}} en Minimarket La Esquina sigue en preparación. Total: {{2}}. ¿Quieres que lo confirmemos?&quot;,
+      &quot;example&quot;: { &quot;body_text&quot;: [[&quot;LE-1&quot;, &quot;S/ 8.60&quot;]] }
+    },
+    { &quot;type&quot;: &quot;FOOTER&quot;, &quot;text&quot;: &quot;Minimarket La Esquina&quot; },
+    {
+      &quot;type&quot;: &quot;BUTTONS&quot;,
+      &quot;buttons&quot;: [
+        { &quot;type&quot;: &quot;QUICK_REPLY&quot;, &quot;text&quot;: &quot;Confirmar&quot; },
+        { &quot;type&quot;: &quot;QUICK_REPLY&quot;, &quot;text&quot;: &quot;Cambiar pedido&quot; }
+      ]
+    }
+  ]
+}</code></pre>
+</div>
+<p>Fíjate en el <code>example</code>: para variables posicionales se entrega en <code>body_text</code> un arreglo con <strong>un arreglo de valores de ejemplo</strong>, uno por variable (<code>LE-1</code> para <code>{{1}}</code>, <code>S/ 8.60</code> para <code>{{2}}</code>). Los ejemplos son datos falsos y claros, nunca de clientes reales.</p>
+<p>Para enviarla a la API:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl -X POST &quot;https://graph.facebook.com/v26.0/TU_WABA_ID/message_templates&quot; \
+  -H &quot;Authorization: Bearer $WA_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d @recordatorio_pedido.json</code></pre>
+</div>
+<p><code>v26.0</code> es la versión que usa <code>GRAPH_VERSION</code> en <code>whatsapp.js</code> (verificada en el código de referencia el 2026-10-07). Las versiones de la API caducan: revisa el <a href="https://developers.facebook.com/docs/graph-api/changelog/">registro de cambios</a> antes de desplegar. No pude ejecutar esta llamada contra Meta (requiere una cuenta real), así que la estructura sale de la documentación, no de una prueba mía: <strong>verifica este dato</strong> con una plantilla de prueba antes de automatizar nada.</p>
+<h2 id="la-aprobacion"><span class="n">6.</span>La aprobación</h2>
+<p>Cuando creas o editas una plantilla, entra en revisión. Según la documentación oficial, la revisión es automática y puede tardar <strong>hasta 24 horas</strong>. Hasta que no esté en estado <strong>aprobado</strong> (<code>APPROVED</code>), no puedes enviarla. En el panel verás estados como en revisión, rechazada, activa, pausada o desactivada. Hay tres formas de enterarte del resultado:</p>
+<ul>
+<li>Mirar el panel de plantillas de WhatsApp Manager.</li>
+<li>Consultar el campo <code>status</code> de la plantilla por la API.</li>
+<li>Suscribirte al webhook <code>message_template_status_update</code>, que avisa de cada cambio de estado (el mismo mecanismo de webhook que ya usas para los mensajes).</li>
+</ul>
+<p>Si te rechazan, no es un callejón sin salida: lee el motivo, corrige (suele ser un texto ambiguo, una variable mal puesta o una categoría equivocada) y vuelve a enviar. Mientras tanto, tu bot <strong>no debe depender</strong> de que la plantilla exista. Por eso en el Worker la plantilla se usa solo cuando la ventana está cerrada, y el envío está dentro de un <code>try/catch</code> en el cron.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Crea las plantillas con anticipación</p>
+<p>Crea y aprueba las plantillas <strong>antes</strong> de necesitarlas. Si el recordatorio de un cliente real sale mañana y tu plantilla sigue en revisión, ese mensaje no se enviará.</p></div>
+<h2 id="enviar-una-plantilla-con-parametros"><span class="n">7.</span>Enviar una plantilla con parámetros</h2>
+<p>Ya viste cómo se construye el cuerpo del mensaje. La función <code>construirPlantilla</code> de <code>src/whatsapp.js</code> recibe el destinatario, el nombre de la plantilla, el idioma y la lista de variables:</p>
+<div class="code">
+  <div class="code-head"><span>whatsapp.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function construirPlantilla(to, nombre, idioma = &#x27;es&#x27;, variables = []) {
+  const template = { name: nombre, language: { code: idioma } };
+  if (variables.length &gt; 0) {
+    template.components = [{ type: &#x27;body&#x27;, parameters: variables.map((v) =&gt; ({ type: &#x27;text&#x27;, text: String(v) })) }];
+  }
+  return { ...base(to), type: &#x27;template&#x27;, template };
+}</code></pre>
+</div>
+<p>Con nuestras dos variables, el cuerpo que se envía a <code>POST /{PHONE_NUMBER_ID}/messages</code> es (salida real):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;messaging_product&quot;:&quot;whatsapp&quot;,&quot;recipient_type&quot;:&quot;individual&quot;,&quot;to&quot;:&quot;51999000111&quot;,&quot;type&quot;:&quot;template&quot;,&quot;template&quot;:{&quot;name&quot;:&quot;recordatorio_pedido&quot;,&quot;language&quot;:{&quot;code&quot;:&quot;es&quot;},&quot;components&quot;:[{&quot;type&quot;:&quot;body&quot;,&quot;parameters&quot;:[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;LE-1&quot;},{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;S/ 8.60&quot;}]}]}}</code></pre>
+</div>
+<p>Observa tres cosas:</p>
+<ul>
+<li>Cada <code>parameters</code> va <strong>en el mismo orden</strong> que las variables <code>{{1}}</code>, <code>{{2}}</code> del cuerpo.</li>
+<li><code>String(v)</code> convierte números en texto: <code>{{2}}</code> recibe <code>"S/ 8.60"</code>, que armamos antes con <code>"S/ " + total.toFixed(2)</code>.</li>
+<li>Una plantilla <strong>sin variables</strong> (como <code>carrito_pendiente</code>) no lleva <code>components</code>, lo cual el código resuelve con el <code>if</code>:</li>
+</ul>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;messaging_product&quot;:&quot;whatsapp&quot;,&quot;recipient_type&quot;:&quot;individual&quot;,&quot;to&quot;:&quot;51999000111&quot;,&quot;type&quot;:&quot;template&quot;,&quot;template&quot;:{&quot;name&quot;:&quot;carrito_pendiente&quot;,&quot;language&quot;:{&quot;code&quot;:&quot;es&quot;}}}</code></pre>
+</div>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Variables con nombre</p>
+<p><code>construirPlantilla</code> usa variables posicionales. Para plantillas con variables con nombre, cada parámetro debe llevar también <code>parameter_name</code>. Es un cambio pequeño en esa función, pero el código de referencia no lo hace (el propio comentario del archivo lo señala como pendiente de verificar). Consulta el <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/overview">resumen de plantillas</a> antes de implementarlo.</p></div>
+<h3>Cuando algo sale mal</h3>
+<p>Enviar una plantilla que no existe, que no está aprobada o con un idioma que no coincide devuelve un error. <code>enviarMensaje</code> lo convierte en una excepción <strong>sin incluir el token</strong>. Simulé una respuesta 404 con el mensaje de error típico para plantillas inexistentes (el texto exacto de Meta puede variar):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>WhatsApp respondió 404: Template name does not exist in the translation</code></pre>
+</div>
+<p>Los errores más comunes: nombre mal escrito, idioma distinto al de la plantilla, número de variables distinto al esperado, o plantilla todavía en revisión. Revisa siempre que el nombre y el código de idioma coincidan <strong>exactamente</strong>.</p>
+<h2 id="botones-de-respuesta-rapida"><span class="n">8.</span>Botones de respuesta rápida</h2>
+<p>Una plantilla puede incluir <strong>botones de respuesta rápida</strong> (<em>quick reply</em>): el cliente toca «Confirmar» en lugar de escribir. Se definen al crear la plantilla (el bloque <code>BUTTONS</code> del JSON de arriba), con un texto de hasta 25 caracteres, y puedes tener hasta 10 en total. Si los agrupas con otros tipos de botones, los de respuesta rápida deben ir todos juntos al inicio o al final. Las plantillas con 4 o más botones, o con una combinación de tipos, pueden no verse en el cliente de WhatsApp para escritorio, así que piensa en el celular y mantén pocos.</p>
+<h3>Enviarla con botones</h3>
+<p>Al enviar, cada botón de respuesta rápida puede llevar un <strong>payload</strong>: un texto interno que identifica qué botón tocó el cliente (no se muestra). Nuestra función de referencia no incluye botones, así que armamos una variante propia. La estructura del componente <code>button</code> con <code>sub_type: "quick_reply"</code>, <code>index</code> y un parámetro de tipo <code>payload</code> es la que conozco por la API, pero <strong>no la encontré descrita en las páginas que consulté</strong>, así que <strong>verifica este dato</strong> en la referencia de componentes de plantillas antes de usarla en producción:</p>
+<div class="code">
+  <div class="code-head"><span>plantillas.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function construirPlantillaConBotones(to, nombre, idioma, variables, payloads) {
+  const base = construirPlantilla(to, nombre, idioma, variables);
+  const comps = base.template.components ?? [];
+  payloads.forEach((payload, index) =&gt; comps.push({
+    type: &#x27;button&#x27;, sub_type: &#x27;quick_reply&#x27;, index: String(index),
+    parameters: [{ type: &#x27;payload&#x27;, payload }],
+  }));
+  base.template.components = comps;
+  return base;
+}</code></pre>
+</div>
+<p>Con <code>['pedido_confirmar', 'pedido_editar']</code> como payloads, los componentes finales son (salida real, después del cuerpo con sus dos variables):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{ &quot;type&quot;: &quot;button&quot;, &quot;sub_type&quot;: &quot;quick_reply&quot;, &quot;index&quot;: &quot;0&quot;, &quot;parameters&quot;: [{ &quot;type&quot;: &quot;payload&quot;, &quot;payload&quot;: &quot;pedido_confirmar&quot; }] }
+{ &quot;type&quot;: &quot;button&quot;, &quot;sub_type&quot;: &quot;quick_reply&quot;, &quot;index&quot;: &quot;1&quot;, &quot;parameters&quot;: [{ &quot;type&quot;: &quot;payload&quot;, &quot;payload&quot;: &quot;pedido_editar&quot; }] }</code></pre>
+</div>
+<p>(Los reduje a una línea cada uno para leerlos mejor.) Los payloads <code>pedido_confirmar</code> y <code>pedido_editar</code> son justo los ids que el motor ya entiende en el flujo del pedido: <code>pedido_confirmar pedido_editar pedido_cancelar</code> aparecen entre sus ids interactivos en <code>API.md</code>. Es decir, un botón de plantilla podría reutilizar la misma lógica que un botón de la conversación.</p>
+<h3>Recibir lo que el cliente toca</h3>
+<p>Cuando el cliente toca un botón de respuesta rápida de una plantilla, Meta te avisa por el webhook con un mensaje de tipo <code>button</code>. Lo que hace <code>parsearWebhook</code> en el código real con un mensaje así (armé el payload a mano siguiendo ese formato):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[{&quot;tipo&quot;:&quot;mensaje&quot;,&quot;de&quot;:&quot;51999000111&quot;,&quot;nombre&quot;:&quot;Cliente Demo&quot;,&quot;id&quot;:&quot;wamid.B1&quot;,&quot;timestamp&quot;:1791385300,&quot;phoneNumberId&quot;:&quot;123&quot;,&quot;entrada&quot;:{&quot;tipo&quot;:&quot;texto&quot;,&quot;texto&quot;:&quot;Confirmar&quot;}}]</code></pre>
+</div>
+<p>El código lo trata como si el cliente hubiera <strong>escrito</strong> el texto del botón («Confirmar»). Fíjate: se pierde el payload. El propio código lo admite con un comentario <code>VERIFICAR</code>: no pude abrir la página oficial de ese tipo de mensaje, así que revisa en la documentación del webhook que el campo sea <code>button.text</code>, y si quieres usar el payload, tendrías que ampliar <code>parsearEntrada</code>.</p>
+<p>Mientras tanto, la consecuencia práctica es un <strong>consejo de diseño</strong>: como el texto del botón entra al motor como texto libre, elige textos que <code>detectarIntencion</code> ya entiende. Lo probé con los dos botones de nuestro ejemplo:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>confirmar desconocida</code></pre>
+</div>
+<p>«Confirmar» se reconoce como la intención <code>confirmar</code>, pero «Cambiar pedido» cae en <code>desconocida</code>. Opciones: renombrar el botón a un texto que el bot sí entienda (por ejemplo, «Cancelar» o «Ayuda» si encajan), enseñarle al motor la frase nueva en <code>texto.js</code>, o procesar el payload. Elige según el caso, pero <strong>prueba siempre el camino de cada botón</strong>: un botón que lleva a «No entendí tu mensaje» arruina la experiencia.</p>
+<p>Además, cuando el cliente responde a una plantilla, <strong>se abre una ventana de 24 horas</strong>. Desde ese momento, el bot puede continuar con mensajes libres, botones y listas. Esa es la gracia de una buena plantilla: no intenta resolverlo todo, solo <strong>abrir la conversación</strong>.</p>
+<h2 id="cuidado-con-el-uso"><span class="n">9.</span>Cuidado con el uso</h2>
+<ul>
+<li><strong>Probar solo con tu número.</strong> Mientras practicas, envía plantillas únicamente a tu propio número de prueba. Usa en los ejemplos teléfonos falsos como <code>51999000111</code>.</li>
+<li><strong>Marketing con permiso.</strong> Una plantilla de marketing solo debe ir a quien aceptó recibirla. Si el usuario dejó de recibir mensajes de marketing, la API acepta la petición pero no entrega el mensaje, y llega un estado <code>failed</code> con un código (la documentación de plantillas de marketing menciona el <code>131050</code>; <strong>verifica este dato</strong> en la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/marketing-templates">página oficial</a>). Tu bot debe leer esos estados y dejar de insistir.</li>
+<li><strong>No abuses.</strong> Una plantilla mal usada baja la calidad del número, y Meta puede limitar tu capacidad de envío. Las dos lecciones siguientes, de <a href="../18-recordatorios-y-seguimiento/">recordatorios</a> y <a href="../20-marketing-responsable/">marketing responsable</a>, ponen las reglas de uso.</li>
+</ul>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Enviar una plantilla que aún no está aprobada.</strong> Solo las plantillas <code>APPROVED</code> pueden enviarse.</li>
+<li><strong>Nombre con mayúsculas, espacios o tildes.</strong> Solo minúsculas, números y guion bajo.</li>
+<li><strong>Variables salteadas</strong> (<code>{{1}}</code> y <code>{{3}}</code>) o sin ejemplos al crearlas.</li>
+<li><strong>Elegir mal la categoría.</strong> Mezclar un aviso de pedido con una oferta puede hacer que Meta la trate como marketing, con otro precio y otras reglas.</li>
+<li><strong>Desajuste de idioma.</strong> Crear la plantilla en un idioma y enviarla con otro código devuelve error.</li>
+<li><strong>Botones que el bot no entiende.</strong> Si el texto del botón cae en «no entendí», la experiencia se rompe.</li>
+<li><strong>Esperar la aprobación en el último momento.</strong> La revisión puede tardar hasta 24 horas.</li>
+<li><strong>Pasar datos reales en los ejemplos de la plantilla.</strong> Usa siempre datos inventados.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Fuera de la ventana de 24 horas, solo puedes enviar plantillas aprobadas por Meta.</li>
+<li>Hay tres categorías: utilidad, marketing y autenticación; la categoría afecta reglas y precio, y el contenido manda sobre la intención.</li>
+<li>Una plantilla tiene cuerpo (hasta 1 024 caracteres), y opcionalmente encabezado, pie y botones (hasta 10 de respuesta rápida, de 25 caracteres cada uno).</li>
+<li>Las variables <code>{{1}}</code>, <code>{{2}}</code>... deben ser consecutivas y llevar ejemplos al crear la plantilla.</li>
+<li>La revisión es automática y puede tardar hasta 24 horas; consulta el estado en el panel, por la API o con el webhook <code>message_template_status_update</code>.</li>
+<li><code>construirPlantilla(to, nombre, idioma, variables)</code> arma el envío; el nombre y el idioma deben coincidir exactamente con los aprobados.</li>
+<li>Un botón de respuesta rápida llega como mensaje de tipo <code>button</code>: diseña sus textos para que el motor los entienda.</li>
+<li>Verifica siempre en la documentación oficial lo que cambia con el tiempo: categorías, precios, versión de la API y reglas de revisión.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plantilla</td>
+<td>Mensaje de formato fijo aprobado por Meta, enviable fuera de la ventana de 24 horas.</td>
+</tr>
+<tr>
+<td>Categoría</td>
+<td>Clasificación de la plantilla: utilidad, marketing o autenticación.</td>
+</tr>
+<tr>
+<td>Componente</td>
+<td>Parte de una plantilla: cuerpo, encabezado, pie o botones.</td>
+</tr>
+<tr>
+<td>Variable</td>
+<td>Marcador <code>{{1}}</code> del texto que se llena al enviar.</td>
+</tr>
+<tr>
+<td>Respuesta rápida</td>
+<td>Botón de plantilla que el cliente toca para contestar sin escribir.</td>
+</tr>
+<tr>
+<td>Payload</td>
+<td>Texto interno asociado a un botón que identifica cuál se tocó.</td>
+</tr>
+<tr>
+<td>WABA ID</td>
+<td>Identificador de tu cuenta de WhatsApp Business, usado para crear plantillas.</td>
+</tr>
+<tr>
+<td><code>APPROVED</code></td>
+<td>Estado de una plantilla que ya puede enviarse.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>Un cliente te escribió hace tres días y hoy quieres avisarle que su pedido sigue pendiente. ¿Qué debes enviar?</p><ul class="opts"><li><button type="button" class="opt">Un texto libre, porque ya hubo una conversación</button></li><li><button type="button" class="opt" data-ok>Una plantilla aprobada, porque la ventana de 24 horas ya se cerró</button></li><li><button type="button" class="opt">Un audio</button></li><li><button type="button" class="opt">Nada: la API no permite escribir a clientes antiguos</button></li></ul><p class="explain" hidden>Fuera de la ventana solo se pueden enviar plantillas aprobadas.</p></div>
+<div class="quiz-q"><p>¿Cuál es un nombre de plantilla válido?</p><ul class="opts"><li><button type="button" class="opt">Recordatorio Pedido</button></li><li><button type="button" class="opt">confirmación-pedido</button></li><li><button type="button" class="opt" data-ok>recordatorio_pedido</button></li><li><button type="button" class="opt">Recordatorio_Pedido</button></li></ul><p class="explain" hidden>Solo se permiten letras minúsculas sin tilde, números y guiones bajos.</p></div>
+<div class="quiz-q"><p>Redactas «Tu pedido {{1}} está listo. Además, mira nuestras ofertas de la semana.» y la declaras como utilidad. ¿Qué riesgo corres?</p><ul class="opts"><li><button type="button" class="opt">Ninguno, porque tú elegiste la categoría</button></li><li><button type="button" class="opt" data-ok>Que Meta la considere marketing por su contenido, con otras reglas y otro precio</button></li><li><button type="button" class="opt">Que no se pueda usar la variable {{1}}</button></li><li><button type="button" class="opt">Que los clientes no vean el texto</button></li></ul><p class="explain" hidden>El contenido manda sobre la categoría declarada; no mezcles un aviso de pedido con promociones.</p></div>
+<div class="quiz-q"><p>¿Qué envía el código al usar <code>construirPlantilla(to, 'recordatorio_pedido', 'es', ['LE-1', 'S/ 8.60'])</code>?</p><ul class="opts"><li><button type="button" class="opt">Un mensaje de texto libre con los dos valores unidos</button></li><li><button type="button" class="opt" data-ok>Un mensaje de tipo template cuyo cuerpo lleva dos parámetros de texto, en el orden de {{1}} y {{2}}</button></li><li><button type="button" class="opt">Una lista interactiva</button></li><li><button type="button" class="opt">Una petición para crear la plantilla</button></li></ul><p class="explain" hidden>La función arma el JSON de <code>type: "template"</code> con <code>components</code> de tipo <code>body</code> y sus <code>parameters</code>.</p></div>
+<div class="quiz-q"><p>Un cliente toca el botón «Cambiar pedido» de tu plantilla y el bot responde «No entendí». ¿Cuál es la causa más probable según esta lección?</p><ul class="opts"><li><button type="button" class="opt">Meta bloqueó la plantilla</button></li><li><button type="button" class="opt" data-ok>El botón llega como texto y <code>detectarIntencion</code> no reconoce esa frase</button></li><li><button type="button" class="opt">La ventana de 24 horas no se abrió</button></li><li><button type="button" class="opt">El payload tiene más de 25 caracteres</button></li></ul><p class="explain" hidden>El parser trata el botón como texto escrito; hay que usar textos que el motor entienda o ampliar el procesamiento.</p></div>
+<div class="quiz-q"><p>¿Cuánto puede tardar la revisión de una plantilla según la documentación consultada?</p><ul class="opts"><li><button type="button" class="opt">Es inmediata siempre</button></li><li><button type="button" class="opt">Una semana</button></li><li><button type="button" class="opt" data-ok>Hasta 24 horas, y solo se puede enviar cuando está aprobada</button></li><li><button type="button" class="opt">Meta no revisa las plantillas</button></li></ul><p class="explain" hidden>La documentación indica una revisión automática de hasta 24 horas; verifica el dato vigente antes de planificar.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-17">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../16-panel-con-google-sheets/"><small>← Anterior</small>Panel del dueño con Google Sheets</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 17 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2017:%20Plantillas%20de%20mensaje&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

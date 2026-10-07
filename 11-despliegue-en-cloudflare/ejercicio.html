@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Despliegue en Cloudflare · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Despliegue en Cloudflare.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Despliegue en Cloudflare · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Despliegue en Cloudflare.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 11</a> › Ejercicio</div>
+        <h1>Ejercicio: Despliegue en Cloudflare</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Dejar el proyecto listo para desplegar: cuenta creada, Wrangler autenticado, configuración revisada y el empaquetado verificado con <code>--dry-run</code>. <strong>No despliegues todavía</strong>: eso lo harás con tus credenciales reales de Meta en las lecciones 12 y 13.</p>
+<h3>Cómo se trabaja</h3>
+<p>Esta lección es de configuración, así que el ejercicio no tiene comprobaciones automáticas: lo verificas tú con la salida de cada comando. Trabaja en la carpeta <code>codigo/</code> del curso y anota en un archivo <code>notas-despliegue.md</code> lo que se pide. Si algo no coincide con lo que ves en pantalla, la <a href="https://developers.cloudflare.com/workers/wrangler/commands/">documentación oficial de Wrangler</a> manda: los mensajes cambian entre versiones.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade un segundo Worker de práctica, <code>hola-minimarket</code>, con una carpeta nueva, un <code>wrangler.toml</code> mínimo (<code>name</code>, <code>main</code>, <code>compatibility_date</code>) y un <code>fetch</code> que devuelva «Hola desde Minimarket La Esquina». Pruébalo con <code>npx wrangler dev</code> y compruébalo con <code>npx wrangler deploy --dry-run</code>. Desplegarlo de verdad es opcional (es gratuito), pero acuérdate de borrarlo después desde el panel si ya no lo necesitas.</p></div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Crea tu cuenta gratuita en dash.cloudflare.com y confirma tu correo. En <code>notas-despliegue.md</code> anota el plan que ves en tu cuenta (no pegues contraseñas ni códigos).</span></label></li><li><label><input type="checkbox" id="p2"><span>En <code>codigo/</code> ejecuta <code>npm install</code> y luego <code>npx wrangler --version</code>. Anota la versión.</span></label></li><li><label><input type="checkbox" id="p3"><span>Ejecuta <code>npx wrangler login</code>, autoriza en el navegador y verifica con <code>npx wrangler whoami</code> que aparece tu correo. Anota solo el nombre de la cuenta (no hace falta pegar el Account ID).</span></label></li><li><label><input type="checkbox" id="p4"><span>Abre <code>wrangler.toml</code> y subraya (en tus notas) cuáles de estos valores son de ejemplo y deben cambiar antes de un despliegue real: <code>id</code>, <code>preview_id</code> y <code>WA_PHONE_ID</code>. Explica en una línea por qué <code>VERIFY_TOKEN</code>, <code>WA_TOKEN</code> y <code>APP_SECRET</code> NO aparecen en ese archivo.</span></label></li><li><label><input type="checkbox" id="p5"><span>Ejecuta <code>npx wrangler kv namespace create --help</code> y anota qué hace la opción <code>--update-config</code>. NO ejecutes el comando de creación todavía si no quieres dejar recursos en tu cuenta; si lo ejecutas, anota el id y bórralo después con <code>npx wrangler kv namespace delete</code>.</span></label></li><li><label><input type="checkbox" id="p6"><span>Ejecuta <code>npx wrangler deploy --dry-run</code> y anota: el tamaño total del paquete, los bindings que aparecen y cuáles de los tres secretos aparecen (deberían ser ninguno).</span></label></li><li><label><input type="checkbox" id="p7"><span>Ejecuta <code>npx wrangler deploy --dry-run --outdir dist</code> y abre <code>dist/worker.js</code> en tu editor: ubica la función <code>manejarFetch</code>. Anota cuántos KB pesa el archivo. Después borra la carpeta <code>dist</code> (o añádela a <code>.gitignore</code>).</span></label></li><li><label><input type="checkbox" id="p8"><span>Ejecuta <code>npx wrangler tail --help</code> y <code>npx wrangler rollback --help</code>. Anota la opción de <code>tail</code> que filtra solo invocaciones con error y qué dato necesitas para un <code>rollback</code>.</span></label></li><li><label><input type="checkbox" id="p9"><span>Escribe en tus notas el comando exacto que usarías, ya con tus datos, para cargar <code>WA_TOKEN</code> como secreto, y el que usarías para ver que quedó guardado sin mostrar su valor.</span></label></li><li><label><input type="checkbox" id="p10"><span>Escribe tu lista de comprobación de «antes de cada despliegue» en cuatro pasos y verifica que el primero (<code>npm test</code>) pasa en tu máquina.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Si `npm install` falla</summary><p>Revisa <code>node -v</code>: el proyecto pide Node 22 o superior. Si tienes una versión anterior, actualízala (lección 3) y repite. Si el error menciona permisos, no uses <code>sudo</code>; instala Node con el instalador oficial.</p></details>
+      <details><summary>💡 Pista 2: Si `wrangler login` no abre el navegador</summary><p>Copia la dirección que imprime la terminal en tu navegador. Si estás en un entorno sin pantalla, mira en la documentación oficial la opción de autenticación mediante un API token (variable de entorno <code>CLOUDFLARE_API_TOKEN</code>) en lugar del inicio de sesión interactivo.</p></details>
+      <details><summary>💡 Pista 3: Por qué el dry-run pasa con ids de ejemplo</summary><p><code>--dry-run</code> no consulta tu cuenta de Cloudflare: solo compila y valida el archivo. Un <code>id</code> de KV inexistente solo se detecta al desplegar de verdad. Por eso, antes del despliegue real, comprueba a mano que reemplazaste los ids.</p></details>
+      <details><summary>💡 Pista 4: El comando de los secretos</summary><p>El formato es <code>npx wrangler secret put NOMBRE</code>. Wrangler te pide el valor por teclado. Para ver los nombres guardados (nunca los valores) usa <code>npx wrangler secret list</code>.</p></details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 11</a>
+        <a class="next" href="../12-cuenta-y-app-de-meta/"><small>Siguiente →</small>Cuenta y app de Meta</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 11 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Despliegue%20en%20Cloudflare&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

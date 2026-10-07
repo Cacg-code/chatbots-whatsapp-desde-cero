@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuenta y app de Meta · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Crea tu cuenta de desarrollador, la app de negocio, la cuenta de WhatsApp Business y el número de prueba, y entiende qué token usar y cuál guardar.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Cuenta y app de Meta · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Crea tu cuenta de desarrollador, la app de negocio, la cuenta de WhatsApp Business y el número de prueba, y entiende qué token usar y cuál guardar.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#que-vas-a-configurar-y-por-que-en-este-o">Qué vas a configurar y por qué en este orden</a></li><li><a href="#antes-de-empezar-lo-que-necesitas">Antes de empezar: lo que necesitas</a></li><li><a href="#paso-1-registrarte-como-desarrollador-y-">Paso 1: registrarte como desarrollador y crear la app</a></li><li><a href="#paso-2-la-cuenta-de-whatsapp-business-y-">Paso 2: la cuenta de WhatsApp Business y el número de prueba</a></li><li><a href="#paso-3-el-token-temporal-y-el-primer-men">Paso 3: el token temporal y el primer mensaje</a></li><li><a href="#paso-4-del-token-temporal-al-permanente">Paso 4: del token temporal al permanente</a></li><li><a href="#como-encaja-con-el-codigo-del-curso">Cómo encaja con el código del curso</a></li><li><a href="#que-no-hace-falta-todavia">Qué no hace falta todavía</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 12</div>
+        <h1>Cuenta y app de Meta</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Describir la jerarquía portafolio comercial, cuenta de WhatsApp Business (WABA), número y app de Meta.</li><li>Crear una app de Meta con el caso de uso de WhatsApp y localizar el panel de configuración de la API.</li><li>Anotar el Phone Number ID, el ID de la cuenta y el App Secret sin exponerlos.</li><li>Distinguir un token temporal de un token permanente de usuario del sistema y saber cuándo usar cada uno.</li><li>Enviar el primer mensaje de prueba y abrir la ventana de 24 horas respondiendo desde tu celular.</li></ul>
+</div>
+
+<h2 id="que-vas-a-configurar-y-por-que-en-este-o"><span class="n">1.</span>Qué vas a configurar y por qué en este orden</h2>
+<p>Hasta la <a href="../11-despliegue-en-cloudflare/">lección 11</a> tu bot vivió en tu computadora y en un Worker de Cloudflare, sin hablar con WhatsApp. En esta lección haces el trámite que conecta ese código con la plataforma de Meta. Es la parte menos «programada» del curso: son pantallas, botones y copiar identificadores. Pero casi todos los errores de las lecciones siguientes (mensajes que no llegan, tokens que caducan, webhooks que no se verifican) nacen aquí, así que conviene entender qué es cada pieza.</p>
+<p>Las piezas se anidan así:</p>
+<div class="flow"><div class="node"><strong>Portafolio comercial</strong><span>tu empresa en Meta</span></div><div class="arrow">→<code>contiene</code></div><div class="node"><strong>Cuenta de WhatsApp Business</strong><span>WABA</span></div><div class="arrow">→<code>tiene</code></div><div class="node"><strong>Número de teléfono</strong><span>Phone Number ID</span></div><div class="arrow">→<code>lo usa</code></div><div class="node"><strong>App de Meta</strong><span>token + webhook</span></div></div>
+<ul>
+<li>El <strong>portafolio comercial</strong> (antes «Business Manager») es la cuenta de empresa. Para practicar basta uno personal o de prueba.</li>
+<li>La <strong>WABA</strong> (WhatsApp Business Account) es el contenedor de tus números y de tus plantillas.</li>
+<li>El <strong>número</strong> tiene un identificador propio, el <strong>Phone Number ID</strong>, que es lo que va en la URL de la API para enviar mensajes. <strong>No es el número de teléfono</strong>: es un número largo interno de Meta.</li>
+<li>La <strong>app de Meta</strong> es tu aplicación de desarrollador: ahí se obtienen los tokens y se registra el webhook.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Meta rediseña con frecuencia sus paneles y renombra menús (el panel de pruebas se ha llamado «API Setup» o «Configuración de la API», y el caso de uso se presenta de distintas formas según la fecha). Los nombres de este texto son los de la guía oficial al escribir la lección. Si tu pantalla se ve distinta, busca el equivalente y apóyate en la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started">guía oficial de inicio</a>. Lo que no cambia es el concepto: necesitas una app, una WABA, un número, un token y un webhook.</p></div>
+<h2 id="antes-de-empezar-lo-que-necesitas"><span class="n">2.</span>Antes de empezar: lo que necesitas</h2>
+<ol>
+<li>Una <strong>cuenta personal de Facebook</strong> (Meta la usa para identificarte como desarrollador; no se publica nada en ella).</li>
+<li>Un <strong>correo</strong> y un <strong>celular con WhatsApp</strong> donde recibirás los mensajes de prueba. Ese celular será tu «cliente».</li>
+<li>Opcional pero recomendable: activar la verificación en dos pasos en tu cuenta, porque más adelante guardarás credenciales de empresa.</li>
+</ol>
+<p>No necesitas tarjeta de crédito para empezar con el número de prueba. Los datos de pago y la verificación del negocio aparecen cuando quieras usar tu propio número en producción; eso se trata en la <a href="../21-costos-y-metricas/">lección 21</a> y en la <a href="../26-vender-tu-bot/">26</a>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los requisitos para pasar a producción (verificación del negocio, método de pago, límites de mensajes) cambian con el tiempo. Revisa siempre la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started">documentación oficial de WhatsApp Business Platform</a> antes de prometerle plazos a un cliente.</p></div>
+<h2 id="paso-1-registrarte-como-desarrollador-y-"><span class="n">3.</span>Paso 1: registrarte como desarrollador y crear la app</h2>
+<p>Entra en <a href="https://developers.facebook.com">developers.facebook.com</a> con tu cuenta y acepta los términos de desarrollador (si es tu primera vez, te pedirán confirmar correo y teléfono). Esto lo haces tú: es un trámite de cuenta y términos legales, nadie debería hacerlo por ti.</p>
+<p>Luego, según la guía oficial de inicio:</p>
+<ol>
+<li>En el <strong>App Dashboard</strong> («Mis apps»), pulsa <strong>Create App</strong> («Crear app»).</li>
+<li>Elige el caso de uso <strong>Connect with customers through WhatsApp</strong> («Conectar con clientes a través de WhatsApp»).</li>
+<li>Ponle un nombre claro, por ejemplo <code>Bot Minimarket La Esquina (pruebas)</code>, y asócialo a un portafolio comercial (puedes crear uno nuevo).</li>
+<li>Llegarás a <strong>Customize use case &gt; Connect on WhatsApp &gt; Quickstart</strong>. Ahí pulsa <strong>Start using the API</strong> («Empezar a usar la API»).</li>
+</ol>
+<p>Cuando termines, tendrás una app con el producto WhatsApp añadido. En el menú izquierdo aparecerá una sección <strong>WhatsApp</strong> con subpáginas como <strong>API Setup</strong> y <strong>Configuration</strong>. Guarda en un lugar seguro dos cosas que te servirán en la lección 13:</p>
+<ul>
+<li>El <strong>ID de la app</strong> (App ID), visible en la parte superior del panel.</li>
+<li>El <strong>App Secret</strong> (secreto de la app), normalmente en <strong>App settings &gt; Basic</strong> («Configuración de la app &gt; Básica»). Con él firma Meta cada mensaje que te envía; tu Worker lo usa en la variable <code>APP_SECRET</code>.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>La ruta exacta del App Secret y el nombre de los menús pueden variar. Si no lo encuentras, busca «App Secret» en la <a href="https://developers.facebook.com/docs/development/create-an-app/app-dashboard/">documentación del panel de apps</a>.</p></div>
+<h2 id="paso-2-la-cuenta-de-whatsapp-business-y-"><span class="n">4.</span>Paso 2: la cuenta de WhatsApp Business y el número de prueba</h2>
+<p>En el panel <strong>API Setup</strong> de WhatsApp verás una cabecera con varios campos. Según la guía oficial:</p>
+<ol>
+<li>Selecciona o crea una <strong>cuenta de WhatsApp Business</strong>. Anota el <strong>WhatsApp Business Account ID</strong> que muestra el panel.</li>
+<li>En el campo <strong>From</strong> («De») eliges el <strong>número de prueba</strong>. Anota su <strong>Phone Number ID</strong> (el identificador largo, no el teléfono). Este valor irá en tu variable <code>WA_PHONE_ID</code>.</li>
+<li>En el campo <strong>To</strong> («Para») agregas el <strong>destinatario</strong>: tu número de celular, donde recibirás los mensajes de prueba.</li>
+</ol>
+<p>Esa lista de destinatarios es una protección: con un número de prueba <strong>solo puedes escribir a los números que registraste ahí</strong>. Si intentas escribir a otro, la API responde con un error (lo verás en la <a href="../14-enviar-mensajes/">lección 14</a>).</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>El tope de destinatarios de prueba, el método de confirmación del celular y las condiciones del número de prueba son datos que Meta ajusta. Consúltalos en la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started">guía oficial de inicio</a> y no los des por fijos.</p></div>
+<p>En el curso usamos números ficticios como <code>51999000111</code> para el cliente y <code>51999000222</code> para el negocio. <strong>Los tuyos serán distintos</strong>: nunca los pegues en repositorios públicos, capturas de pantalla ni en tus notas compartidas.</p>
+<h2 id="paso-3-el-token-temporal-y-el-primer-men"><span class="n">5.</span>Paso 3: el token temporal y el primer mensaje</h2>
+<p>En la misma pantalla hay un botón <strong>Generate access token</strong> («Generar token de acceso»). El token que obtienes es <strong>temporal</strong>: la guía oficial lo describe como un token que «caduca rápido» y que sirve solo para probar. Mira en tu panel cuánto dura exactamente.</p>
+<p>Puedes enviar tu primer mensaje de dos maneras:</p>
+<ul>
+<li>Con el botón <strong>Send message</strong> del panel, que manda una plantilla de ejemplo de Meta a tu celular.</li>
+<li>Con <code>curl</code> desde tu terminal, que es lo que de verdad hará tu bot por dentro:</li>
+</ul>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl -X POST &quot;https://graph.facebook.com/v26.0/TU_PHONE_NUMBER_ID/messages&quot; \
+  -H &quot;Authorization: Bearer TU_TOKEN_TEMPORAL&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{&quot;messaging_product&quot;:&quot;whatsapp&quot;,&quot;to&quot;:&quot;51999000111&quot;,&quot;type&quot;:&quot;template&quot;,&quot;template&quot;:{&quot;name&quot;:&quot;hello_world&quot;,&quot;language&quot;:{&quot;code&quot;:&quot;en_US&quot;}}}&#x27;</code></pre>
+</div>
+<p>Reemplaza <code>TU_PHONE_NUMBER_ID</code>, <code>TU_TOKEN_TEMPORAL</code> y el número del ejemplo por los tuyos. La versión <code>v26.0</code> es la que usa el código del curso (<a href="../14-enviar-mensajes/">lección 14</a>); revisa el <a href="https://developers.facebook.com/docs/graph-api/changelog/">registro de cambios de la Graph API</a> por si hay una más reciente.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>El nombre y el idioma de la plantilla de ejemplo (<code>hello_world</code>, <code>en_US</code>) los define Meta y pueden cambiar. Usa el que muestra tu panel en <strong>API Setup</strong>.</p></div>
+<p>Una respuesta de éxito tiene esta forma (el id real de tu mensaje será otro):</p>
+<div class="code">
+  <div class="code-head"><span>JSON</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;messaging_product&quot;: &quot;whatsapp&quot;,
+  &quot;contacts&quot;: [{ &quot;input&quot;: &quot;51999000111&quot;, &quot;wa_id&quot;: &quot;51999000111&quot; }],
+  &quot;messages&quot;: [{ &quot;id&quot;: &quot;wamid.EJEMPLO123&quot; }]
+}</code></pre>
+</div>
+<p>Fíjate en algo importante: <strong>esa respuesta solo confirma que la API aceptó tu petición</strong>, no que el mensaje llegó. La documentación oficial lo dice así: la entrega se informa después por webhook (estados <code>sent</code>, <code>delivered</code>, <code>read</code>, <code>failed</code>), como viste en la <a href="../09-webhooks-y-json-de-whatsapp/">lección 9</a>.</p>
+<p>Ahora abre WhatsApp en tu celular y <strong>responde</strong> al mensaje con cualquier texto. Ese acto abre la <strong>ventana de 24 horas</strong> de atención al cliente: desde ese momento puedes enviarle texto libre, botones y listas (no solo plantillas), tal como explicó la <a href="../01-como-funciona-un-bot/">lección 1</a>. Mientras el cliente no escriba, solo puedes mandarle plantillas.</p>
+<h2 id="paso-4-del-token-temporal-al-permanente"><span class="n">6.</span>Paso 4: del token temporal al permanente</h2>
+<p>Un token que muere pronto sirve para practicar, pero un bot desplegado en la nube necesita uno estable. La forma que describe la guía oficial es un <strong>usuario del sistema</strong> (<em>system user</em>) dentro de la <strong>Configuración del negocio</strong> (<em>Business Settings</em>):</p>
+<ol>
+<li>En <strong>Business Settings</strong>, abre <strong>System users</strong> («Usuarios del sistema») y pulsa <strong>Add</strong> («Agregar»). Dale un nombre como <code>bot-minimarket</code>.</li>
+<li>Pulsa <strong>Assign Assets</strong> («Asignar activos») y añade dos cosas con control total: tu <strong>app</strong> (permiso <em>Manage app</em>) y tu <strong>cuenta de WhatsApp</strong> (permiso <em>Manage WhatsApp Business accounts</em>).</li>
+<li>Pulsa <strong>Generate token</strong> («Generar token»), elige tu app y marca los permisos que indica la guía:
+   - <code>whatsapp_business_messaging</code> (enviar mensajes)
+   - <code>whatsapp_business_management</code> (administrar la cuenta y las plantillas)
+   - <code>business_management</code></li>
+<li>Copia el token <strong>en ese momento</strong> y guárdalo en un gestor de contraseñas. No des por hecho que podrás volver a verlo.</li>
+</ol>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Meta ha cambiado cómo se generan y cuánto duran los tokens de usuario del sistema. Mira qué opciones te ofrece tu pantalla y lee la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started">guía oficial</a>. Si tu token tiene fecha de caducidad, anótala en tu calendario.</p></div>
+<div class="callout consejo">
+<p class="callout-title">💡 Una regla simple de seguridad</p>
+<p>El token es una contraseña con poder de enviar mensajes en nombre del negocio (y de gastar su dinero). Nunca lo pegues en el código, ni en GitHub, ni en capturas, ni en chats. En el curso vive solo en secretos: <code>.dev.vars</code> en tu computadora (ignorado por git) y <code>wrangler secret put</code> en la nube. La <a href="../24-seguridad-y-privacidad/">lección 24</a> profundiza en esto.</p></div>
+<h2 id="como-encaja-con-el-codigo-del-curso"><span class="n">7.</span>Cómo encaja con el código del curso</h2>
+<p>El Worker de referencia necesita cuatro valores, definidos en <code>.dev.vars.example</code>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>De dónde sale</th>
+<th>¿Secreta?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VERIFY_TOKEN</code></td>
+<td>Un texto largo que <strong>inventas tú</strong>; lo pondrás igual aquí y en Meta</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td><code>WA_TOKEN</code></td>
+<td>El token (temporal para probar, permanente después)</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td><code>WA_PHONE_ID</code></td>
+<td>El Phone Number ID del número de prueba</td>
+<td>No es crítico, pero tampoco lo publiques</td>
+</tr>
+<tr>
+<td><code>APP_SECRET</code></td>
+<td>App settings &gt; Basic</td>
+<td>Sí</td>
+</tr>
+</tbody>
+</table></div>
+<p>Para probar localmente, copia el ejemplo y reemplaza los valores ficticios:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>cp .dev.vars.example .dev.vars</code></pre>
+</div>
+<p>Y para la nube:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler secret put WA_TOKEN
+npx wrangler secret put APP_SECRET
+npx wrangler secret put VERIFY_TOKEN</code></pre>
+</div>
+<p>Cada comando te pide pegar el valor. Quedan cifrados en Cloudflare y el código los lee como <code>env.WA_TOKEN</code>. El Phone Number ID es una variable normal (<code>[vars]</code> en <code>wrangler.toml</code>).</p>
+<h2 id="que-no-hace-falta-todavia"><span class="n">8.</span>Qué no hace falta todavía</h2>
+<p>Para el curso <strong>no necesitas</strong> verificar tu negocio, comprar un número real ni añadir método de pago. Esos pasos solo importan cuando lo vendas a un cliente real (<a href="../26-vender-tu-bot/">lección 26</a>).</p>
+<p>Lo que sí debes evitar es registrar el número real de un cliente (o tu WhatsApp personal) en la API solo «para probar»: normalmente un número se usa o con la app de WhatsApp Business o con la API, y revertirlo puede costar tiempo. Usa siempre el número de prueba hasta que sea necesario.</p>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Confundir el Phone Number ID con el número de teléfono.</strong> El ID es un valor largo interno; si pones el teléfono en la URL, la API responde que no existe.</li>
+<li><strong>Usar el token temporal en producción.</strong> Funciona unos días y luego el bot «deja de responder» con un error de token vencido. Genera uno de usuario del sistema.</li>
+<li><strong>Olvidar registrar el destinatario en el campo «To».</strong> Con el número de prueba, escribir a un número no registrado falla.</li>
+<li><strong>Pegar el token o el App Secret en el código o en un repositorio.</strong> Si pasa, revócalo y genera uno nuevo de inmediato.</li>
+<li><strong>Esperar texto libre sin haber respondido desde el celular.</strong> Hasta que el cliente escribe, solo se pueden enviar plantillas.</li>
+<li><strong>Seguir una captura de pantalla vieja de un tutorial.</strong> Los menús de Meta cambian: guíate por los conceptos y por la documentación oficial.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>La jerarquía es: portafolio comercial, WABA, número (Phone Number ID) y app de Meta.</li>
+<li>Meta ofrece un <strong>número de prueba</strong>; solo escribe a los destinatarios que registres.</li>
+<li>El <strong>token temporal</strong> caduca pronto; el de <strong>usuario del sistema</strong> es el que usa un bot desplegado.</li>
+<li>El Phone Number ID <strong>no</strong> es el teléfono; guárdalo junto con el App Secret y el token.</li>
+<li>Los secretos viven en <code>.dev.vars</code> y <code>wrangler secret</code>, nunca en el código ni en git.</li>
+<li>Los nombres de menús y los límites cambian: verifica en la documentación oficial.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Portafolio comercial</td>
+<td>Cuenta de empresa en Meta (antes Business Manager) que agrupa activos.</td>
+</tr>
+<tr>
+<td>WABA</td>
+<td>Cuenta de WhatsApp Business: contiene números y plantillas.</td>
+</tr>
+<tr>
+<td>Phone Number ID</td>
+<td>Identificador interno del número, usado en la URL de la API.</td>
+</tr>
+<tr>
+<td>App de Meta</td>
+<td>Aplicación de desarrollador que da acceso a la API y al webhook.</td>
+</tr>
+<tr>
+<td>Token temporal</td>
+<td>Credencial de prueba que caduca pronto.</td>
+</tr>
+<tr>
+<td>Usuario del sistema</td>
+<td>Identidad técnica del negocio para generar tokens estables.</td>
+</tr>
+<tr>
+<td>App Secret</td>
+<td>Secreto de la app con el que se firma cada webhook que Meta envía.</td>
+</tr>
+<tr>
+<td>Número de prueba</td>
+<td>Número que Meta ofrece para practicar, con destinatarios limitados.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Qué identificador va en la URL de la API para enviar un mensaje?</p><ul class="opts"><li><button type="button" class="opt">El número de teléfono del cliente</button></li><li><button type="button" class="opt" data-ok>El Phone Number ID del número del negocio</button></li><li><button type="button" class="opt">El App Secret</button></li><li><button type="button" class="opt">El nombre de la app</button></li></ul><p class="explain" hidden>La ruta es /{PHONE_NUMBER_ID}/messages; el teléfono del cliente va en el campo "to" del cuerpo.</p></div>
+<div class="quiz-q"><p>¿Qué problema tiene usar solo el token temporal en un bot desplegado?</p><ul class="opts"><li><button type="button" class="opt">Es demasiado largo</button></li><li><button type="button" class="opt" data-ok>Caduca pronto y el bot dejará de poder enviar mensajes</button></li><li><button type="button" class="opt">No permite enviar texto</button></li><li><button type="button" class="opt">Solo funciona en Windows</button></li></ul><p class="explain" hidden>El temporal es para probar; para producción se genera uno con un usuario del sistema.</p></div>
+<div class="quiz-q"><p>¿Qué debes hacer para poder enviar texto libre con el número de prueba?</p><ul class="opts"><li><button type="button" class="opt">Pagar un plan</button></li><li><button type="button" class="opt" data-ok>Registrar tu celular como destinatario y responder un mensaje desde él para abrir la ventana de 24 horas</button></li><li><button type="button" class="opt">Cambiar el nombre de la app</button></li><li><button type="button" class="opt">Nada, siempre se puede</button></li></ul><p class="explain" hidden>La ventana de 24 horas se abre cuando el cliente escribe; antes solo se envían plantillas.</p></div>
+<div class="quiz-q"><p>¿Dónde se guardan los secretos del Worker en la nube?</p><ul class="opts"><li><button type="button" class="opt">En el archivo index.js</button></li><li><button type="button" class="opt">En un repositorio público</button></li><li><button type="button" class="opt" data-ok>Con wrangler secret put, que los guarda cifrados</button></li><li><button type="button" class="opt">En el título de la app de Meta</button></li></ul><p class="explain" hidden>El código los lee como env.NOMBRE; nunca deben estar en git.</p></div>
+<div class="quiz-q"><p>Tu pantalla de Meta no coincide con las capturas del curso. ¿Qué haces?</p><ul class="opts"><li><button type="button" class="opt">Abandonas</button></li><li><button type="button" class="opt" data-ok>Buscas el equivalente por concepto y revisas la documentación oficial</button></li><li><button type="button" class="opt">Usas una librería no oficial</button></li><li><button type="button" class="opt">Creas otra cuenta de Facebook</button></li></ul><p class="explain" hidden>Meta cambia los menús con frecuencia; los conceptos (app, WABA, número, token, webhook) se mantienen.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-12">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../11-despliegue-en-cloudflare/"><small>← Anterior</small>Despliegue en Cloudflare</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 12 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2012:%20Cuenta%20y%20app%20de%20Meta&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

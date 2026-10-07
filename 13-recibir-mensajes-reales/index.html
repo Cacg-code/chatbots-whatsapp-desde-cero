@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recibir mensajes reales · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Conecta el webhook de tu Worker con Meta, verifica la URL, suscríbete al campo de mensajes y mira llegar un mensaje real de tu celular.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Recibir mensajes reales · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Conecta el webhook de tu Worker con Meta, verifica la URL, suscríbete al campo de mensajes y mira llegar un mensaje real de tu celular.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#el-objetivo-que-meta-te-hable-a-ti">El objetivo: que Meta te hable a ti</a></li><li><a href="#que-exige-meta-de-tu-endpoint">Qué exige Meta de tu endpoint</a></li><li><a href="#el-apreton-de-manos-de-verificacion">El apretón de manos de verificación</a></li><li><a href="#opcion-a-tunel-temporal-con-cloudflared">Opción A: túnel temporal con cloudflared</a></li><li><a href="#opcion-b-el-worker-desplegado">Opción B: el Worker desplegado</a></li><li><a href="#registrar-el-webhook-en-meta">Registrar el webhook en Meta</a></li><li><a href="#la-primera-prueba-real">La primera prueba real</a></li><li><a href="#mensajes-y-estados-dos-clases-de-evento">Mensajes y estados: dos clases de evento</a></li><li><a href="#cuando-no-llega-nada-diagnostico">Cuando no llega nada: diagnóstico</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 13</div>
+        <h1>Recibir mensajes reales</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar el apretón de manos de verificación del webhook (hub.mode, hub.verify_token, hub.challenge).</li><li>Exponer tu Worker a Meta mediante un túnel temporal o un despliegue en Cloudflare.</li><li>Registrar la URL y el token de verificación en el panel de Meta y suscribirte al campo messages.</li><li>Leer en los registros un mensaje real y distinguirlo de un evento de estado.</li><li>Diagnosticar por qué un webhook no se verifica o no recibe mensajes.</li></ul>
+</div>
+
+<h2 id="el-objetivo-que-meta-te-hable-a-ti"><span class="n">1.</span>El objetivo: que Meta te hable a ti</h2>
+<p>Hasta ahora, los mensajes de WhatsApp que tu código procesó eran archivos JSON de ejemplo (<code>test/payloads/*.json</code>). En esta lección ocurre el cambio importante: escribes desde tu celular y <strong>el mensaje llega a tu servidor</strong>. Para eso hay que hacer tres cosas:</p>
+<ol>
+<li>Que tu servidor sea alcanzable desde internet por HTTPS.</li>
+<li>Registrar esa dirección en Meta y superar la <strong>verificación</strong>.</li>
+<li>Suscribirte a los eventos que quieres recibir.</li>
+</ol>
+<div class="flow"><div class="node"><strong>Tu celular</strong><span>escribe &quot;hola&quot;</span></div><div class="arrow">→<code>mensaje</code></div><div class="node"><strong>Meta</strong><span>Cloud API</span></div><div class="arrow">→<code>POST (JSON firmado)</code></div><div class="node"><strong>Tu Worker</strong><span>/webhook</span></div><div class="arrow">→<code>200 ok</code></div><div class="node"><strong>Meta</strong><span>confirma entrega</span></div></div>
+<p>Requisito: haber hecho la <a href="../12-cuenta-y-app-de-meta/">lección 12</a> (app, número de prueba, destinatario, <code>APP_SECRET</code>, <code>WA_PHONE_ID</code> y un token) y tener el Worker de las lecciones <a href="../10-servidor-del-bot/">10</a> y <a href="../11-despliegue-en-cloudflare/">11</a>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los nombres de los menús de Meta (por ejemplo, <strong>WhatsApp &gt; Configuration</strong> y el botón de editar el webhook) cambian con las actualizaciones del panel. Los pasos de abajo siguen la <a href="https://developers.facebook.com/docs/graph-api/webhooks/getting-started">guía oficial de webhooks</a>; si tu pantalla difiere, busca el equivalente por concepto.</p></div>
+<h2 id="que-exige-meta-de-tu-endpoint"><span class="n">2.</span>Qué exige Meta de tu endpoint</h2>
+<p>La documentación oficial de webhooks establece estas condiciones:</p>
+<ul>
+<li>La URL debe responder por <strong>HTTPS con un certificado válido</strong>. Los certificados autofirmados no se aceptan. Por eso <code>http://localhost:8787</code> no sirve tal cual.</li>
+<li>Registras la URL junto con un <strong>token de verificación</strong> (<em>Verify Token</em>): un texto cualquiera que tú inventas.</li>
+<li>Cada notificación llega por <code>POST</code> y debes responder <code>200 OK</code>.</li>
+<li>Cada <code>POST</code> trae la cabecera <code>X-Hub-Signature-256</code>, con <code>sha256=</code> seguido de la firma calculada con tu App Secret. Validarla es opcional según la documentación, pero <strong>recomendada</strong>; el Worker del curso la exige.</li>
+<li>Si no respondes bien, Meta reintenta de inmediato y luego varias veces durante 36 horas, cada vez con menos frecuencia. Las notificaciones pueden llegar <strong>duplicadas o en lote</strong>, así que hay que procesar cada una por separado y deduplicar.</li>
+</ul>
+<p>Dos ideas de diseño del Worker de referencia salen directamente de esa lista: la <strong>idempotencia</strong> (la clave <code>visto:&lt;wamid&gt;</code> que evita responder dos veces al mismo mensaje) y <strong>responder 200 al instante y trabajar en segundo plano</strong> con <code>ctx.waitUntil</code>.</p>
+<h2 id="el-apreton-de-manos-de-verificacion"><span class="n">3.</span>El apretón de manos de verificación</h2>
+<p>Cuando pulsas «Verificar y guardar» en el panel, Meta envía un <code>GET</code> a tu URL con tres parámetros:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Qué es</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hub.mode</code></td>
+<td>Siempre <code>subscribe</code></td>
+</tr>
+<tr>
+<td><code>hub.verify_token</code></td>
+<td>El token que escribiste en el panel</td>
+</tr>
+<tr>
+<td><code>hub.challenge</code></td>
+<td>Un número aleatorio que debes devolver</td>
+</tr>
+</tbody>
+</table></div>
+<p>Tu código debe comprobar que el token coincide y responder <code>200</code> con el texto de <code>hub.challenge</code> en el cuerpo. Si no, responder un error. Esto es lo que hace <code>verificarWebhook</code> en <code>src/worker.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function verificarWebhook(url, env) {
+  const modo = url.searchParams.get(&#x27;hub.mode&#x27;);
+  const token = url.searchParams.get(&#x27;hub.verify_token&#x27;);
+  const reto = url.searchParams.get(&#x27;hub.challenge&#x27;);
+  if (modo === &#x27;subscribe&#x27; &amp;&amp; env.VERIFY_TOKEN &amp;&amp; token === env.VERIFY_TOKEN &amp;&amp; reto) {
+    return new Response(reto, { status: 200 });
+  }
+  return new Response(&#x27;Prohibido&#x27;, { status: 403 });
+}</code></pre>
+</div>
+<p>Observa los detalles: se exige que <code>env.VERIFY_TOKEN</code> exista (si lo olvidaste configurar, nadie puede verificar contra un valor vacío) y se devuelve <strong>solo el reto</strong>, sin comillas ni JSON.</p>
+<p>Puedes simular a Meta antes de tocar el panel. Estas son las respuestas reales que dio el Worker en una ejecución con un <code>VERIFY_TOKEN</code> de prueba:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>GET /webhook?hub.mode=subscribe&amp;hub.verify_token=token-de-prueba&amp;hub.challenge=1158201444
+200 1158201444
+
+GET /webhook?hub.mode=subscribe&amp;hub.verify_token=otro&amp;hub.challenge=1
+403 Prohibido</code></pre>
+</div>
+<p>Con <code>curl</code> en tu máquina, cuando el Worker corre en local, sería:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl &quot;http://localhost:8787/webhook?hub.mode=subscribe&amp;hub.verify_token=TU_VERIFY_TOKEN&amp;hub.challenge=12345&quot;</code></pre>
+</div>
+<p>Si ves <code>12345</code>, la parte de verificación funciona. Haz esta prueba <strong>antes</strong> de ir a Meta: así separas los fallos de tu código de los fallos del panel.</p>
+<h2 id="opcion-a-tunel-temporal-con-cloudflared"><span class="n">4.</span>Opción A: túnel temporal con cloudflared</h2>
+<p>Para ver mensajes llegando a tu computadora, sin desplegar nada, usa un túnel. Un <strong>túnel</strong> crea una dirección HTTPS pública que reenvía el tráfico a un puerto local.</p>
+<ol>
+<li>Instala <code>cloudflared</code> desde la <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/">documentación de Cloudflare</a>.</li>
+<li>En una terminal, arranca el Worker en local (necesita <code>.dev.vars</code> con tus valores de la lección 12):</li>
+</ol>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler dev</code></pre>
+</div>
+<ol start="3">
+<li>En otra terminal, abre el túnel hacia el puerto del Worker (por defecto 8787):</li>
+</ol>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>cloudflared tunnel --url http://localhost:8787</code></pre>
+</div>
+<p><code>cloudflared</code> imprime una dirección temporal <code>https://algo-aleatorio.trycloudflare.com</code>. Según la documentación de Cloudflare, no hace falta cuenta ni dominio, la dirección <strong>cambia cada vez</strong> que creas un túnel y deja de funcionar al detener el proceso; es solo para pruebas y desarrollo.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Estas condiciones de los túneles rápidos (límites, estabilidad) pueden cambiar. Mira la <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/">página oficial de Quick Tunnels</a>.</p></div>
+<p>Tu URL de webhook será, por ejemplo, <code>https://algo-aleatorio.trycloudflare.com/webhook</code>. Como cambia en cada sesión, tendrás que actualizarla en Meta cada vez que reinicies el túnel; es la molestia que te empuja a la opción B.</p>
+<h2 id="opcion-b-el-worker-desplegado"><span class="n">5.</span>Opción B: el Worker desplegado</h2>
+<p>Si ya desplegaste en la <a href="../11-despliegue-en-cloudflare/">lección 11</a>, tienes una URL estable del tipo <code>https://bot-minimarket.TU-SUBDOMINIO.workers.dev</code>. Es la forma recomendada porque no cambia. Sube los secretos si no lo hiciste:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler secret put VERIFY_TOKEN
+npx wrangler secret put WA_TOKEN
+npx wrangler secret put APP_SECRET
+npx wrangler deploy</code></pre>
+</div>
+<p>Prueba que está vivo con <code>curl https://bot-minimarket.TU-SUBDOMINIO.workers.dev/salud</code>; debe responder <code>{"ok":true}</code>. Y para ver los registros en tiempo real mientras llegan mensajes:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler tail</code></pre>
+</div>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · ¿Cuál elegir?</p>
+<p>Para aprender y depurar, el túnel con <code>wrangler dev</code> te deja ver todo en tu terminal y editar código al instante. Para dejar el bot funcionando mientras duermes, el despliegue. Muchas personas usan ambos: túnel mientras desarrollan y Worker desplegado como «producción».</p></div>
+<h2 id="registrar-el-webhook-en-meta"><span class="n">6.</span>Registrar el webhook en Meta</h2>
+<p>En el panel de tu app, sección <strong>WhatsApp &gt; Configuration</strong> («Configuración») según la guía oficial, busca el bloque <strong>Webhook</strong>:</p>
+<ol>
+<li>Pulsa <strong>Edit</strong> («Editar»).</li>
+<li>En <strong>Callback URL</strong> pega tu URL completa, terminando en <code>/webhook</code>.</li>
+<li>En <strong>Verify token</strong> pega el mismo texto que pusiste en <code>VERIFY_TOKEN</code>.</li>
+<li>Pulsa <strong>Verify and save</strong> («Verificar y guardar»).</li>
+</ol>
+<p>Si todo va bien, el panel guarda sin errores. Si no, mira los mensajes de error y la tabla de diagnóstico más abajo.</p>
+<p>Guardar la URL <strong>no basta</strong>: además debes <strong>suscribirte a los campos</strong> que quieres recibir. Para un bot necesitas el campo <strong><code>messages</code></strong>. En el panel verás una tabla de campos del webhook con un interruptor «Subscribe» («Suscribirse») junto a <code>messages</code>. Actívalo. Sin esa suscripción, la verificación es exitosa pero tu servidor jamás recibe un mensaje (un fallo muy frecuente y confuso).</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Dónde se ven los campos suscritos y cómo se vincula la app a la cuenta de WhatsApp Business (la suscripción de la app a la WABA) ha cambiado entre versiones del panel. Revisa la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/">documentación de webhooks de WhatsApp</a> si, tras suscribirte a <code>messages</code>, siguen sin llegar eventos.</p></div>
+<h2 id="la-primera-prueba-real"><span class="n">7.</span>La primera prueba real</h2>
+<p>Con el Worker corriendo y el webhook suscrito:</p>
+<ol>
+<li>Mantén abierta la terminal de <code>wrangler dev</code> (o <code>wrangler tail</code>).</li>
+<li>Desde tu celular, escribe <code>hola</code> al número de prueba (el que aparece en <strong>API Setup</strong>).</li>
+<li>Observa la terminal.</li>
+</ol>
+<p>Lo esperable es que Meta haga un <code>POST</code> a <code>/webhook</code> con un JSON como el de <code>test/payloads/texto.json</code> (con datos de ejemplo, no reales):</p>
+<div class="code">
+  <div class="code-head"><span>JSON</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;object&quot;: &quot;whatsapp_business_account&quot;,
+  &quot;entry&quot;: [{
+    &quot;id&quot;: &quot;102290129340398&quot;,
+    &quot;changes&quot;: [{
+      &quot;value&quot;: {
+        &quot;messaging_product&quot;: &quot;whatsapp&quot;,
+        &quot;metadata&quot;: { &quot;display_phone_number&quot;: &quot;51999000222&quot;, &quot;phone_number_id&quot;: &quot;106540352242922&quot; },
+        &quot;contacts&quot;: [{ &quot;profile&quot;: { &quot;name&quot;: &quot;Cliente Ejemplo&quot; }, &quot;wa_id&quot;: &quot;51999000111&quot; }],
+        &quot;messages&quot;: [{ &quot;from&quot;: &quot;51999000111&quot;, &quot;id&quot;: &quot;wamid.TEXTO001&quot;, &quot;timestamp&quot;: &quot;1791360000&quot;, &quot;text&quot;: { &quot;body&quot;: &quot;Quiero 2 leches&quot; }, &quot;type&quot;: &quot;text&quot; }]
+      },
+      &quot;field&quot;: &quot;messages&quot;
+    }]
+  }]
+}</code></pre>
+</div>
+<p>Tu Worker comprueba la firma, responde <code>200 ok</code> y procesa el mensaje en segundo plano. Con una firma correcta y con una incorrecta, las respuestas reales fueron:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>POST /webhook (firma válida)   -&gt; 200 ok
+POST /webhook (firma falsa)    -&gt; 401 Firma inválida</code></pre>
+</div>
+<p>Y como en esa prueba el token de WhatsApp era falso, al intentar contestar el Worker registró el error que devuelve Meta cuando el token no es válido:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>WhatsApp respondió 401: Invalid OAuth access token - Cannot parse access token</code></pre>
+</div>
+<p>Es una buena señal de diagnóstico: significa que el mensaje <strong>sí llegó</strong> y se procesó, y que el fallo está en el <strong>envío</strong> (token). Con un token real te contestará el bot; el envío es el tema de la <a href="../14-enviar-mensajes/">lección 14</a>.</p>
+<h2 id="mensajes-y-estados-dos-clases-de-evento"><span class="n">8.</span>Mensajes y estados: dos clases de evento</h2>
+<p>Tu webhook no solo recibe mensajes de clientes. Cuando el bot envía algo, Meta te avisa del destino de cada mensaje con un evento de <strong>estado</strong> (<code>sent</code>, <code>delivered</code>, <code>read</code>, <code>failed</code>). Llegan por el mismo campo <code>messages</code>, pero en <code>value.statuses</code> en vez de <code>value.messages</code>. La función <code>parsearWebhook</code> de <code>src/whatsapp.js</code> los separa:</p>
+<div class="code">
+  <div class="code-head"><span>src/whatsapp.js (fragmento)</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>for (const msg of valor.messages ?? []) {
+  const evento = parsearMensaje(msg, valor.contacts ?? [], phoneNumberId);
+  if (evento) eventos.push(evento);
+}
+for (const st of valor.statuses ?? []) {
+  if (!st?.id) continue;
+  eventos.push({ tipo: &#x27;estado&#x27;, id: st.id, estado: st.status, /* ... */ });
+}</code></pre>
+</div>
+<p>Por eso, al probar, verás <strong>más eventos de los que esperabas</strong>: tu mensaje entrante y, después, los estados del mensaje que respondió el bot. No es un error. También aprenderás a ignorar con elegancia lo que no entiendes: imágenes, audios y otros tipos llegan como <code>no_soportado</code> y el bot responde con un texto amable en lugar de romperse.</p>
+<h2 id="cuando-no-llega-nada-diagnostico"><span class="n">9.</span>Cuando no llega nada: diagnóstico</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Síntoma</th>
+<th>Causa probable</th>
+<th>Qué hacer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>El panel no verifica la URL</td>
+<td>Token distinto, URL sin <code>/webhook</code>, o Worker sin <code>VERIFY_TOKEN</code></td>
+<td>Prueba con <code>curl</code> el <code>GET</code> de verificación (arriba)</td>
+</tr>
+<tr>
+<td>Verifica, pero no llegan mensajes</td>
+<td>Falta suscribirse al campo <code>messages</code></td>
+<td>Activa la suscripción en el panel</td>
+</tr>
+<tr>
+<td>Llegan, pero el Worker responde 401</td>
+<td><code>APP_SECRET</code> equivocado o el cuerpo se modificó antes de verificar la firma</td>
+<td>Revisa el secreto; usa <code>request.text()</code> antes de <code>JSON.parse</code></td>
+</tr>
+<tr>
+<td>Te llega el mismo mensaje varias veces</td>
+<td>Tu servidor tardó o falló y Meta reintentó</td>
+<td>Responde 200 rápido; mantén la idempotencia (<code>visto:</code>)</td>
+</tr>
+<tr>
+<td>Con túnel dejó de funcionar</td>
+<td>La URL temporal cambió</td>
+<td>Reinicia el túnel y actualiza la URL en Meta</td>
+</tr>
+<tr>
+<td>Escribes desde un número que no registraste</td>
+<td>El número de prueba solo trabaja con destinatarios registrados</td>
+<td>Registra ese número en el panel</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Si Meta no logra entregar a tu URL durante mucho tiempo, descarta las notificaciones (según la documentación, tras 36 horas). Un bot caído un fin de semana puede perder mensajes; en producción conviene monitorear (lección <a href="../23-pruebas-y-errores/">23</a>).</p></div>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Poner la URL de <code>localhost</code> en el panel.</strong> Meta no puede alcanzar tu computadora: necesita una URL pública HTTPS (túnel o despliegue).</li>
+<li><strong>Olvidar el <code>/webhook</code> al final de la URL.</strong> El Worker acepta el <code>GET</code> de verificación en <code>/webhook</code>; con la raíz también funciona en el código del curso, pero lo correcto es ser explícito.</li>
+<li><strong>Verificar sin suscribirse a <code>messages</code>.</strong> La URL queda «verificada» y aun así no llega nada.</li>
+<li><strong>Parsear el JSON antes de comprobar la firma.</strong> La firma se calcula sobre el texto exacto; si lo reformateas, deja de coincidir.</li>
+<li><strong>Tardar en responder.</strong> Meta reintenta si no recibe <code>200</code>; responde primero y trabaja después.</li>
+<li><strong>Pegar el token real en la terminal compartida o en capturas.</strong> En las pruebas usa siempre valores como <code>token-de-prueba</code> hasta que sea imprescindible.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Meta exige una URL <strong>HTTPS pública</strong> con certificado válido; localhost solo sirve con un túnel.</li>
+<li>La verificación es un <code>GET</code> con <code>hub.mode</code>, <code>hub.verify_token</code> y <code>hub.challenge</code>: devuelves el reto si el token coincide.</li>
+<li>Hay que <strong>suscribirse al campo <code>messages</code></strong>; la verificación sola no basta.</li>
+<li>Los mensajes llegan por <code>POST</code> firmado (<code>X-Hub-Signature-256</code>); responde <code>200</code> rápido y procesa en segundo plano.</li>
+<li>Meta reintenta durante 36 horas y puede duplicar o agrupar: procesa cada evento por separado y deduplica.</li>
+<li>Los eventos de <strong>estado</strong> llegan por el mismo webhook que los mensajes.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Callback URL</td>
+<td>Dirección HTTPS de tu servidor donde Meta entrega los eventos.</td>
+</tr>
+<tr>
+<td>Verify Token</td>
+<td>Texto que tú inventas y que Meta devuelve en la verificación para probar que la URL es tuya.</td>
+</tr>
+<tr>
+<td>hub.challenge</td>
+<td>Número aleatorio que tu endpoint debe devolver tal cual durante la verificación.</td>
+</tr>
+<tr>
+<td>Suscripción a campos</td>
+<td>Elección de qué tipos de evento (por ejemplo <code>messages</code>) quieres recibir.</td>
+</tr>
+<tr>
+<td>Túnel</td>
+<td>Servicio que expone un puerto local mediante una URL pública HTTPS.</td>
+</tr>
+<tr>
+<td>Idempotencia</td>
+<td>Propiedad de procesar igual un evento aunque llegue repetido.</td>
+</tr>
+<tr>
+<td>Evento de estado</td>
+<td>Aviso de Meta sobre el destino de un mensaje enviado: sent, delivered, read o failed.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>Meta envía un GET con hub.mode=subscribe, hub.verify_token y hub.challenge. ¿Qué debe responder tu endpoint?</p><ul class="opts"><li><button type="button" class="opt">Un JSON con el token</button></li><li><button type="button" class="opt" data-ok>Código 200 con el valor de hub.challenge en el cuerpo, si el token coincide</button></li><li><button type="button" class="opt">Código 301 hacia la página de Meta</button></li><li><button type="button" class="opt">Nada: Meta lo ignora</button></li></ul><p class="explain" hidden>Si el token coincide devuelves el reto tal cual; si no, un error como 403.</p></div>
+<div class="quiz-q"><p>Verificaste la URL en el panel pero no llega ningún mensaje. ¿Qué revisas primero?</p><ul class="opts"><li><button type="button" class="opt">Reinstalas Node</button></li><li><button type="button" class="opt" data-ok>Que estés suscrito al campo messages del webhook</button></li><li><button type="button" class="opt">Cambias el nombre del bot</button></li><li><button type="button" class="opt">Borras el App Secret</button></li></ul><p class="explain" hidden>La verificación y la suscripción son pasos distintos; sin suscribirte a messages no hay entregas.</p></div>
+<div class="quiz-q"><p>¿Por qué no basta con http://localhost:8787 como Callback URL?</p><ul class="opts"><li><button type="button" class="opt">Porque el puerto es muy alto</button></li><li><button type="button" class="opt" data-ok>Porque Meta necesita una URL HTTPS pública con certificado válido, y tu computadora no es alcanzable desde internet</button></li><li><button type="button" class="opt">Porque Node no soporta webhooks</button></li><li><button type="button" class="opt">Porque localhost solo funciona los domingos</button></li></ul><p class="explain" hidden>Un túnel o un despliegue en Cloudflare resuelve esa exigencia.</p></div>
+<div class="quiz-q"><p>¿Qué debe hacer tu servidor ante una notificación de Meta?</p><ul class="opts"><li><button type="button" class="opt">Tardar lo necesario y responder al final</button></li><li><button type="button" class="opt" data-ok>Responder 200 de inmediato y procesar en segundo plano, evitando duplicados</button></li><li><button type="button" class="opt">Responder siempre con un error para forzar reenvío</button></li><li><button type="button" class="opt">Guardarla sin responder</button></li></ul><p class="explain" hidden>Si no respondes 200, Meta reintenta durante horas y puede duplicar eventos.</p></div>
+<div class="quiz-q"><p>Recibes un evento con value.statuses y status "delivered". ¿Qué es?</p><ul class="opts"><li><button type="button" class="opt">Un mensaje nuevo del cliente</button></li><li><button type="button" class="opt" data-ok>Un aviso de estado de un mensaje que enviaste tú</button></li><li><button type="button" class="opt">Un error de verificación</button></li><li><button type="button" class="opt">Un cambio de contraseña</button></li></ul><p class="explain" hidden>Los estados (sent, delivered, read, failed) llegan por el mismo webhook, en statuses.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-13">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../12-cuenta-y-app-de-meta/"><small>← Anterior</small>Cuenta y app de Meta</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 13 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2013:%20Recibir%20mensajes%20reales&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

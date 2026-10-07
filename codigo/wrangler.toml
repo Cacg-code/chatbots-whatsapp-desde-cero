@@ -1,0 +1,19 @@
+name = "bot-minimarket"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+
+# KV: guarda sesiones, pedidos y los ids de mensajes ya procesados.
+# Crea el tuyo con: npx wrangler kv namespace create BOT_KV
+[[kv_namespaces]]
+binding = "BOT_KV"
+id = "00000000000000000000000000000000"          # id de EJEMPLO: reemplázalo
+preview_id = "11111111111111111111111111111111"  # id de EJEMPLO para wrangler dev
+
+# Cron: cada 15 minutos corre scheduled() (recordatorios).
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Variables NO secretas. Los secretos (VERIFY_TOKEN, WA_TOKEN, APP_SECRET)
+# se cargan con `wrangler secret put` y en local con .dev.vars
+[vars]
+WA_PHONE_ID = "000000000000000"   # id de EJEMPLO; en local .dev.vars lo reemplaza

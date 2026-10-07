@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Otros proveedores y alternativas a la API directa · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Otros proveedores y alternativas a la API directa.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Otros proveedores y alternativas a la API directa · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Otros proveedores y alternativas a la API directa.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 28</a> › Ejercicio</div>
+        <h1>Ejercicio: Otros proveedores y alternativas a la API directa</h1>
+        <ul class="meta"><li>⏱ 40 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Comparar proveedores con números, recomendar un camino según el perfil del proyecto y escribir el adaptador de entrada de Twilio, para comprobar que cambiar de proveedor solo toca la carcasa del bot.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es de investigación en las páginas oficiales. La <strong>parte B</strong> son cuatro funciones de JavaScript puro que se comprueban en esta página. Los precios que uses en la parte B son <strong>inventados</strong> y solo sirven para practicar la cuenta: nunca cotices con ellos.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade <code>salidaATwilio(para, respuesta)</code> que convierta una respuesta de tipo <code>texto</code> del motor en el cuerpo <code>{ To: "whatsapp:+&lt;para&gt;", Body: texto }</code>, y que lance un error para los demás tipos (explica en un comentario por qué los botones necesitan plantillas o contenido especial en ese proveedor: revisa su documentación antes de decidir).</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Abre las páginas oficiales de precios de Meta, de Twilio y de 360dialog y anota en <code>notas.md</code>, para cada una, la <strong>fecha de consulta</strong> y qué cobra (por mensaje, cuota mensual, o ambos). Marca cada cifra con «Verifica este dato».</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Elige un negocio imaginario (por ejemplo, el minimarket con 600 mensajes de plantilla al mes) y escribe en <code>notas.md</code> qué camino recomendarías (API directa, proveedor o sandbox) y por qué, en 4 líneas.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>costoMensual({ cuotaFija, tarifaProveedor, mensajes, tarifaMeta, plantillas })</code>: devuelve <code>cuotaFija + tarifaProveedor * mensajes + tarifaMeta * plantillas</code>, redondeado a 2 decimales. Los campos que falten valen 0.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>recomendarOpcion({ sabeProgramar, numClientes, quiereSoporte, usaLibreriaNoOficial })</code> con estas reglas, en este orden: si usa librería no oficial devuelve <code>"rechazar"</code>; si no sabe programar devuelve <code>"bsp"</code>; si quiere soporte o tiene más de 5 clientes devuelve <code>"bsp"</code>; en otro caso devuelve <code>"api-directa"</code>.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>riesgoDeBloqueo(opcion)</code>: <code>"api-directa"</code> y <code>"bsp"</code> dan <code>"bajo"</code>; <code>"baileys"</code> y <code>"whatsapp-web.js"</code> dan <code>"alto"</code>; cualquier otra cosa da <code>"desconocido"</code>.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>entradaDeTwilio(form)</code>: recibe un objeto con <code>From</code> (por ejemplo <code>"whatsapp:+51999000111"</code>) y <code>Body</code>, y devuelve <code>{ de, entrada }</code> donde <code>de</code> es el número sin el prefijo <code>whatsapp:</code> ni el <code>+</code>, y <code>entrada</code> es <code>{ tipo: "texto", texto }</code> (con el texto recortado). Si falta <code>From</code>, o falta <code>Body</code> o está vacío, devuelve <code>null</code>.</span></label></li></ul>
+      <details><summary>💡 Pista 1: La suma de costos</summary><p>Usa valores por defecto al desestructurar: <code>{ cuotaFija = 0, tarifaProveedor = 0, ... }</code>. Para redondear a 2 decimales: <code>Math.round(x * 100) / 100</code>.</p></details>
+      <details><summary>💡 Pista 2: Orden de las reglas</summary><p>Las reglas se evalúan de arriba abajo con <code>if ... return</code>. Si el cliente usa una librería no oficial, nada más importa: devuelves <code>"rechazar"</code> primero.</p></details>
+      <details><summary>💡 Pista 3: Limpiar el número de Twilio</summary><p><code>form.From.replace("whatsapp:", "").replace("+", "")</code> deja solo los dígitos. Revisa <code>typeof form.Body === "string"</code> y que, ya recortado, no esté vacío.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`costoMensual` suma cuota, tarifa del proveedor y cobro de Meta", "h": "cuotaFija + tarifaProveedor*mensajes + tarifaMeta*plantillas.", "t": "return costoMensual({cuotaFija:50,tarifaProveedor:0.01,mensajes:1000,tarifaMeta:0.05,plantillas:100})===65"}, {"d": "`costoMensual` trata los campos que faltan como cero y redondea", "h": "Usa valores por defecto `= 0` y `Math.round(x*100)/100`.", "t": "return costoMensual({})===0 && costoMensual({tarifaProveedor:0.005,mensajes:333})===1.67 && costoMensual({cuotaFija:49})===49"}, {"d": "`recomendarOpcion` rechaza las librerías no oficiales antes que nada", "h": "Comprueba `usaLibreriaNoOficial` en la primera línea.", "t": "return recomendarOpcion({sabeProgramar:true,numClientes:1,quiereSoporte:false,usaLibreriaNoOficial:true})===\"rechazar\" && recomendarOpcion({sabeProgramar:false,usaLibreriaNoOficial:true})===\"rechazar\""}, {"d": "`recomendarOpcion` manda a un BSP a quien no sabe programar", "h": "Si `sabeProgramar` es falso devuelve `\"bsp\"`.", "t": "return recomendarOpcion({sabeProgramar:false,numClientes:1,quiereSoporte:false,usaLibreriaNoOficial:false})===\"bsp\""}, {"d": "`recomendarOpcion` elige BSP con soporte o con más de 5 clientes, y API directa en el resto", "h": "Más de 5 es `> 5`: exactamente 5 clientes todavía va a API directa.", "t": "return recomendarOpcion({sabeProgramar:true,numClientes:2,quiereSoporte:true,usaLibreriaNoOficial:false})===\"bsp\" && recomendarOpcion({sabeProgramar:true,numClientes:6,quiereSoporte:false,usaLibreriaNoOficial:false})===\"bsp\" && recomendarOpcion({sabeProgramar:true,numClientes:5,quiereSoporte:false,usaLibreriaNoOficial:false})===\"api-directa\""}, {"d": "`riesgoDeBloqueo` clasifica las opciones", "h": "Un objeto con las claves y `?? \"desconocido\"` resuelve todo.", "t": "return riesgoDeBloqueo(\"api-directa\")===\"bajo\" && riesgoDeBloqueo(\"bsp\")===\"bajo\" && riesgoDeBloqueo(\"baileys\")===\"alto\" && riesgoDeBloqueo(\"whatsapp-web.js\")===\"alto\" && riesgoDeBloqueo(\"otra\")===\"desconocido\""}, {"d": "`entradaDeTwilio` convierte un mensaje de Twilio en la entrada del motor", "h": "Quita `whatsapp:` y `+` de `From`; recorta `Body`.", "t": "var r=entradaDeTwilio({From:\"whatsapp:+51999000111\",To:\"whatsapp:+51999000222\",Body:\"  quiero 2 leches \"});return r!==null && r.de===\"51999000111\" && r.entrada.tipo===\"texto\" && r.entrada.texto===\"quiero 2 leches\""}, {"d": "`entradaDeTwilio` devuelve `null` si falta el remitente o el texto", "h": "Revisa `From` y que `Body` sea texto no vacío después de recortar.", "t": "return entradaDeTwilio({Body:\"hola\"})===null && entradaDeTwilio({From:\"whatsapp:+51999000111\"})===null && entradaDeTwilio({From:\"whatsapp:+51999000111\",Body:\"   \"})===null && entradaDeTwilio(null)===null"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function costoMensual({ cuotaFija = 0, tarifaProveedor = 0, mensajes = 0, tarifaMeta = 0, plantillas = 0 } = {}) {
+  const total = cuotaFija + tarifaProveedor * mensajes + tarifaMeta * plantillas;
+  return Math.round(total * 100) / 100;
+}
+
+function recomendarOpcion({ sabeProgramar, numClientes, quiereSoporte, usaLibreriaNoOficial }) {
+  if (usaLibreriaNoOficial) return &quot;rechazar&quot;;
+  if (!sabeProgramar) return &quot;bsp&quot;;
+  if (quiereSoporte || numClientes &gt; 5) return &quot;bsp&quot;;
+  return &quot;api-directa&quot;;
+}
+
+const RIESGOS = {
+  &quot;api-directa&quot;: &quot;bajo&quot;,
+  &quot;bsp&quot;: &quot;bajo&quot;,
+  &quot;baileys&quot;: &quot;alto&quot;,
+  &quot;whatsapp-web.js&quot;: &quot;alto&quot;,
+};
+
+function riesgoDeBloqueo(opcion) {
+  return RIESGOS[opcion] ?? &quot;desconocido&quot;;
+}
+
+function entradaDeTwilio(form) {
+  if (!form || typeof form.From !== &quot;string&quot; || typeof form.Body !== &quot;string&quot;) return null;
+  const texto = form.Body.trim();
+  if (!texto) return null;
+  const de = form.From.replace(&quot;whatsapp:&quot;, &quot;&quot;).replace(&quot;+&quot;, &quot;&quot;);
+  return { de, entrada: { tipo: &quot;texto&quot;, texto } };
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 28</a>
+        <a class="next" href="../15-memoria-con-kv/"><small>Siguiente →</small>Memoria con Cloudflare KV</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 28 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Otros%20proveedores%20y%20alternativas%20a%20la%20API%20directa&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

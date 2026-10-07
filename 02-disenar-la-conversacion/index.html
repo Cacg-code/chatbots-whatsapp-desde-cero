@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diseñar la conversación antes de programar · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Define qué hará y qué no hará tu bot, su tono, sus flujos y estados, los límites de los mensajes interactivos y cómo pasar a una persona.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Diseñar la conversación antes de programar · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Define qué hará y qué no hará tu bot, su tono, sus flujos y estados, los límites de los mensajes interactivos y cómo pasar a una persona.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-se-disena-antes-de-programar">Por qué se diseña antes de programar</a></li><li><a href="#casos-de-uso-que-debe-y-que-no-debe-hace">Casos de uso: qué debe y qué NO debe hacer</a></li><li><a href="#el-tono-del-bot">El tono del bot</a></li><li><a href="#un-flujo-de-conversacion">Un flujo de conversación</a></li><li><a href="#del-flujo-al-mapa-de-estados">Del flujo al mapa de estados</a></li><li><a href="#botones-listas-y-texto-que-formato-usar">Botones, listas y texto: qué formato usar</a></li><li><a href="#mensajes-de-error-y-de-no-entendi">Mensajes de error y de «no entendí»</a></li><li><a href="#el-traspaso-a-una-persona-handoff">El traspaso a una persona (handoff)</a></li><li><a href="#el-mismo-diseno-sirve-para-cualquier-neg">El mismo diseño sirve para cualquier negocio</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 2</div>
+        <h1>Diseñar la conversación antes de programar</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: básico</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Definir los casos de uso de un bot y separar lo que debe hacer de lo que no debe hacer.</li><li>Elegir un tono y escribir mensajes de bienvenida, de error y de «no entendí» coherentes.</li><li>Dibujar un flujo de conversación y convertirlo en un mapa de estados en tabla.</li><li>Respetar los límites de botones y listas de WhatsApp y decidir cuándo usar cada formato.</li><li>Diseñar el traspaso a una persona (handoff) y adaptar el diseño a otros negocios.</li></ul>
+</div>
+
+<h2 id="por-que-se-disena-antes-de-programar"><span class="n">1.</span>Por qué se diseña antes de programar</h2>
+<p>La tentación al empezar es abrir el editor y escribir <code>if (texto === "hola")</code>. Funciona los primeros diez minutos; luego aparece el cliente que escribe «buenas, quiero 3 panes y una gaseosa, ¿hacen delivery?» y el código se vuelve un enredo de condiciones.</p>
+<p>Un bot es una <strong>conversación guiada</strong>, y las conversaciones se diseñan igual que una pantalla: primero en papel. Diseñar antes te ahorra reescribir porque respondes preguntas que, si no, te hace el código a las 11 de la noche:</p>
+<ul>
+<li>¿Qué quiere lograr el cliente cuando escribe?</li>
+<li>¿Qué debe poder hacer el bot <strong>solo</strong>, y qué debe pasar a una persona?</li>
+<li>¿Cómo se ve el bot cuando algo sale mal?</li>
+</ul>
+<p>En esta lección no escribirás un bot, sino el <strong>plano</strong> de uno. En la <a href="../04-primer-bot-en-consola/">lección 4</a> lo convertirás en código, y en la <a href="../05-estado-de-la-conversacion/">lección 5</a> el mapa de estados que dibujes aquí se vuelve una estructura de datos.</p>
+<h2 id="casos-de-uso-que-debe-y-que-no-debe-hace"><span class="n">2.</span>Casos de uso: qué debe y qué NO debe hacer</h2>
+<p>Un <strong>caso de uso</strong> es una tarea concreta que el cliente quiere cumplir. Para el minimarket, los más frecuentes son:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Caso de uso</th>
+<th>¿Lo automatiza el bot?</th>
+<th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Preguntar horario y dirección</td>
+<td>Sí</td>
+<td>Es siempre la misma respuesta; ahorra decenas de mensajes.</td>
+</tr>
+<tr>
+<td>Ver el catálogo y los precios</td>
+<td>Sí</td>
+<td>Son datos que tú controlas.</td>
+</tr>
+<tr>
+<td>Armar un pedido y confirmarlo</td>
+<td>Sí</td>
+<td>Es el flujo que genera ventas.</td>
+</tr>
+<tr>
+<td>Preguntar por el estado de un pedido</td>
+<td>Sí (con datos)</td>
+<td>Se consulta en tu sistema.</td>
+</tr>
+<tr>
+<td>Un reclamo por un producto en mal estado</td>
+<td><strong>No</strong>: a una persona</td>
+<td>Requiere empatía y decisiones.</td>
+</tr>
+<tr>
+<td>Negociar un precio por volumen</td>
+<td><strong>No</strong>: a una persona</td>
+<td>Hay excepciones y criterio comercial.</td>
+</tr>
+<tr>
+<td>Dar consejos de salud o legales</td>
+<td><strong>No</strong></td>
+<td>El bot no debe aconsejar donde no tiene autoridad.</td>
+</tr>
+</tbody>
+</table></div>
+<p>La regla práctica: <strong>automatiza lo repetitivo y predecible; entrega a una persona lo delicado, lo excepcional y lo emocional.</strong> Un bot que intenta hacerlo todo falla en lo difícil y arruina la imagen del negocio.</p>
+<p>Escribe, antes de seguir, dos listas cortas. Para el minimarket:</p>
+<ul>
+<li><strong>El bot hace:</strong> mostrar horario y dirección, enseñar el catálogo, armar y confirmar pedidos, avisar el estado del pedido.</li>
+<li><strong>El bot NO hace:</strong> resolver reclamos, aceptar devoluciones, prometer descuentos que no están publicados, pedir datos de tarjeta, hablar de temas ajenos al negocio.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Qué no debe pedir nunca el bot</p>
+<p>No pidas contraseñas, números completos de tarjeta, claves de banca móvil ni códigos de verificación por WhatsApp. Si necesitas un pago, el bot comparte los datos de pago del negocio o un enlace de una pasarela; nunca recoge datos sensibles en el chat. Lo retomamos en la <a href="../24-seguridad-y-privacidad/">lección 24</a>.</p></div>
+<h2 id="el-tono-del-bot"><span class="n">3.</span>El tono del bot</h2>
+<p>El <strong>tono</strong> es cómo «suena» el bot. Es una decisión de marca y se toma una vez para todos los mensajes:</p>
+<ul>
+<li><strong>Tuteo o usted.</strong> Un minimarket de barrio puede tutear; una clínica o un estudio legal suele usar «usted». Elige uno y no los mezcles.</li>
+<li><strong>Corto.</strong> Se lee en el celular, de pie, con prisa: frases de una o dos líneas, una idea por mensaje.</li>
+<li><strong>Dices lo que puedes hacer.</strong> «Puedo mostrarte el catálogo, tomar tu pedido o decirte el horario» orienta mejor que «¿En qué puedo ayudarte?».</li>
+<li><strong>Honesto sobre ser un bot.</strong> Un cliente que descubre que hablaba con un programa que fingía ser persona se siente engañado. Una línea basta: «Soy el asistente virtual de Minimarket La Esquina».</li>
+<li><strong>Sin emojis en este curso.</strong> Los mensajes de ejemplo no los llevan; en un negocio real son una decisión de marca que puedes tomar después, con moderación.</li>
+</ul>
+<p>Compara dos versiones del mismo mensaje:</p>
+<div class="callout ejemplo">
+<p class="callout-title">🧪 Ejemplo · Mal tono y buen tono</p>
+<p><strong>Mal:</strong> «ERROR: OPCIÓN NO VÁLIDA. Vuelva a intentarlo.»
+<strong>Bien:</strong> «No entendí esa opción. Puedes escribir 1 para el catálogo, 2 para hacer un pedido o 3 para el horario.»</p>
+<p>El primero acusa al cliente y no dice cómo seguir; el segundo asume que fue un malentendido y da una salida.</p></div>
+<h2 id="un-flujo-de-conversacion"><span class="n">4.</span>Un flujo de conversación</h2>
+<p>Un <strong>flujo</strong> es el camino que sigue la conversación, de la bienvenida al final. Antes de programarlo, dibújalo. Este es el flujo principal del minimarket:</p>
+<div class="flow"><div class="node"><strong>Bienvenida</strong><span>saluda y ofrece menú</span></div><div class="arrow">→<code>elige &quot;pedido&quot;</code></div><div class="node"><strong>Elegir productos</strong><span>catálogo y cantidades</span></div><div class="arrow">→<code>confirma</code></div><div class="node"><strong>Datos de entrega</strong><span>dirección y forma de pago</span></div><div class="arrow">→<code>acepta resumen</code></div><div class="node"><strong>Pedido registrado</strong><span>número y tiempo estimado</span></div></div>
+<p>Y este es el flujo de los casos informativos, mucho más corto:</p>
+<div class="flow"><div class="node"><strong>Bienvenida</strong><span>menú</span></div><div class="arrow">→<code>elige &quot;horario&quot;</code></div><div class="node"><strong>Respuesta fija</strong><span>horario y dirección</span></div><div class="arrow">→<code>el cliente escribe de nuevo</code></div><div class="node"><strong>Bienvenida</strong><span>menú</span></div></div>
+<p>Fíjate en que <strong>todo flujo vuelve al menú o a un final claro</strong>. Una conversación sin salida es una de las quejas más comunes: el cliente queda escribiendo a un bot que ya no sabe qué hacer.</p>
+<h2 id="del-flujo-al-mapa-de-estados"><span class="n">5.</span>Del flujo al mapa de estados</h2>
+<p>Un flujo dibujado es fácil de entender; para programarlo conviene pasarlo a una <strong>tabla de estados</strong>. Un <strong>estado</strong> es «en qué punto de la conversación está este cliente ahora». Por cada estado anotas qué dice el bot, qué acepta como entrada y a qué estado pasa:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Estado</th>
+<th>El bot dice</th>
+<th>Entradas aceptadas</th>
+<th>Siguiente estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>inicio</code></td>
+<td>Saludo y menú de 3 opciones</td>
+<td>pedido, horario, ayuda</td>
+<td><code>eligiendo</code>, <code>inicio</code>, <code>humano</code></td>
+</tr>
+<tr>
+<td><code>eligiendo</code></td>
+<td>Catálogo y pregunta «¿qué quieres?»</td>
+<td>nombre de producto y cantidad, «listo», «cancelar»</td>
+<td><code>eligiendo</code>, <code>entrega</code>, <code>inicio</code></td>
+</tr>
+<tr>
+<td><code>entrega</code></td>
+<td>Pide la dirección y la forma de pago</td>
+<td>texto libre</td>
+<td><code>confirmando</code></td>
+</tr>
+<tr>
+<td><code>confirmando</code></td>
+<td>Resumen con total y botones Confirmar / Cambiar</td>
+<td>confirmar, cambiar</td>
+<td><code>final</code>, <code>eligiendo</code></td>
+</tr>
+<tr>
+<td><code>final</code></td>
+<td>Número de pedido y tiempo estimado</td>
+<td>cualquier mensaje</td>
+<td><code>inicio</code></td>
+</tr>
+<tr>
+<td><code>humano</code></td>
+<td>«Te paso con una persona»</td>
+<td>cualquier mensaje (lo atiende alguien)</td>
+<td><code>inicio</code> (cuando se cierra el caso)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Esta tabla es la columna vertebral del bot. Cuando algo falle, preguntarás: «¿en qué estado estaba el cliente y qué entrada recibió?». La <a href="../05-estado-de-la-conversacion/">lección 5</a> la traduce a código.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Dibuja los caminos tristes</p>
+<p>Para cada estado pregunta: ¿qué pasa si el cliente escribe algo inesperado? ¿si cancela? ¿si desaparece en medio del pedido? Los «caminos tristes» son donde un bot se gana o pierde la confianza del cliente.</p></div>
+<h2 id="botones-listas-y-texto-que-formato-usar"><span class="n">6.</span>Botones, listas y texto: qué formato usar</h2>
+<p>WhatsApp permite mensajes de texto libre y <strong>mensajes interactivos</strong>, que facilitan la respuesta del cliente porque tocan en lugar de teclear. Los dos que usarás son:</p>
+<ul>
+<li><strong>Botones de respuesta</strong> (<em>reply buttons</em>): hasta 3 botones debajo del mensaje. Ideales para decisiones cortas: Confirmar / Cambiar / Cancelar.</li>
+<li><strong>Lista</strong> (<em>list message</em>): un botón que abre un menú desplegable con varias filas, agrupables en secciones. Ideal para elegir entre 4 a 10 opciones, como el menú principal o las categorías.</li>
+</ul>
+<p>Los límites son estrictos. Si los superas, la API <strong>rechaza el mensaje</strong> y el cliente no recibe nada. Estas son las cifras que figuran hoy en la documentación oficial de Meta:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Botones de respuesta</th>
+<th>Lista</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cantidad máxima</td>
+<td>3 botones</td>
+<td>10 filas en total (hasta 10 secciones)</td>
+</tr>
+<tr>
+<td>Título del botón / de la fila</td>
+<td>20 caracteres</td>
+<td>24 caracteres</td>
+</tr>
+<tr>
+<td>Descripción de la fila</td>
+<td>no aplica</td>
+<td>72 caracteres (opcional)</td>
+</tr>
+<tr>
+<td>Texto del botón que abre la lista</td>
+<td>no aplica</td>
+<td>20 caracteres</td>
+</tr>
+<tr>
+<td>Identificador (<code>id</code>)</td>
+<td>256 caracteres</td>
+<td>200 caracteres</td>
+</tr>
+<tr>
+<td>Texto del cuerpo</td>
+<td>1024 caracteres</td>
+<td>4096 caracteres</td>
+</tr>
+<tr>
+<td>Pie (footer)</td>
+<td>60 caracteres</td>
+<td>60 caracteres</td>
+</tr>
+<tr>
+<td>Encabezado de texto</td>
+<td>revisa la documentación</td>
+<td>60 caracteres</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Estas cifras se tomaron de la documentación oficial de Meta (<a href="https://developers.facebook.com/docs/whatsapp/cloud-api/messages/interactive-reply-buttons-messages">botones de respuesta</a> y <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/messages/interactive-list-messages">mensajes de lista</a>) y pueden cambiar. El límite del encabezado de texto de los botones no aparece indicado en esa página: consúltalo antes de usarlo. Guarda siempre los límites en constantes de tu código, no repartidos por todos los mensajes.</p></div>
+<p>La <strong>decisión</strong> es mecánica:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Si el cliente debe elegir entre…</th>
+<th>Usa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 a 3 opciones cortas</td>
+<td>Botones</td>
+</tr>
+<tr>
+<td>4 a 10 opciones</td>
+<td>Lista</td>
+</tr>
+<tr>
+<td>Más de 10 opciones, o un dato libre (cantidad, dirección)</td>
+<td>Texto, o filtra por pasos (primero categoría, luego producto)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Y un detalle de ingeniería importante: <strong>no todos los clientes ven los mensajes interactivos igual</strong> (versiones antiguas de la app, otras plataformas). Un bot robusto siempre puede degradarse a una <strong>versión de texto numerada</strong> («Responde 1 para…, 2 para…»). En el ejercicio escribirás la función que genera ese texto, junto con las que validan botones y listas antes de enviarlos. Un título de 25 caracteres no debe llegar a Meta: lo recortas tú, con criterio, antes.</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>Ejemplo de menú de respaldo:
+1. Ver catálogo
+2. Hacer un pedido
+3. Horario y dirección</code></pre>
+</div>
+<h2 id="mensajes-de-error-y-de-no-entendi"><span class="n">7.</span>Mensajes de error y de «no entendí»</h2>
+<p>Tu bot <strong>se va a equivocar</strong> y los clientes van a escribir cosas imprevistas. Lo que diferencia a un bot bueno de uno frustrante es cómo maneja ese momento. Estas son las pautas:</p>
+<ol>
+<li><strong>No culpes al cliente.</strong> «No entendí» (el bot es quien no entendió), no «escribiste mal».</li>
+<li><strong>Di cómo seguir.</strong> Ofrece las opciones disponibles, no solo el fallo.</li>
+<li><strong>Varía el mensaje la segunda vez.</strong> Si el cliente falla dos veces, repetir exactamente lo mismo desespera. Cambia el enfoque: «Parece que no estoy ayudando. ¿Quieres hablar con una persona?».</li>
+<li><strong>Cuenta los fallos seguidos.</strong> Dos o tres «no entendí» consecutivos es la señal para ofrecer una persona.</li>
+<li><strong>Que el error nunca deje la conversación muerta.</strong> Todo mensaje de error termina en una opción.</li>
+</ol>
+<p>Una escalera de respuestas típica:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Fallo consecutivo</th>
+<th>Respuesta del bot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.º</td>
+<td>«No entendí tu mensaje. Puedes escribir catálogo, pedido u horario.»</td>
+</tr>
+<tr>
+<td>2.º</td>
+<td>«Sigo sin entender. Elige una opción: 1. Catálogo 2. Pedido 3. Horario.»</td>
+</tr>
+<tr>
+<td>3.º</td>
+<td>«Parece que no logro ayudarte. ¿Te paso con una persona del minimarket?»</td>
+</tr>
+</tbody>
+</table></div>
+<p>También hay <strong>errores propios</strong>: el servidor se cae, la base de datos no responde. Al cliente no le muestres jamás un error técnico; dile algo como «Tuve un problema para procesar tu mensaje. Inténtalo en unos minutos o escribe <em>persona</em> para que te atienda alguien». Esto se retoma en la <a href="../23-pruebas-y-errores/">lección 23</a>.</p>
+<h2 id="el-traspaso-a-una-persona-handoff"><span class="n">8.</span>El traspaso a una persona (handoff)</h2>
+<p>El <strong>handoff</strong> es el momento en que el bot deja de contestar y una persona del negocio toma la conversación. Es parte del diseño, no un parche. Diseña tres cosas:</p>
+<ul>
+<li><strong>Cuándo se activa:</strong> el cliente lo pide («persona», «asesor», «reclamo»); el bot falla varias veces seguidas; el tema está en la lista de «el bot NO hace» (un reclamo, una devolución).</li>
+<li><strong>Qué se le dice al cliente:</strong> que alguien lo atenderá, <strong>cuándo</strong> (dentro del horario o no) y que no necesita repetir todo.</li>
+<li><strong>Qué recibe la persona:</strong> el historial resumido, el nombre y el motivo, para no empezar de cero.</li>
+</ul>
+<div class="flow"><div class="node"><strong>Bot</strong><span>conversación normal</span></div><div class="arrow">→<code>pide una persona, o falla 3 veces</code></div><div class="node"><strong>Estado humano</strong><span>el bot se calla</span></div><div class="arrow">→<code>alguien responde</code></div><div class="node"><strong>Persona</strong><span>atiende al cliente</span></div><div class="arrow">→<code>cierra el caso</code></div><div class="node"><strong>Bot</strong><span>vuelve a atender</span></div></div>
+<p>Un detalle crítico: mientras el estado es <code>humano</code>, <strong>el bot no debe responder</strong> a los mensajes del cliente; de lo contrario el bot y la persona hablarían a la vez. Y fuera del horario de atención, el mensaje debe ser honesto: «Nuestro equipo atiende de 8:00 a 21:00. Te escribiremos mañana a primera hora». En la <a href="../25-atencion-humana/">lección 25</a> lo construirás completo.</p>
+<h2 id="el-mismo-diseno-sirve-para-cualquier-neg"><span class="n">9.</span>El mismo diseño sirve para cualquier negocio</h2>
+<p>Todo lo anterior aplica a cualquier negocio con clientes que preguntan lo mismo cien veces. Esta tabla muestra cómo se ve el diseño en otros rubros. Fíjate en que cambian los <strong>datos</strong> y los <strong>flujos</strong>, pero la estructura (menú, flujo principal, información fija, handoff) es la misma:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Negocio</th>
+<th>Flujo principal del bot</th>
+<th>Información fija</th>
+<th>Pasa a una persona cuando…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ferretería</strong></td>
+<td>Consultar si hay un producto y su precio; reservar para recoger</td>
+<td>Horario, dirección, marcas disponibles</td>
+<td>Piden cotización de obra grande o asesoría técnica</td>
+</tr>
+<tr>
+<td><strong>Taller mecánico</strong></td>
+<td>Pedir cita para revisión o mantenimiento; ver estado del vehículo</td>
+<td>Servicios, horario, ubicación</td>
+<td>Diagnóstico de una falla o un presupuesto de reparación</td>
+</tr>
+<tr>
+<td><strong>Academia</strong></td>
+<td>Consultar cursos, horarios y matrícula; reservar una clase de prueba</td>
+<td>Cursos, precios, sedes</td>
+<td>Dudas de pago, becas o cambios de grupo</td>
+</tr>
+<tr>
+<td><strong>Restaurante</strong></td>
+<td>Ver la carta, pedir para recoger o delivery; reservar mesa</td>
+<td>Carta, horario, zona de delivery</td>
+<td>Alergias, eventos grandes o un reclamo</td>
+</tr>
+<tr>
+<td><strong>Peluquería</strong></td>
+<td>Reservar cita por servicio y estilista; reprogramar</td>
+<td>Servicios, precios, horario</td>
+<td>Un servicio especial (novias, color complicado)</td>
+</tr>
+<tr>
+<td><strong>Tienda de ropa</strong></td>
+<td>Ver novedades por categoría; consultar talla y stock; reservar</td>
+<td>Tallas, cambios, formas de envío</td>
+<td>Cambios, devoluciones o pedidos al por mayor</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cuando un cliente te pida un bot, esta tabla es el comienzo de la conversación: «¿cuáles son las 10 preguntas que más te hacen?». Ahí está el 80 % del diseño. La <a href="../26-vender-tu-bot/">lección 26</a> retoma esto desde el lado comercial.</p>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Empezar a programar sin saber qué NO hará el bot.</strong> Sin esa lista, el alcance crece sin control y el bot promete lo que no puede cumplir.</li>
+<li><strong>Menús demasiado largos.</strong> Diez opciones en un solo mensaje abruman; filtra por pasos.</li>
+<li><strong>Superar los límites de botones o listas.</strong> La API rechaza el mensaje completo; valida antes de enviar.</li>
+<li><strong>Un «no entendí» idéntico, una y otra vez.</strong> Varía el mensaje y ofrece una persona al tercer fallo.</li>
+<li><strong>Flujos sin salida.</strong> El cliente debe poder volver al menú, cancelar o pedir ayuda en cualquier punto.</li>
+<li><strong>Que el bot siga hablando cuando ya atiende una persona.</strong> El estado <code>humano</code> debe silenciar al bot.</li>
+<li><strong>Pedir datos sensibles en el chat.</strong> Nunca contraseñas ni tarjetas completas.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Diseña antes de programar: casos de uso, qué <strong>sí</strong> y qué <strong>no</strong> hace el bot, tono y flujos.</li>
+<li>Automatiza lo repetitivo; entrega a una persona lo delicado y lo excepcional.</li>
+<li>Un mapa de estados en tabla (estado, mensaje, entradas, siguiente estado) es el plano del bot.</li>
+<li>Botones: máximo 3 y 20 caracteres por título. Listas: máximo 10 filas y 24 caracteres por título (verifica en la documentación de Meta).</li>
+<li>Todo mensaje de error debe terminar con una opción; tras 2 o 3 fallos, ofrece una persona.</li>
+<li>El handoff se diseña: cuándo, qué se dice y qué información recibe la persona.</li>
+<li>El diseño es el mismo para cualquier negocio; cambian los datos.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Caso de uso</td>
+<td>Tarea concreta que el cliente quiere cumplir con el bot.</td>
+</tr>
+<tr>
+<td>Flujo</td>
+<td>Camino que sigue una conversación, de la bienvenida al final.</td>
+</tr>
+<tr>
+<td>Estado</td>
+<td>Punto de la conversación en el que se encuentra un cliente.</td>
+</tr>
+<tr>
+<td>Mensaje interactivo</td>
+<td>Mensaje con botones o lista para que el cliente toque en vez de escribir.</td>
+</tr>
+<tr>
+<td>Botón de respuesta</td>
+<td>Botón bajo un mensaje; hasta 3 por mensaje.</td>
+</tr>
+<tr>
+<td>Lista</td>
+<td>Menú desplegable con filas agrupables en secciones.</td>
+</tr>
+<tr>
+<td>Handoff</td>
+<td>Traspaso de la conversación del bot a una persona.</td>
+</tr>
+<tr>
+<td>Degradación</td>
+<td>Usar una versión más simple (texto numerado) cuando no se puede mostrar la ideal.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Cuál de estos casos conviene pasar a una persona en lugar de automatizarlo?</p><ul class="opts"><li><button type="button" class="opt">Preguntar el horario de atención</button></li><li><button type="button" class="opt">Ver el catálogo con precios</button></li><li><button type="button" class="opt" data-ok>Un reclamo por un producto en mal estado</button></li><li><button type="button" class="opt">Consultar la dirección de la tienda</button></li></ul><p class="explain" hidden>Los reclamos requieren empatía y decisiones; lo repetitivo y predecible es lo que se automatiza.</p></div>
+<div class="quiz-q"><p>¿Qué es un estado en el diseño de un bot?</p><ul class="opts"><li><button type="button" class="opt">Un mensaje de error del servidor</button></li><li><button type="button" class="opt" data-ok>El punto de la conversación en el que está un cliente ahora</button></li><li><button type="button" class="opt">El país del número del cliente</button></li><li><button type="button" class="opt">El tipo de plantilla aprobada por Meta</button></li></ul><p class="explain" hidden>El mapa de estados dice qué dice el bot, qué acepta y a dónde pasa en cada punto.</p></div>
+<div class="quiz-q"><p>Quieres que el cliente elija entre 7 categorías de productos. ¿Qué formato corresponde según los límites actuales?</p><ul class="opts"><li><button type="button" class="opt">Botones de respuesta</button></li><li><button type="button" class="opt" data-ok>Una lista, que admite hasta 10 filas</button></li><li><button type="button" class="opt">Un solo texto sin formato, porque 7 es muy poco</button></li><li><button type="button" class="opt">No se puede, el máximo es 3 opciones en cualquier formato</button></li></ul><p class="explain" hidden>Los botones llegan a 3; una lista admite hasta 10 filas. Verifica las cifras en la documentación de Meta.</p></div>
+<div class="quiz-q"><p>¿Qué debes hacer cuando el cliente falla tres veces seguidas?</p><ul class="opts"><li><button type="button" class="opt">Repetir exactamente el mismo mensaje de error</button></li><li><button type="button" class="opt" data-ok>Ofrecerle hablar con una persona</button></li><li><button type="button" class="opt">Ignorar sus mensajes hasta que escriba bien</button></li><li><button type="button" class="opt">Reiniciar el servidor</button></li></ul><p class="explain" hidden>Varias fallas seguidas indican que el bot no ayuda; el handoff evita perder al cliente.</p></div>
+<div class="quiz-q"><p>Mientras el estado de una conversación es «humano», ¿cómo debe comportarse el bot?</p><ul class="opts"><li><button type="button" class="opt">Responder igual que siempre</button></li><li><button type="button" class="opt">Duplicar cada mensaje del cliente</button></li><li><button type="button" class="opt" data-ok>Callar y dejar que la persona atienda</button></li><li><button type="button" class="opt">Mandar el menú cada minuto</button></li></ul><p class="explain" hidden>Si el bot sigue hablando, él y la persona se pisan y el cliente recibe respuestas contradictorias.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-02">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../01-como-funciona-un-bot/"><small>← Anterior</small>Cómo funciona un bot de WhatsApp</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 2 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%202:%20Diseñar%20la%20conversación%20antes%20de%20programar&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

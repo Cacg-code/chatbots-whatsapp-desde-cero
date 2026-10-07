@@ -523,7 +523,7 @@
     var confetti = function (x, y) {
       if (reduce) return;
       var cv = document.createElement('canvas'); cv.className = 'confetti'; cv.width = innerWidth; cv.height = innerHeight; document.body.appendChild(cv);
-      var g = cv.getContext('2d'), cols = ['#4f46e5', '#22d3ee', '#f472b6', '#facc15', '#34d399', '#fb923c'], ps = [];
+      var g = cv.getContext('2d'), cols = ['#0b7a75', '#5eead4', '#ff8a3d', '#facc15', '#34d399', '#fb923c'], ps = [];
       for (var i = 0; i < 110; i++) {
         var a = Math.random() * Math.PI * 2, v = 5 + Math.random() * 9;
         ps.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 6, r: Math.random() * 6, w: 5 + Math.random() * 6, h: 3 + Math.random() * 5, c: cols[i % cols.length], l: 0 });
@@ -745,7 +745,7 @@
 
     // ----- Cursos y lecciones (se leen de assets/indice.json) -----
     var COURSES = [
-      { tot: 27, id: 'bot', pre: 'bot-', name: 'Chatbots de WhatsApp', dir: '', home: '', emoji: '💬' }
+      { tot: 29, id: 'bot', pre: 'bot-', name: 'Chatbots de WhatsApp', dir: '', home: '', emoji: '💬' }
     ];
     var DIRS = {};
     var data = null; // { courses: [{...c, lessons:[{path,title,key}]}] }
@@ -790,7 +790,7 @@
     var TITLES = ['Curioso', 'Aprendiz', 'Explorador', 'Constructor', 'Dev junior', 'Dev', 'Maestro', 'Leyenda'];
     var AVATARS = ['🌱', '🔰', '🧭', '🛠️', '💻', '🚀', '🧙', '👑'];
     // ----- Temas por nivel, avatares, escudos, reto diario, insignia -----
-    var SKINS = [{ id: 'base', n: 'Índigo', lv: 1, c: '#4f46e5' }, { id: 'oceano', n: 'Océano', lv: 2, c: '#0891b2' }, { id: 'atardecer', n: 'Atardecer', lv: 3, c: '#ea580c' }, { id: 'bosque', n: 'Bosque', lv: 5, c: '#15803d' }, { id: 'neon', n: 'Neón', lv: 7, c: '#c026d3' }];
+    var SKINS = [{ id: 'base', n: 'Menta', lv: 1, c: '#0b7a75' }, { id: 'oceano', n: 'Océano', lv: 2, c: '#0891b2' }, { id: 'atardecer', n: 'Atardecer', lv: 3, c: '#ea580c' }, { id: 'bosque', n: 'Bosque', lv: 5, c: '#15803d' }, { id: 'neon', n: 'Neón', lv: 7, c: '#c026d3' }];
     var applySkin = function () {
       var id = store.get('skin') || 'base', lv = levelOf(xpNow()), sk = SKINS.filter(function (x) { return x.id === id; })[0];
       if (!sk || sk.lv > lv) id = 'base';
@@ -830,9 +830,9 @@
     var titleIdx = function (lvl) { var av = store.get('avatar'); return av !== null && +av <= lvl - 1 ? +av : Math.min(lvl - 1, TITLES.length - 1); };
     var shareImage = function () {
       var xp = xpNow(), lvl = levelOf(xp), ti = titleIdx(lvl), s = streaks(), c = document.createElement('canvas'); c.width = 1080; c.height = 1080;
-      var g = c.getContext('2d'), ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4f46e5';
-      if (ac.charAt(0) !== '#' || ac.length !== 7) ac = '#4f46e5';
-      var gr = g.createLinearGradient(0, 0, 1080, 1080); gr.addColorStop(0, '#0f1222'); gr.addColorStop(1, '#1f2440'); g.fillStyle = gr; g.fillRect(0, 0, 1080, 1080);
+      var g = c.getContext('2d'), ac = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#0b7a75';
+      if (ac.charAt(0) !== '#' || ac.length !== 7) ac = '#0b7a75';
+      var gr = g.createLinearGradient(0, 0, 1080, 1080); gr.addColorStop(0, '#08191c'); gr.addColorStop(1, '#143037'); g.fillStyle = gr; g.fillRect(0, 0, 1080, 1080);
       var rg = g.createRadialGradient(840, 220, 0, 840, 220, 600); rg.addColorStop(0, ac + '88'); rg.addColorStop(1, ac + '00'); g.fillStyle = rg; g.fillRect(0, 0, 1080, 1080);
       g.fillStyle = '#fff'; g.textAlign = 'center';
       g.font = '200px serif'; g.fillText(AVATARS[ti], 540, 330);

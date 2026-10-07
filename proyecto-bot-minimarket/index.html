@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyecto final: el bot del minimarket · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Arma de punta a punta el bot de Minimarket La Esquina reutilizando el código de referencia: pruebas, atención humana, despliegue, conexión con WhatsApp, checklist de entrega y criterios de evaluación.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Proyecto final: el bot del minimarket · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Arma de punta a punta el bot de Minimarket La Esquina reutilizando el código de referencia: pruebas, atención humana, despliegue, conexión con WhatsApp, checklist de entrega y criterios de evaluación.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#que-vas-a-construir">Qué vas a construir</a></li><li><a href="#paso-0-prepara-tu-carpeta">Paso 0: prepara tu carpeta</a></li><li><a href="#paso-1-reconoce-las-piezas">Paso 1: reconoce las piezas</a></li><li><a href="#paso-2-personaliza-el-negocio">Paso 2: personaliza el negocio</a></li><li><a href="#paso-3-pruebas-de-aceptacion">Paso 3: pruebas de aceptación</a></li><li><a href="#paso-4-atencion-humana">Paso 4: atención humana</a></li><li><a href="#paso-5-fiabilidad-y-registros">Paso 5: fiabilidad y registros</a></li><li><a href="#paso-6-despliega-en-cloudflare">Paso 6: despliega en Cloudflare</a></li><li><a href="#paso-7-conecta-con-whatsapp">Paso 7: conecta con WhatsApp</a></li><li><a href="#paso-8-plantillas">Paso 8: plantillas</a></li><li><a href="#paso-9-prueba-de-punta-a-punta-con-tu-te">Paso 9: prueba de punta a punta con tu teléfono</a></li><li><a href="#checklist-de-entrega">Checklist de entrega</a></li><li><a href="#criterios-de-evaluacion">Criterios de evaluación</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Proyecto final</div>
+        <h1>Proyecto final: el bot del minimarket</h1>
+        <ul class="meta"><li>⏱ 180 minutos</li><li>📶 Nivel: avanzado</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Ensamblar el bot completo del minimarket a partir del código de referencia, entendiendo qué hace cada módulo.</li><li>Escribir una suite de pruebas de aceptación que demuestre que el bot cumple lo prometido.</li><li>Integrar la atención humana con horario, aviso al dueño y retorno automático al bot.</li><li>Desplegar el bot en Cloudflare y conectarlo a un número de prueba de WhatsApp con firma y secretos bien configurados.</li><li>Verificar tu trabajo con una lista de entrega y una rúbrica de evaluación.</li></ul>
+</div>
+
+<h2 id="que-vas-a-construir"><span class="n">1.</span>Qué vas a construir</h2>
+<p>Es el cierre del curso. Ya aprendiste cada pieza por separado; ahora las juntas en un bot que un negocio podría usar. El resultado es el bot de <strong>Minimarket La Esquina</strong> (negocio ficticio, moneda soles) con estas capacidades:</p>
+<ul>
+<li>Saluda, muestra el catálogo por categorías y entiende texto libre («quiero 4 leches y 3 arroz»).</li>
+<li>Arma el carrito, ofrece recojo o delivery (con mínimo de S/ 25.00 y costo de S/ 3.00), pide dirección y forma de pago, y confirma el pedido.</li>
+<li>Pasa la conversación a una persona, avisa al dueño y vuelve al bot si nadie atiende.</li>
+<li>Corre en un Worker de Cloudflare, con sesiones y pedidos guardados en KV, firma del webhook verificada y recordatorios por cron.</li>
+<li>Tiene pruebas automáticas que lo protegen de errores.</li>
+</ul>
+<p>No empiezas de cero: el <strong>código de referencia</strong> (carpeta <code>codigo/</code> del curso) ya trae el motor, el traductor a la API de Meta, el Worker y 112 pruebas. Tu trabajo es <strong>entenderlo, completarlo, probarlo, desplegarlo y defenderlo</strong>. Es lo mismo que harás cuando le armes un bot a un cliente real, que es lo que veremos al final en la <a href="../26-vender-tu-bot/">lección 26</a>.</p>
+<div class="flow"><div class="node"><strong>Código base</strong><span>112 pruebas</span></div><div class="arrow">→<code>pruebas y atención humana</code></div><div class="node"><strong>Bot completo</strong><span>tu copia</span></div><div class="arrow">→<code>despliegue</code></div><div class="node"><strong>Worker</strong><span>Cloudflare</span></div><div class="arrow">→<code>webhook</code></div><div class="node"><strong>WhatsApp</strong><span>número de prueba</span></div></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Reglas del proyecto</p>
+<p>Todo el proyecto usa datos <strong>ficticios</strong>: el negocio es inventado, los teléfonos son del rango de ejemplo (<code>51999000111</code>, <code>51999000333</code>) y nada de esto es un negocio real. Para probar en tu teléfono usarás el <strong>número de prueba</strong> de Meta, no el número de un cliente. Los mensajes del bot <strong>no llevan emojis</strong>.</p></div>
+<h2 id="paso-0-prepara-tu-carpeta"><span class="n">2.</span>Paso 0: prepara tu carpeta</h2>
+<p>Copia el código de referencia a una carpeta nueva que será <strong>tu</strong> proyecto (no trabajes sobre el original) y comprueba que todo funciona antes de cambiar nada. Esto te da un punto de partida verde: si algo se rompe después, sabrás que fue por tu cambio.</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>node --version      # debe ser 22 o superior
+cp -r codigo mi-bot-minimarket
+cd mi-bot-minimarket
+npm install         # instala wrangler, solo para el Worker
+npm test</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ℹ tests 112
+ℹ suites 0
+ℹ pass 112
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0</code></pre>
+</div>
+<p>Haz <code>git init</code> y un primer <em>commit</em> aquí: «código base verde». Cada paso siguiente terminará con otro commit pequeño. Si usas git en la carpeta, verifica que <code>.gitignore</code> incluya <code>.dev.vars</code> y <code>node_modules</code>: ya viene así en el código base y es la primera defensa de tus secretos.</p>
+<h2 id="paso-1-reconoce-las-piezas"><span class="n">3.</span>Paso 1: reconoce las piezas</h2>
+<p>Antes de tocar nada, dedica diez minutos a leer. Esta tabla es tu mapa:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Responsabilidad</th>
+<th>¿Lo tocarás?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/catalogo.js</code></td>
+<td>Datos del negocio y productos</td>
+<td>Sí, para personalizar</td>
+</tr>
+<tr>
+<td><code>src/texto.js</code></td>
+<td>Entender texto libre y detectar intención</td>
+<td>Un poco (palabras de reclamo)</td>
+</tr>
+<tr>
+<td><code>src/carrito.js</code></td>
+<td>Carrito puro y total en céntimos</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>src/mensajes.js</code></td>
+<td>Todos los textos del bot</td>
+<td>Sí, para ajustar la voz</td>
+</tr>
+<tr>
+<td><code>src/motor.js</code></td>
+<td>Máquina de estados (<code>procesar</code>)</td>
+<td>No (es lo que más pruebas tiene)</td>
+</tr>
+<tr>
+<td><code>src/whatsapp.js</code></td>
+<td>Traductor a la API de Meta, firma, envío</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>src/recordatorios.js</code></td>
+<td>Qué recordar y cuándo</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>src/worker.js</code></td>
+<td>Webhook, KV, cron</td>
+<td>Poco (conectar la atención humana)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Haz el recorrido en la consola, sin WhatsApp. El simulador <code>consola.js</code> usa el mismo motor que el Worker:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>printf &#x27;hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n&#x27; | node consola.js</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>tu&gt; confirmar
+
+bot&gt; Pedido LE-... recibido. Total: S/ 8.60.
+Estará listo para recoger en unos 15 minutos.
+Pagas en efectivo al recibir tu pedido.
+Gracias por comprar en Minimarket La Esquina.</code></pre>
+</div>
+<p>(El código del pedido cambia en cada ejecución porque se deriva de la hora.) Si te falta contexto, repasa la arquitectura en las lecciones <a href="../05-estado-de-la-conversacion/">5</a>, <a href="../08-flujo-de-pedido/">8</a> y <a href="../10-servidor-del-bot/">10</a>.</p>
+<h2 id="paso-2-personaliza-el-negocio"><span class="n">4.</span>Paso 2: personaliza el negocio</h2>
+<p>Abre <code>src/catalogo.js</code>. El objeto <code>NEGOCIO</code> y el arreglo <code>PRODUCTOS</code> son lo único que describe al minimarket. Haz tres cambios para que el bot sea <strong>tuyo</strong>:</p>
+<ol>
+<li>Cambia <code>horario</code>, <code>direccion</code> (ficticia) y <code>zonas</code> de delivery.</li>
+<li>Agrega <strong>3 productos nuevos</strong> con su categoría, unidad y varios sinónimos (cómo los llama la gente: «gaseosa», «chaufa», etc.). Recuerda que el buscador usa <strong>solo los sinónimos</strong>.</li>
+<li>Si tienes otro nombre de negocio en mente para el reto, cámbialo en <code>NEGOCIO.nombre</code>; todos los mensajes lo usan.</li>
+</ol>
+<p>Cuida los límites de WhatsApp: el nombre de un producto debe tener <strong>24 caracteres o menos</strong> porque aparece como título de fila de lista. No lo tienes que recordar: la suite de pruebas llama a <code>construirEnvio</code> con cada respuesta y falla si algo excede un límite.</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npm test</code></pre>
+</div>
+<p>Si un nombre es demasiado largo, verás un error como <code>título de fila de más de 24 caracteres</code>. Corrígelo y repite.</p>
+<h2 id="paso-3-pruebas-de-aceptacion"><span class="n">5.</span>Paso 3: pruebas de aceptación</h2>
+<p>Las pruebas del código base protegen cada módulo. Ahora escribes las que protegen <strong>lo que le prometes al cliente</strong>. Crea <code>test/aceptacion.test.js</code> con los escenarios clave. Usa la ayuda <code>conversacion()</code> que ya existe (la viste en la <a href="../23-pruebas-y-errores/">lección 23</a>):</p>
+<div class="code">
+  <div class="code-head"><span>test/aceptacion.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import test from &#x27;node:test&#x27;;
+import assert from &#x27;node:assert/strict&#x27;;
+import { conversacion } from &#x27;./ayudas.js&#x27;;
+
+test(&#x27;A1. pedido con delivery, Yape y dirección&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.decir(&#x27;hola&#x27;);
+  c.decir(&#x27;quiero 4 leches y 3 arroz&#x27;);
+  c.tocar(&#x27;cerrar&#x27;);
+  c.tocar(&#x27;entrega:delivery&#x27;);
+  c.decir(&#x27;Av. Los Olivos 456, frente al parque&#x27;);
+  c.tocar(&#x27;pago:yape&#x27;);
+  assert.match(c.texto, /Total a pagar: S\/ 32\.80/);
+  c.tocar(&#x27;pedido_confirmar&#x27;);
+  const p = c.sesion.pedidoNuevo;
+  assert.equal(p.total, 32.8);
+  assert.equal(p.entrega, &#x27;delivery&#x27;);
+});
+
+test(&#x27;A2. &quot;gaseosa&quot; es ambiguo: el bot pregunta cuál&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.decir(&#x27;2 gaseosas&#x27;);
+  assert.deepEqual(c.tipos, [&#x27;lista&#x27;]);
+  c.tocar(&#x27;prod:gaseosa-cola&#x27;);
+  assert.equal(c.sesion.carrito[0].cantidad, 2);
+});
+
+test(&#x27;A3. cancelar en cualquier paso limpia el carrito&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.decir(&#x27;2 leches&#x27;); c.tocar(&#x27;cerrar&#x27;);
+  c.decir(&#x27;cancelar&#x27;);
+  assert.equal(c.sesion.carrito.length, 0);
+  assert.match(c.texto, /Cancelé tu pedido/);
+});
+
+test(&#x27;A4. una persona: el bot calla y menu lo devuelve&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.decir(&#x27;persona&#x27;);
+  c.decir(&#x27;hola?&#x27;);
+  assert.equal(c.respuestas.length, 0);
+  c.decir(&#x27;menu&#x27;);
+  assert.equal(c.sesion.estado, &#x27;MENU&#x27;);
+});
+
+test(&#x27;A5. audio e imagen reciben aviso, no error&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  c.enviar({ tipo: &#x27;no_soportado&#x27;, subtipo: &#x27;audio&#x27; });
+  assert.match(c.texto, /solo entiendo texto y botones/);
+});
+
+test(&#x27;A6. ningún mensaje del bot tiene emojis&#x27;, () =&gt; {
+  const c = conversacion(&#x27;51999000111&#x27;);
+  for (const t of [&#x27;hola&#x27;, &#x27;2 leches&#x27;, &#x27;listo&#x27;, &#x27;delivery&#x27;, &#x27;xx&#x27;, &#x27;persona&#x27;]) c.decir(t);
+  const emoji = /\p{Extended_Pictographic}/u;
+  const todo = c.transcripcion.map((r) =&gt; r.texto ?? &#x27;&#x27;).join(&#x27;\n&#x27;);
+  assert.equal(emoji.test(todo), false);
+});</code></pre>
+</div>
+<p>Tres cosas para observar:</p>
+<ul>
+<li>En <strong>A1</strong> la cuenta se hace así: 4 leches (4 × S/ 4.30 = 17.20) + 3 arroz (3 × S/ 4.20 = 12.60) = S/ 29.80, que supera el mínimo de delivery de S/ 25.00; más S/ 3.00 de envío son <strong>S/ 32.80</strong>. Mi primer intento usó 3 leches y 2 arroz (S/ 21.30) y la prueba falló: el bot respondió que no alcanzaba el mínimo. El bot tenía razón y la prueba estaba mal.</li>
+<li><strong>A2</strong> valida la ambigüedad: hay dos gaseosas (cola y naranja), así que el bot debe mostrar una lista.</li>
+<li><strong>A6</strong> convierte una regla de estilo («sin emojis») en una prueba que se ejecuta sola.</li>
+</ul>
+<p>Con las seis pruebas añadidas, el resultado fue:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>✔ A1. pedido con delivery, Yape y dirección (5.3558ms)
+✔ A2. &quot;gaseosa&quot; es ambiguo: el bot pregunta cuál (3.5694ms)
+✔ A3. cancelar en cualquier paso limpia el carrito (0.7702ms)
+✔ A4. una persona: el bot calla y menu lo devuelve (0.8417ms)
+✔ A5. audio e imagen reciben aviso, no error (0.3439ms)
+✔ A6. ningún mensaje del bot tiene emojis (2.4418ms)</code></pre>
+</div>
+<p>Agrega al menos <strong>dos escenarios propios</strong> (por ejemplo, un pedido de recojo con transferencia y un producto que tú agregaste en el paso 2).</p>
+<h2 id="paso-4-atencion-humana"><span class="n">6.</span>Paso 4: atención humana</h2>
+<p>El código base ya sabe callarse en <code>ESPERANDO_HUMANO</code>, pero <strong>no avisa a nadie</strong>. Integra lo que construiste en la <a href="../25-atencion-humana/">lección 25</a>:</p>
+<ol>
+<li>Crea <code>src/humano.js</code> con <code>estaAbierto</code>, <code>mensajeFueraDeHorario</code>, <code>textoAvisoDueno</code>, <code>humanoVencido</code>, <code>procesarConHumano</code>, <code>avisarAlDueno</code> y <code>liberarHumanosVencidos</code>. Importa <code>procesarMensaje</code> desde <code>./worker.js</code>, y las otras funciones desde <code>./whatsapp.js</code> y <code>./recordatorios.js</code>.</li>
+<li>En <code>avisarAlDueno</code> añade una protección: si falta la variable <code>DUENO_TEL</code>, deja un error en el log y no rompas el flujo (así un olvido de configuración no tumba el bot).</li>
+<li>En <code>src/worker.js</code> haz tres cambios pequeños: importa de <code>./humano.js</code>; en <code>procesarEventos</code> llama a <code>procesarConHumano(env, evento)</code> en vez de <code>procesarMensaje(env, evento)</code>; y en <code>scheduled</code> ejecuta también <code>liberarHumanosVencidos(env)</code> junto con los recordatorios:</li>
+</ol>
+<div class="code">
+  <div class="code-head"><span>src/worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { procesarConHumano, liberarHumanosVencidos } from &#x27;./humano.js&#x27;;
+// ...
+if (evento.tipo === &#x27;mensaje&#x27;) await procesarConHumano(env, evento);
+// ...
+scheduled(_evento, env, ctx) {
+  ctx.waitUntil(Promise.all([ejecutarRecordatorios(env), liberarHumanosVencidos(env)])
+    .catch((e) =&gt; console.error(&#x27;Error en tareas programadas:&#x27;, e.message)));
+},</code></pre>
+</div>
+<p><code>worker.js</code> e <code>humano.js</code> se importan entre sí. Funciona porque todo son funciones que se llaman más tarde, no al cargar el módulo; lo comprobamos ejecutando las pruebas completas. Añade tus pruebas de la lección 25 (<code>humano.test.js</code>) a <code>test/</code>, y una prueba <strong>de extremo a extremo</strong>: un POST firmado con «quiero hablar con una persona» debe dejar la sesión en <code>ESPERANDO_HUMANO</code> y producir un aviso al dueño. Con un <code>fetch</code> falso, la salida real fue:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>HTTP 200
+(leído) -&gt; read
+51999000111 -&gt; text
+51999000333 -&gt; template
+✔ un cliente pide una persona y el dueño recibe el aviso (74.5467ms)</code></pre>
+</div>
+<p>El orden es el esperado: se marca como leído, se responde al cliente y se avisa al dueño (con plantilla, porque su ventana de 24 horas estaba cerrada). Con los siete tests de humano y los seis de aceptación añadidos al código base, <code>npm test</code> quedó en verde:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ℹ tests 126
+ℹ pass 126
+ℹ fail 0</code></pre>
+</div>
+<p>(126 incluye las 112 pruebas del código base, siete de humano, seis de aceptación y un caso de «falta <code>DUENO_TEL</code>»; la prueba extremo a extremo se sumó aparte. Tu número exacto dependerá de cuántas pruebas propias escribas; lo importante es que <code>fail</code> sea 0.)</p>
+<p>Agrega también las palabras <code>reclamo</code>, <code>queja</code> y <code>devolucion</code> a la intención <code>humano</code> en <code>src/texto.js</code>, como viste en la lección.</p>
+<h2 id="paso-5-fiabilidad-y-registros"><span class="n">7.</span>Paso 5: fiabilidad y registros</h2>
+<p>Incorpora de la <a href="../23-pruebas-y-errores/">lección 23</a> lo que le da robustez, en un archivo <code>src/fiabilidad.js</code>: <code>registrar</code> (log JSON sin secretos), <code>ocultarSecretos</code>, <code>ocultarTelefono</code>, <code>conReintentos</code>, <code>enviarConReintentos</code> y <code>clasificarError</code>. Después:</p>
+<ul>
+<li>Cambia en el Worker los <code>console.error</code> de los envíos por <code>registrar('error', ...)</code> con el id del mensaje y el código de error de Meta.</li>
+<li>Usa <code>enviarConReintentos</code> para enviar las respuestas al cliente (2 o 3 intentos, solo <code>429</code> y <code>5xx</code>).</li>
+<li>Cuando llegue un estado <code>failed</code>, registra el código y su <code>clasificarError(...).accion</code>.</li>
+</ul>
+<p>Aquí aplican dos reglas de la <a href="../24-seguridad-y-privacidad/">lección 24</a>: ningún token ni App Secret en el log, y ningún teléfono completo.</p>
+<h2 id="paso-6-despliega-en-cloudflare"><span class="n">8.</span>Paso 6: despliega en Cloudflare</h2>
+<p>Sigue la <a href="../11-despliegue-en-cloudflare/">lección 11</a>. Resumen de comandos, todos desde tu carpeta:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler login
+npx wrangler kv namespace create BOT_KV      # copia el id a wrangler.toml
+npx wrangler secret put VERIFY_TOKEN
+npx wrangler secret put WA_TOKEN
+npx wrangler secret put APP_SECRET</code></pre>
+</div>
+<p>Edita <code>wrangler.toml</code>: reemplaza el <code>id</code> de ejemplo del KV por el tuyo, y en <code>[vars]</code> pon tu <code>WA_PHONE_ID</code> y agrega <code>DUENO_TEL = "51999000333"</code> (en la práctica, el teléfono real de quien atiende; aquí usamos el de ejemplo). Antes de publicar, empaqueta sin desplegar:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler deploy --dry-run</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Total Upload: 53.33 KiB / gzip: 14.89 KiB
+Your Worker has access to the following bindings:
+env.BOT_KV (00000000000000000000000000000000)           KV Namespace
+env.WA_PHONE_ID (&quot;000000000000000&quot;)                     Environment Variable</code></pre>
+</div>
+<p>Con tus cambios del paso 4 el paquete pasó de unos 49 KiB a 53 KiB. Verifica que sin ids reales la salida muestre los de ejemplo, y con los tuyos, los tuyos. Cuando estés conforme, <code>npx wrangler deploy</code> publica el Worker. La URL termina en <code>workers.dev</code>; comprueba <code>https://&lt;tu-worker&gt;.workers.dev/salud</code>: debe responder <code>{"ok":true}</code>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los nombres de comandos de <code>wrangler</code> y los límites del plan gratuito de Cloudflare cambian con el tiempo. Si un comando no existe, consulta la <a href="https://developers.cloudflare.com/workers/">documentación oficial de Workers</a> y la <a href="https://developers.cloudflare.com/workers/wrangler/">de Wrangler</a>. El código base ya trae una versión validada de <code>compatibility_date</code>, pero conviene revisarla antes de desplegar.</p></div>
+<h2 id="paso-7-conecta-con-whatsapp"><span class="n">9.</span>Paso 7: conecta con WhatsApp</h2>
+<p>Con el Worker publicado, sigue las lecciones <a href="../12-cuenta-y-app-de-meta/">12</a> y <a href="../13-recibir-mensajes-reales/">13</a> para el lado de Meta: app, número de prueba, token y webhook. Lo esencial:</p>
+<ol>
+<li>En la configuración del webhook de tu app de Meta, la URL de devolución es <code>https://&lt;tu-worker&gt;.workers.dev/webhook</code> y el token de verificación es el mismo <code>VERIFY_TOKEN</code> que guardaste como secreto.</li>
+<li>Suscribe el campo <code>messages</code>.</li>
+<li>En el número de prueba, agrega <strong>tu propio teléfono</strong> a la lista de destinatarios permitidos (si no lo haces verás el error <code>131030</code>).</li>
+<li>El <code>WA_TOKEN</code> temporal de prueba <strong>vence</strong>; para algo duradero necesitas un token de usuario del sistema (<a href="../12-cuenta-y-app-de-meta/">lección 12</a>).</li>
+</ol>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los nombres de los menús de Meta, los límites del número de prueba y la vigencia de los tokens cambian con frecuencia. Guíate por la documentación oficial de la <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/">WhatsApp Cloud API</a> y no por capturas de pantalla de tutoriales viejos. Recuerda también que el código base <strong>no se ejecutó contra la API real de Meta</strong>: es tu prueba la que lo valida.</p></div>
+<h2 id="paso-8-plantillas"><span class="n">10.</span>Paso 8: plantillas</h2>
+<p>El Worker usa tres plantillas que debes crear y esperar a que Meta apruebe (<a href="../17-plantillas/">lección 17</a>): <code>recordatorio_pedido</code> (1 variable: el código del pedido), <code>carrito_pendiente</code> (sin variables) y <code>aviso_atencion</code> (1 variable: el teléfono del cliente), todas en idioma <code>es</code>. Mientras no estén aprobadas, los recordatorios y avisos fuera de la ventana de 24 horas fallarán con el error <code>131047</code> o con un error de plantilla inexistente; el cron lo registrará y no tumbará el bot. Si aún no tienes plantillas aprobadas, indica eso en tu entrega: es una limitación declarada, no un defecto escondido.</p>
+<h2 id="paso-9-prueba-de-punta-a-punta-con-tu-te"><span class="n">11.</span>Paso 9: prueba de punta a punta con tu teléfono</h2>
+<p>Ejecuta este guion con tu teléfono real, mirando los logs en vivo con <code>npx wrangler tail</code>:</p>
+<ol>
+<li>Escribe «hola»: debe llegar la bienvenida y el menú.</li>
+<li>Pide «quiero 4 leches y 3 arroz», finaliza, elige delivery, escribe una dirección y paga con Yape. Confirma. Debe aparecer el pedido en KV (<code>pedido:LE-...</code>).</li>
+<li>Repite el pedido y cancélalo en el resumen.</li>
+<li>Escribe «hablar con una persona»: el bot debe avisar y callarse; el teléfono del dueño de la prueba debe recibir el aviso.</li>
+<li>Escribe «menu»: el bot vuelve.</li>
+<li>Envía una nota de voz: respuesta de «solo entiendo texto y botones».</li>
+<li>Reenvía el mismo webhook (por ejemplo, con <code>curl</code> y la misma firma): no se debe duplicar el pedido.</li>
+</ol>
+<p>Toma nota de cualquier diferencia entre lo que esperabas y lo que viste. Una buena entrega incluye lo que <strong>no</strong> salió bien y por qué.</p>
+<h2 id="checklist-de-entrega"><span class="n">12.</span>Checklist de entrega</h2>
+<p>Marca cada punto antes de entregar. Si alguno no se cumple, escríbelo en el README como pendiente conocido.</p>
+<p><strong>Código y pruebas</strong>
+- [ ] <code>npm test</code> pasa con 0 fallas y tus pruebas incluyen al menos 6 escenarios de aceptación (2 propios).
+- [ ] Hay una prueba de extremo a extremo (webhook firmado, motor y aviso al dueño).
+- [ ] Los nombres de productos respetan los límites de WhatsApp (la suite lo demuestra).
+- [ ] Ningún mensaje del bot contiene emojis (prueba A6).</p>
+<p><strong>Seguridad y datos</strong>
+- [ ] No hay tokens, secretos ni teléfonos reales en el repositorio (<code>git log -p</code> y búsqueda de «EAA» y de tu número).
+- [ ] <code>.dev.vars</code> y <code>node_modules</code> están en <code>.gitignore</code>.
+- [ ] La firma <code>X-Hub-Signature-256</code> se verifica: un POST sin firma o con firma errónea devuelve <code>401</code>.
+- [ ] Los logs no muestran tokens ni teléfonos completos.</p>
+<p><strong>Operación</strong>
+- [ ] El Worker responde <code>{"ok":true}</code> en <code>/salud</code>.
+- [ ] La atención humana avisa al dueño, respeta el horario y vuelve al bot (a pedido o por tiempo).
+- [ ] Los reintentos se limitan a <code>429</code> y <code>5xx</code>.
+- [ ] Un mensaje repetido no duplica pedidos.</p>
+<p><strong>Documentación</strong>
+- [ ] Un <code>README.md</code> que explique qué hace el bot, cómo correr las pruebas, cómo desplegar y qué falta (plantillas pendientes, límites conocidos).
+- [ ] Una lista de las plantillas, con su texto y variables.
+- [ ] Una captura o transcripción de una conversación real con el número de prueba (con datos ficticios).</p>
+<h2 id="criterios-de-evaluacion"><span class="n">13.</span>Criterios de evaluación</h2>
+<p>La nota total es de 100 puntos. Esta rúbrica sirve para autoevaluarte o para que un mentor te califique:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Puntos</th>
+<th>Qué se espera</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Funcionamiento del bot</td>
+<td>25</td>
+<td>El pedido completo (recojo y delivery) funciona en consola y en WhatsApp; el catálogo propio está integrado.</td>
+</tr>
+<tr>
+<td>Pruebas</td>
+<td>20</td>
+<td>Suite verde, escenarios de aceptación y una prueba de extremo a extremo con datos ficticios.</td>
+</tr>
+<tr>
+<td>Atención humana</td>
+<td>15</td>
+<td>Traspaso, silencio del bot, aviso al dueño con la regla de 24 horas, horario y retorno.</td>
+</tr>
+<tr>
+<td>Seguridad y privacidad</td>
+<td>15</td>
+<td>Secretos fuera del código, firma verificada, logs limpios, sin datos reales.</td>
+</tr>
+<tr>
+<td>Despliegue y conexión</td>
+<td>15</td>
+<td>Worker publicado, webhook verificado y prueba real con teléfono, con evidencia.</td>
+</tr>
+<tr>
+<td>Documentación y honestidad</td>
+<td>10</td>
+<td>README claro, pendientes declarados, nada de «debería funcionar» sin haberlo probado.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Una referencia de niveles: <strong>90 a 100</strong> es un bot que podrías mostrar a un cliente; <strong>70 a 89</strong> funciona pero le faltan pruebas o documentación; <strong>menos de 70</strong> significa que hay pasos centrales sin cubrir. En la rúbrica, la honestidad pesa: una entrega que declara «las plantillas aún no están aprobadas» vale más que una que lo oculta.</p>
+<h2 id="errores-frecuentes"><span class="n">14.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Empezar a escribir código sin leer el base.</strong> Gran parte de lo que crees que falta ya existe y está probado.</li>
+<li><strong>Modificar <code>motor.js</code> para todo.</strong> La atención humana, los logs y los reintentos viven en capas que rodean al motor; el motor se queda puro y fácil de probar.</li>
+<li><strong>Probar solo con el número de prueba una vez.</strong> El guion del paso 9 existe porque los errores aparecen en el segundo y tercer intento.</li>
+<li><strong>Subir <code>.dev.vars</code> o pegar un token en el README.</strong> Si ocurre, <strong>revoca el token de inmediato</strong> y genera uno nuevo.</li>
+<li><strong>Olvidar agregar tu teléfono a la lista de destinatarios permitidos.</strong> Verás <code>131030</code> aunque el código esté perfecto.</li>
+<li><strong>Dar por buenos los textos sin leerlos en el teléfono.</strong> Un botón cortado o una línea larga solo se nota en la pantalla del cliente.</li>
+<li><strong>No dejar constancia de lo pendiente.</strong> Las plantillas sin aprobar, el token temporal y el límite de KV son límites reales: anótalos.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">15.</span>Apuntes para llevar</h2>
+<ul>
+<li>El proyecto final es integración: reutilizas el código base y lo completas con pruebas, atención humana, fiabilidad y despliegue.</li>
+<li>El motor se queda puro; todo lo nuevo (avisos, reintentos, logs) va en capas alrededor.</li>
+<li>Las pruebas de aceptación traducen lo que prometes al cliente (incluidas reglas de estilo, como «sin emojis») en comprobaciones automáticas.</li>
+<li>Antes de publicar, <code>wrangler deploy --dry-run</code> valida el empaquetado sin tocar la nube.</li>
+<li>El número de prueba exige agregar tu teléfono como destinatario; los tokens temporales vencen.</li>
+<li>Entregar bien es entregar con honestidad: lista de pendientes, evidencia y una rúbrica con la que te evalúes.</li>
+</ul>
+<h2 id="glosario"><span class="n">16.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prueba de aceptación</td>
+<td>Prueba que comprueba una promesa al cliente, no un detalle interno del código.</td>
+</tr>
+<tr>
+<td>Extremo a extremo</td>
+<td>Prueba que recorre todo el camino: webhook, motor, almacenamiento y envío.</td>
+</tr>
+<tr>
+<td>Dry run</td>
+<td>Ejecución de ensayo que valida el empaquetado sin publicar nada.</td>
+</tr>
+<tr>
+<td>Número de prueba</td>
+<td>Número que Meta entrega para practicar con la API, con destinatarios limitados.</td>
+</tr>
+<tr>
+<td>Destinatario permitido</td>
+<td>Teléfono autorizado a recibir mensajes del número de prueba.</td>
+</tr>
+<tr>
+<td>Secreto</td>
+<td>Valor que no debe estar en el código ni en git (token, App Secret).</td>
+</tr>
+<tr>
+<td>Rúbrica</td>
+<td>Tabla de criterios y puntos para evaluar un trabajo.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Por qué conviene trabajar en una copia (<code>mi-bot-minimarket</code>) y confirmar primero que <code>npm test</code> pasa?</p><ul class="opts"><li><button type="button" class="opt">Para que el código original no se pueda editar</button></li><li><button type="button" class="opt" data-ok>Para tener un punto de partida verde: si algo falla después, sabes que fue por tu cambio</button></li><li><button type="button" class="opt">Porque <code>wrangler</code> solo funciona en copias</button></li><li><button type="button" class="opt">Para evitar instalar Node</button></li></ul><p class="explain" hidden>Una línea base en verde permite aislar el origen de cualquier error posterior.</p></div>
+<div class="quiz-q"><p>En el pedido de 4 leches (S/ 4.30 c/u) y 3 arroz (S/ 4.20 c/u) con delivery de S/ 3.00, ¿cuál es el total?</p><ul class="opts"><li><button type="button" class="opt">S/ 29.80</button></li><li><button type="button" class="opt">S/ 21.30</button></li><li><button type="button" class="opt" data-ok>S/ 32.80</button></li><li><button type="button" class="opt">S/ 25.00</button></li></ul><p class="explain" hidden>Productos: 17.20 + 12.60 = 29.80, que supera el mínimo de 25; más 3.00 de envío da 32.80.</p></div>
+<div class="quiz-q"><p>¿Dónde se integra el aviso al dueño cuando un cliente pide una persona?</p><ul class="opts"><li><button type="button" class="opt">Dentro de <code>motor.js</code></button></li><li><button type="button" class="opt" data-ok>En una envoltura alrededor del procesamiento en el Worker, comparando la sesión antes y después</button></li><li><button type="button" class="opt">En el archivo <code>catalogo.js</code></button></li><li><button type="button" class="opt">En el navegador del cliente</button></li></ul><p class="explain" hidden>El motor es puro; enviar mensajes es responsabilidad de la capa de entrada y salida.</p></div>
+<div class="quiz-q"><p>Ves el error 131030 al probar con tu teléfono. ¿Cuál es la causa más probable?</p><ul class="opts"><li><button type="button" class="opt">El token de acceso venció</button></li><li><button type="button" class="opt">Pasaron más de 24 horas desde el último mensaje del cliente</button></li><li><button type="button" class="opt" data-ok>Tu teléfono no está en la lista de destinatarios permitidos del número de prueba</button></li><li><button type="button" class="opt">El App Secret es incorrecto</button></li></ul><p class="explain" hidden>Con el número de prueba solo se puede escribir a los teléfonos agregados a esa lista.</p></div>
+<div class="quiz-q"><p>Tu bot funciona, pero las plantillas aún no están aprobadas. ¿Qué haces en la entrega?</p><ul class="opts"><li><button type="button" class="opt">Lo ocultas, porque resta puntos</button></li><li><button type="button" class="opt" data-ok>Lo declaras en el README como pendiente conocido y explicas el efecto (recordatorios fuera de ventana fallarán)</button></li><li><button type="button" class="opt">Cambias el código para que parezca que funcionan</button></li><li><button type="button" class="opt">No entregas hasta que Meta las apruebe</button></li></ul><p class="explain" hidden>La rúbrica premia la honestidad: un límite declarado vale más que uno escondido.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-P">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../26-vender-tu-bot/"><small>← Anterior</small>Vender tu bot como servicio</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Proyecto final · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Proyecto%20final:%20Proyecto%20final:%20el%20bot%20del%20minimarket&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

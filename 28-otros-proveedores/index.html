@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Otros proveedores y alternativas a la API directa · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Compara la Cloud API directa de Meta con proveedores como Twilio y 360dialog y con librerías no oficiales, para elegir con criterio y sin riesgos para el negocio.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Otros proveedores y alternativas a la API directa · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Compara la Cloud API directa de Meta con proveedores como Twilio y 360dialog y con librerías no oficiales, para elegir con criterio y sin riesgos para el negocio.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#el-mapa-de-opciones">El mapa de opciones</a></li><li><a href="#que-es-un-proveedor-de-soluciones">Qué es un proveedor de soluciones</a></li><li><a href="#que-cambia-respecto-a-la-cloud-api-direc">Qué cambia respecto a la Cloud API directa</a></li><li><a href="#la-tabla-de-comparacion">La tabla de comparación</a></li><li><a href="#cuando-conviene-cada-uno">Cuándo conviene cada uno</a></li><li><a href="#las-alternativas-no-oficiales-y-su-riesg">Las alternativas no oficiales y su riesgo</a></li><li><a href="#como-no-casarte-con-un-proveedor">Cómo no casarte con un proveedor</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 28</div>
+        <h1>Otros proveedores y alternativas a la API directa</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar qué es un proveedor de soluciones (BSP) y qué hace entre tu bot y Meta.</li><li>Identificar qué cambia en tu código y en tu cuenta al usar Twilio o 360dialog en lugar de la Cloud API directa.</li><li>Elegir entre API directa, proveedor o sandbox según el perfil del proyecto.</li><li>Justificar por qué Baileys y whatsapp-web.js no son una opción para un negocio.</li><li>Aislar las diferencias de cada proveedor en un adaptador para no reescribir el motor.</li></ul>
+</div>
+
+<h2 id="el-mapa-de-opciones"><span class="n">1.</span>El mapa de opciones</h2>
+<p>Hasta aquí construiste el bot sobre la <strong>Cloud API de Meta</strong>, hablándole directamente. Pero esa no es la única puerta de entrada. Para poner un bot en WhatsApp existen cuatro caminos:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Camino</th>
+<th>Qué es</th>
+<th>Quién lo respalda</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API directa de Meta</strong></td>
+<td>Tu app de Meta y tu WABA, sin intermediarios.</td>
+<td>Meta</td>
+</tr>
+<tr>
+<td><strong>Proveedor (BSP / Tech Provider)</strong></td>
+<td>Una empresa que ofrece su propia API, panel y facturación encima de la plataforma oficial.</td>
+<td>Meta lo autoriza; el proveedor da el soporte</td>
+</tr>
+<tr>
+<td><strong>Sandbox de un proveedor</strong></td>
+<td>Un número compartido para pruebas rápidas.</td>
+<td>El proveedor (no es producción)</td>
+</tr>
+<tr>
+<td><strong>Librerías no oficiales</strong></td>
+<td>Programas que imitan WhatsApp Web.</td>
+<td>Nadie</td>
+</tr>
+</tbody>
+</table></div>
+<p>La lección <a href="../01-como-funciona-un-bot/">1</a> ya advirtió sobre el último camino y mencionó los proveedores. Aquí los miramos con calma, porque en tu trabajo freelance vas a recibir preguntas como «¿y por qué no usamos Twilio?» o «mi primo tiene un bot gratis con una librería». Conviene tener una respuesta fundamentada.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Todo lo que sigue sobre cada empresa (precios, planes, procesos, nombres de menús) se revisó en sus páginas oficiales el 2026-10-07 y <strong>cambia con frecuencia</strong>. Donde hay cifras, están marcadas. Antes de cotizarle algo a un cliente, vuelve a la fuente.</p></div>
+<h2 id="que-es-un-proveedor-de-soluciones"><span class="n">2.</span>Qué es un proveedor de soluciones</h2>
+<p>Meta llama <strong>Partners</strong> a las empresas que ofrecen servicios de la plataforma de WhatsApp Business en nombre de sus clientes. Según la <a href="https://developers.facebook.com/docs/whatsapp/solution-providers">documentación de Meta</a>, existen tres niveles:</p>
+<ul>
+<li><strong>Solution Partners:</strong> ofrecen el rango completo de servicios (mensajería, facturación, integración, soporte). Pueden tener <strong>líneas de crédito</strong> que extienden a sus clientes, de modo que el cliente no necesita su propio medio de pago en Meta. Meta advierte que convertirse en uno es un proceso largo.</li>
+<li><strong>Tech Providers:</strong> también ofrecen servicios a otros negocios, pero <strong>sin línea de crédito</strong>: el cliente debe poner su propio medio de pago en Meta, y Meta le factura el uso de la API directamente. El proveedor cobra aparte por sus propios servicios.</li>
+<li><strong>Tech Partners:</strong> una mejora del nivel anterior.</li>
+</ul>
+<p>En el habla común todos se llaman <strong>BSP</strong> (<em>Business Solution Provider</em>). Lo que importa para ti: el BSP <strong>no</strong> inventa un WhatsApp distinto. Sigue operando sobre la plataforma oficial; te vende comodidad.</p>
+<p>Un detalle técnico útil: los proveedores suelen dar el alta mediante <strong>Embedded Signup</strong>, un flujo que se abre desde su sitio y que, según Meta, «genera automáticamente todos los activos de WhatsApp requeridos» para el cliente (cuenta, número, permisos). Es el mismo trabajo que en la lección <a href="../12-cuenta-y-app-de-meta/">12</a> hiciste a mano, pero guiado.</p>
+<h2 id="que-cambia-respecto-a-la-cloud-api-direc"><span class="n">3.</span>Qué cambia respecto a la Cloud API directa</h2>
+<p>Con la Cloud API directa tú manejas todo: la app de Meta, el token, el webhook, el formato del JSON. Con un proveedor cambian cinco cosas.</p>
+<div class="flow"><div class="node"><strong>Cliente</strong><span>WhatsApp</span></div><div class="arrow">→<code>mensaje</code></div><div class="node"><strong>Meta</strong><span>plataforma oficial</span></div><div class="arrow">→<code>entrega</code></div><div class="node"><strong>Proveedor</strong><span>su API y su panel</span></div><div class="arrow">→<code>webhook (formato propio)</code></div><div class="node"><strong>Tu servidor</strong><span>adaptador + motor</span></div></div>
+<ol>
+<li><strong>Credenciales.</strong> En lugar del token y la app de Meta usas <strong>las credenciales del proveedor</strong> (cuenta, clave de API o token propio).</li>
+<li><strong>Formato de los mensajes.</strong> Cada proveedor decide cómo te entrega y cómo recibe los mensajes. Eso afecta solo a tu adaptador (<code>whatsapp.js</code> o su equivalente), no al motor.</li>
+<li><strong>Facturación.</strong> Pagas al proveedor, que suma su tarifa a lo que cobra Meta, o bien le pagas una cuota fija y Meta factura aparte.</li>
+<li><strong>Soporte y herramientas.</strong> Paneles, bandejas de entrada, reportes, ayuda humana. Es parte de lo que compras.</li>
+<li><strong>Dependencia.</strong> Un intermediario más es un punto más que puede fallar o cambiar sus precios. Tu negocio queda atado a su plataforma (aunque el número se puede migrar con esfuerzo; verifica las condiciones de cada uno).</li>
+</ol>
+<p>Lo que <strong>no</strong> cambia: las reglas de WhatsApp. La ventana de 24 horas, las plantillas aprobadas, el opt-in y la calidad del número se aplican igual. Twilio, por ejemplo, documenta que «las ventanas de atención al cliente son válidas durante 24 horas después del último mensaje recibido» y que fuera de ellas se necesita una plantilla aprobada: es la misma regla de la lección 1.</p>
+<h3>Twilio</h3>
+<p><a href="https://www.twilio.com/docs/whatsapp">Twilio</a> es una plataforma de comunicaciones muy conocida en el mundo del desarrollo. Lo verificado en su documentación oficial:</p>
+<ul>
+<li>Ofrece un <strong>sandbox de WhatsApp</strong> para «prototipar tu aplicación y probar el envío y recepción de mensajes».</li>
+<li>Un <strong>sender</strong> de WhatsApp es un número vinculado a una cuenta de WhatsApp Business (WABA). Quien lo registra por su cuenta usa el flujo de <em>Self Sign-up</em>, que exige verificar el negocio en Meta para pasar a producción, tener acceso de administrador en Meta y un número que <strong>no esté ya registrado en WhatsApp</strong>.</li>
+<li>Los mensajes entrantes llegan a tu webhook con el mismo formato que SMS/MMS de Twilio, pero con las direcciones en forma <code>whatsapp:+51999000111</code> y el texto en el campo <code>Body</code>. Nada de JSON anidado como el de Meta.</li>
+<li>Las plantillas se envían con un identificador de contenido y variables.</li>
+</ul>
+<p>Un mensaje de Twilio, ya decodificado, se ve así (datos falsos):</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>From=whatsapp:+51999000111
+To=whatsapp:+51999000222
+Body=quiero 2 leches</code></pre>
+</div>
+<p>Mapearlo a la entrada del motor es una función de cinco líneas: quitas el prefijo <code>whatsapp:</code> y el <code>+</code>, y entregas <code>{ tipo: 'texto', texto: Body }</code>. Eso es lo bueno de tener un motor sin canal: cambiar de proveedor es cambiar de adaptador.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>En su página de precios, Twilio indicaba (al 2026-10-07) una tarifa propia de <strong>0.005 USD por mensaje</strong> de WhatsApp, entrante o saliente, más lo que cobra Meta por las plantillas. Esa cifra puede haber cambiado: consulta la <a href="https://www.twilio.com/en-us/whatsapp/pricing">página oficial de Twilio</a>.</p></div>
+<h3>360dialog</h3>
+<p><a href="https://docs.360dialog.com/">360dialog</a> se presenta como «un proveedor de soluciones oficial de WhatsApp Business (BSP) y Premier Meta Partner». Según su documentación:</p>
+<ul>
+<li>Puede <strong>revender el uso</strong> de la solución de WhatsApp con una línea de crédito, y aloja el <em>Embedded Signup</em> para el alta de clientes.</li>
+<li>Los clientes administran números y plantillas desde su <strong>Hub</strong>, y hay herramientas para socios que gestionan varios clientes.</li>
+<li>Ofrece un <strong>sandbox</strong> gratuito.</li>
+<li>Envías mensajes con una petición <code>POST</code> a <code>/messages</code> en su dirección base (la documentación da <code>https://waba-v2.360dialog.io</code> para su API de mensajes), y los mensajes entrantes llegan por webhook; si tu servidor responde algo distinto de 200, reintentan con esperas crecientes.</li>
+</ul>
+<p>La documentación consultada no dice si el formato de las peticiones es idéntico al de Meta, así que <strong>no lo des por hecho</strong>: léelo en su referencia antes de reutilizar tu <code>whatsapp.js</code>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Su página de precios mostraba (al 2026-10-07) cuotas <strong>mensuales fijas por número</strong> (por ejemplo, 49 EUR/mes en un plan «Regular»), con las tarifas de Meta cobradas aparte y sin recargo sobre ellas, según su propia descripción. Revisa los planes vigentes en <a href="https://360dialog.com/pricing">360dialog.com/pricing</a>.</p></div>
+<h3>Otros proveedores</h3>
+<p>Existen muchos más (los listados oficiales de Meta los agrupan como Solution Partners y Tech Providers). No los comparamos aquí porque no puedo darte datos verificados de todos. Para evaluar <strong>cualquiera</strong>, usa este cuestionario:</p>
+<ul>
+<li>¿Es un partner autorizado por Meta? ¿De qué nivel?</li>
+<li>¿Cómo cobra: por mensaje, cuota mensual, o ambos?</li>
+<li>¿Cómo recibo los mensajes (formato) y cómo los envío?</li>
+<li>¿Puedo <strong>llevarme mi número</strong> si me quiero ir?</li>
+<li>¿Qué soporte ofrece y en qué idioma?</li>
+<li>¿Qué pasa con mis datos y los de mis clientes?</li>
+</ul>
+<h2 id="la-tabla-de-comparacion"><span class="n">4.</span>La tabla de comparación</h2>
+<p>Resumen para decidir (precios omitidos a propósito; mira los avisos de arriba):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Aspecto</th>
+<th>API directa de Meta</th>
+<th>Twilio</th>
+<th>360dialog</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quién factura</td>
+<td>Meta</td>
+<td>Twilio (suma su tarifa a lo de Meta)</td>
+<td>360dialog (cuota mensual); Meta aparte</td>
+</tr>
+<tr>
+<td>Alta</td>
+<td>Tú creas app, WABA y número (lección 12)</td>
+<td>Self Sign-up o Embedded Signup</td>
+<td>Hub de 360dialog con Embedded Signup</td>
+</tr>
+<tr>
+<td>Formato de mensajes</td>
+<td>JSON de Meta</td>
+<td>Formulario con <code>From</code>, <code>To</code>, <code>Body</code></td>
+<td>Propio (verifica la referencia)</td>
+</tr>
+<tr>
+<td>Sandbox</td>
+<td>Número de prueba de Meta</td>
+<td>Sandbox de WhatsApp</td>
+<td>Sandbox gratuito</td>
+</tr>
+<tr>
+<td>Reglas de WhatsApp</td>
+<td>Aplican</td>
+<td>Aplican</td>
+<td>Aplican</td>
+</tr>
+<tr>
+<td>Soporte</td>
+<td>Documentación y foros</td>
+<td>Soporte del proveedor</td>
+<td>Soporte del proveedor</td>
+</tr>
+<tr>
+<td>Esfuerzo de arranque</td>
+<td>Alto, pero se aprende todo</td>
+<td>Medio</td>
+<td>Medio</td>
+</tr>
+<tr>
+<td>Control y costo mínimo</td>
+<td>Máximo</td>
+<td>Intermedio</td>
+<td>Intermedio</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="cuando-conviene-cada-uno"><span class="n">5.</span>Cuándo conviene cada uno</h2>
+<p>No hay una respuesta única. Estas reglas prácticas ayudan:</p>
+<ul>
+<li><strong>API directa:</strong> tú programas, tienes <strong>uno o pocos negocios</strong> y quieres entender y controlar todo (es el camino del curso). Te ahorras intermediarios y aprendes el sistema completo.</li>
+<li><strong>Proveedor (BSP):</strong> el cliente quiere <strong>soporte</strong> y un panel, tú no quieres tramitar la cuenta de Meta de cada cliente, o gestionas <strong>muchos clientes</strong> y necesitas procesos de alta repetibles. Pagas por esa comodidad.</li>
+<li><strong>Sandbox de un proveedor:</strong> para <strong>demos y pruebas</strong> rápidas con un cliente; nunca para producción.</li>
+<li><strong>Telegram</strong> (lección <a href="../27-practica-con-telegram/">27</a>): para ensayar sin cuenta de Meta.</li>
+</ul>
+<p>Piensa también en el <strong>riesgo comercial</strong>: si le entregas a un cliente un bot montado en tu cuenta de Meta o de un proveedor, acuerda por escrito <strong>de quién es la cuenta y el número</strong>. Lo conversaste en la lección <a href="../26-vender-tu-bot/">26</a>.</p>
+<h2 id="las-alternativas-no-oficiales-y-su-riesg"><span class="n">6.</span>Las alternativas no oficiales y su riesgo</h2>
+<p>Librerías como <strong>Baileys</strong> o <strong>whatsapp-web.js</strong> no usan la plataforma de negocios: imitan a WhatsApp Web con una cuenta normal. Son populares porque no piden aprobación ni pagan por mensaje. Pero sus propios autores son explícitos:</p>
+<ul>
+<li>El proyecto whatsapp-web.js dice en su README: «WhatsApp no permite bots ni clientes no oficiales en su plataforma, así que esto no debe considerarse totalmente seguro» y «no está garantizado que no te bloqueen al usar este método».</li>
+<li>Baileys declara que no está afiliado ni autorizado por WhatsApp, que sus autores no respaldan usos que violen las condiciones de uso, que desaconsejan el envío masivo o automatizado y que el software se entrega «tal cual», sin garantía.</li>
+</ul>
+<p>Traducido a un negocio: puedes <strong>perder el número</strong> (y con él el historial y los clientes que ya te escriben ahí), no hay a quién apelar, y cualquier cambio de WhatsApp puede romper el bot de un día para otro. Para un proyecto de aprendizaje con tu propio número de pruebas, el riesgo lo asumes tú; para un servicio de pago que depende de él, <strong>no es una opción responsable</strong>.</p>
+<div class="callout ejemplo">
+<p class="callout-title">🧪 Ejemplo · Cómo responderle a un cliente</p>
+<p><strong>Cliente:</strong> Un conocido me dijo que existe una librería gratis para tener un bot en mi WhatsApp de siempre.
+<strong>Tú:</strong> Existe, pero imita WhatsApp Web, que sus propios autores advierten que no está permitido y puede bloquear el número. Si lo bloquean, perdemos las conversaciones y a tus clientes habituales. Con la API oficial el costo es bajo y el riesgo es mínimo.</p></div>
+<h2 id="como-no-casarte-con-un-proveedor"><span class="n">7.</span>Cómo no casarte con un proveedor</h2>
+<p>La defensa técnica es la misma idea del curso: <strong>mantén el motor puro y aísla el canal</strong>. Si tu código está así, cambiar de proveedor es escribir un adaptador nuevo:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>motor.js            (no cambia)
+whatsapp.js         adaptador de Meta directo
+twilio.js           adaptador de Twilio
+telegram.js         adaptador de Telegram (lección 27)
+worker.js           elige el adaptador según la ruta (/webhook, /twilio, /telegram)</code></pre>
+</div>
+<p>Cada adaptador hace tres cosas: <strong>validar</strong> que la petición viene del proveedor, <strong>traducir</strong> la entrada al formato del motor y <strong>traducir</strong> las respuestas a la forma que el proveedor acepta. Guarda las sesiones con una clave que incluya el canal (por ejemplo <code>wa:51999000111</code> o <code>tg:5551001</code>) si compartes la misma base.</p>
+<h2 id="errores-frecuentes"><span class="n">8.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Elegir por precio de lista sin sumar todo.</strong> Cuota mensual, tarifa del proveedor y cobro de Meta se suman; haz la cuenta con el volumen real de tu cliente.</li>
+<li><strong>Dar por hecho que el formato del proveedor es el de Meta.</strong> Cada uno tiene el suyo; léelo en su referencia antes de reutilizar código.</li>
+<li><strong>Usar el sandbox en producción.</strong> Es un número compartido y de pruebas.</li>
+<li><strong>No aclarar de quién es el número y la cuenta.</strong> Si el proveedor o la cuenta están a tu nombre, el cliente puede quedarse sin control. Ponlo por escrito.</li>
+<li><strong>Creer que un proveedor te exime de las reglas de WhatsApp.</strong> La ventana de 24 horas, las plantillas y el opt-in se aplican igual.</li>
+<li><strong>Recomendar una librería no oficial «porque es gratis».</strong> El costo aparece el día que bloquean el número.</li>
+<li><strong>Mezclar la lógica del negocio con el código del proveedor.</strong> Luego cambiar de proveedor obliga a reescribir todo.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">9.</span>Apuntes para llevar</h2>
+<ul>
+<li>Un <strong>BSP</strong> o Tech Provider opera sobre la plataforma oficial y te vende comodidad: alta guiada, panel, soporte y, a veces, facturación y crédito.</li>
+<li>Cambian las credenciales, el formato de los mensajes, la facturación y la dependencia; <strong>no cambian</strong> la ventana de 24 horas, las plantillas ni el opt-in.</li>
+<li>Twilio entrega los mensajes como formulario con prefijo <code>whatsapp:</code>; 360dialog usa su propia API y un cobro mensual por número. Precios: siempre verifícalos.</li>
+<li>La API directa da el máximo control y el menor costo, a cambio de más trabajo de alta.</li>
+<li>Baileys y whatsapp-web.js imitan WhatsApp Web: sin garantías y con riesgo real de bloqueo; no son para un negocio.</li>
+<li>Aísla cada canal en un adaptador y deja el motor puro: así cambiar de proveedor es barato.</li>
+</ul>
+<h2 id="glosario"><span class="n">10.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BSP</td>
+<td>Proveedor de soluciones de WhatsApp Business: ofrece API, panel y servicios sobre la plataforma oficial.</td>
+</tr>
+<tr>
+<td>Solution Partner</td>
+<td>Partner de Meta de nivel completo, que puede extender líneas de crédito a sus clientes.</td>
+</tr>
+<tr>
+<td>Tech Provider</td>
+<td>Proveedor tecnológico autorizado; sus clientes ponen su propio medio de pago en Meta.</td>
+</tr>
+<tr>
+<td>Embedded Signup</td>
+<td>Flujo guiado que crea la cuenta, el número y los permisos de un cliente.</td>
+</tr>
+<tr>
+<td>Sandbox</td>
+<td>Entorno compartido de pruebas, no apto para producción.</td>
+</tr>
+<tr>
+<td>Sender</td>
+<td>En Twilio, número de WhatsApp registrado para enviar mensajes.</td>
+</tr>
+<tr>
+<td>Línea de crédito</td>
+<td>Acuerdo por el cual el proveedor paga a Meta y luego te factura a ti.</td>
+</tr>
+<tr>
+<td>Librería no oficial</td>
+<td>Programa que imita WhatsApp Web; viola las condiciones de uso y arriesga el bloqueo.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Qué diferencia a un Tech Provider de un Solution Partner según Meta?</p><ul class="opts"><li><button type="button" class="opt">El Tech Provider no puede ofrecer servicios de WhatsApp</button></li><li><button type="button" class="opt" data-ok>El Tech Provider no tiene líneas de crédito: el cliente pone su propio medio de pago en Meta</button></li><li><button type="button" class="opt">El Solution Partner no necesita aprobación</button></li><li><button type="button" class="opt">El Tech Provider reemplaza las plantillas</button></li></ul><p class="explain" hidden>Los Solution Partners pueden extender crédito a sus clientes; los Tech Providers, no.</p></div>
+<div class="quiz-q"><p>Cambias de la Cloud API directa a un proveedor. ¿Qué regla de WhatsApp deja de aplicar?</p><ul class="opts"><li><button type="button" class="opt">La ventana de 24 horas</button></li><li><button type="button" class="opt">Las plantillas aprobadas</button></li><li><button type="button" class="opt">El opt-in</button></li><li><button type="button" class="opt" data-ok>Ninguna: las reglas de la plataforma se aplican igual</button></li></ul><p class="explain" hidden>El proveedor te vende comodidad, pero opera sobre la misma plataforma y sus mismas reglas.</p></div>
+<div class="quiz-q"><p>¿Qué parte de tu proyecto debería cambiar al pasar de Meta directo a Twilio?</p><ul class="opts"><li><button type="button" class="opt">El motor de reglas</button></li><li><button type="button" class="opt" data-ok>El adaptador que valida, traduce la entrada y construye los envíos</button></li><li><button type="button" class="opt">El catálogo de productos</button></li><li><button type="button" class="opt">Los textos del bot</button></li></ul><p class="explain" hidden>Con el motor puro y el canal aislado, solo se escribe un adaptador nuevo.</p></div>
+<div class="quiz-q"><p>Un cliente quiere un bot «gratis» con Baileys en su WhatsApp de siempre. ¿Cuál es el mejor consejo?</p><ul class="opts"><li><button type="button" class="opt">Aceptar, porque no cuesta nada</button></li><li><button type="button" class="opt" data-ok>Explicar que imita WhatsApp Web, no está respaldado ni garantizado y puede bloquear el número</button></li><li><button type="button" class="opt">Aceptar solo si el bot es corto</button></li><li><button type="button" class="opt">Usarlo con un número de otra persona</button></li></ul><p class="explain" hidden>Los propios autores advierten que no hay garantías; para un negocio, el riesgo de perder el número es inaceptable.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve sobre todo un sandbox de proveedor?</p><ul class="opts"><li><button type="button" class="opt">Para atender clientes reales</button></li><li><button type="button" class="opt" data-ok>Para prototipar y hacer demos rápidas, nunca para producción</button></li><li><button type="button" class="opt">Para reemplazar el token de Meta</button></li><li><button type="button" class="opt">Para evitar las plantillas</button></li></ul><p class="explain" hidden>Es un entorno compartido de pruebas; la producción usa un número propio registrado.</p></div>
+<div class="quiz-q"><p>¿Qué debes hacer con las cifras de precios de un proveedor que lees en un tutorial?</p><ul class="opts"><li><button type="button" class="opt">Usarlas tal cual en la cotización</button></li><li><button type="button" class="opt" data-ok>Verificarlas en la página oficial vigente, porque cambian</button></li><li><button type="button" class="opt">Multiplicarlas por dos</button></li><li><button type="button" class="opt">Ignorar los cobros de Meta</button></li></ul><p class="explain" hidden>Los precios cambian con el tiempo; consulta siempre la fuente oficial antes de cotizar.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-28">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../27-practica-con-telegram/"><small>← Anterior</small>Practica con Telegram sin cuenta de Meta</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 28 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2028:%20Otros%20proveedores%20y%20alternativas%20a%20la%20API%20directa&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

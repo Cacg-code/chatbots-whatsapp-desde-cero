@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atención humana y traspaso · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo pasar una conversación a una persona sin que el bot interfiera, respetar horarios, avisar al dueño y devolverle la conversación al bot cuando corresponde.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Atención humana y traspaso · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo pasar una conversación a una persona sin que el bot interfiera, respetar horarios, avisar al dueño y devolverle la conversación al bot cuando corresponde.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-todo-bot-necesita-una-salida-a-u">Por qué todo bot necesita una salida a una persona</a></li><li><a href="#cuando-pasar-a-una-persona">Cuándo pasar a una persona</a></li><li><a href="#que-hace-hoy-el-motor-en-modo-humano">Qué hace hoy el motor en modo humano</a></li><li><a href="#y-como-contesta-la-persona">¿Y cómo contesta la persona?</a></li><li><a href="#horarios-no-prometas-lo-que-no-puedes-cu">Horarios: no prometas lo que no puedes cumplir</a></li><li><a href="#avisar-al-dueno-y-la-ventana-de-24-horas">Avisar al dueño (y la ventana de 24 horas)</a></li><li><a href="#conectarlo-al-worker-sin-tocar-el-motor">Conectarlo al Worker sin tocar el motor</a></li><li><a href="#volver-al-bot-cuando-nadie-responde">Volver al bot: cuando nadie responde</a></li><li><a href="#privacidad-el-humano-ve-datos-reales">Privacidad: el humano ve datos reales</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 25</div>
+        <h1>Atención humana y traspaso</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar cuándo un bot debe ceder la conversación a una persona y cómo se detecta ese momento.</li><li>Describir cómo el motor del curso se calla en modo humano (ESPERANDO_HUMANO) y cómo se vuelve al bot.</li><li>Calcular si el negocio está abierto en la hora de Lima y adaptar el mensaje del traspaso.</li><li>Avisar al dueño respetando la ventana de 24 horas (texto libre o plantilla).</li><li>Evitar que un cliente quede esperando para siempre con un tiempo máximo de espera.</li></ul>
+</div>
+
+<h2 id="por-que-todo-bot-necesita-una-salida-a-u"><span class="n">1.</span>Por qué todo bot necesita una salida a una persona</h2>
+<p>Un bot de reglas resuelve bien lo repetitivo: catálogo, pedido, horario. Pero hay conversaciones que no debe resolver él: un reclamo por un producto vencido, una duda sobre una factura, un cliente molesto, una compra grande que quiere negociar. Si el bot insiste con «No te entendí, puedes escribir 2 leches», el cliente se frustra y se va.</p>
+<p>La regla de diseño es simple: <strong>nadie debe quedar atrapado en el bot</strong>. Siempre debe existir un camino a una persona, y ese camino debe ser fácil de encontrar. Ya lo diseñaste desde la <a href="../02-disenar-la-conversacion/">lección 2</a> con el botón «Hablar con alguien»; ahora vamos a hacerlo funcionar de verdad: qué pasa en el bot, a quién se avisa y cómo se vuelve.</p>
+<p>El traspaso (en inglés <em>handoff</em>) tiene cuatro partes:</p>
+<div class="flow"><div class="node"><strong>Cliente</strong><span>pide una persona</span></div><div class="arrow">→<code>el bot cambia de modo</code></div><div class="node"><strong>Bot</strong><span>se calla</span></div><div class="arrow">→<code>aviso</code></div><div class="node"><strong>Dueño</strong><span>recibe el aviso</span></div><div class="arrow">→<code>responde</code></div><div class="node"><strong>Cliente</strong><span>conversa con una persona</span></div></div>
+<h2 id="cuando-pasar-a-una-persona"><span class="n">2.</span>Cuándo pasar a una persona</h2>
+<p>Hay tres disparadores, de más claro a más sutil:</p>
+<ol>
+<li><strong>El cliente lo pide.</strong> Escribe «persona», «asesor», «quiero hablar con el dueño», o toca el botón «Hablar con alguien».</li>
+<li><strong>El bot falla dos veces seguidas.</strong> No entiende dos mensajes seguidos y ofrece el botón. Es lo que hace el código de referencia (contador <code>fallos</code>).</li>
+<li><strong>El tema es delicado.</strong> Reclamos, devoluciones, dinero, salud. Aquí conviene derivar aunque el bot «entendió».</li>
+</ol>
+<p>Veamos qué reconoce hoy el motor, con frases reales de clientes. La función <code>detectarIntencion</code> de <code>src/texto.js</code> devolvió:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;quiero hablar con una persona&quot; -&gt; humano
+&quot;pasame con el dueño&quot; -&gt; humano
+&quot;necesito un asesor&quot; -&gt; humano
+&quot;atencion al cliente&quot; -&gt; humano
+&quot;hablar con alguien por favor&quot; -&gt; humano
+&quot;el encargado está?&quot; -&gt; humano
+&quot;tengo un reclamo&quot; -&gt; desconocida
+&quot;esto es una estafa&quot; -&gt; desconocida</code></pre>
+</div>
+<p>Las frases de «persona» funcionan, pero un <strong>reclamo</strong> no se reconoce: el bot respondería «No te entendí». Es exactamente el tercer disparador. La solución es agregar esas palabras a la lista de la intención <code>humano</code> en tu copia de <code>texto.js</code> (por ejemplo <code>reclamo</code>, <code>queja</code>, <code>devolucion</code>, <code>estafa</code>, <code>denuncia</code>). Es una lista de palabras: se mantiene con el uso, revisando las conversaciones en las que el bot no entendió.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Mejor derivar de más que de menos</p>
+<p>Una derivación innecesaria cuesta unos minutos de una persona. Un reclamo ignorado por un bot cuesta un cliente, y quizá una mala reseña. Ante la duda, ofrece el botón.</p></div>
+<h2 id="que-hace-hoy-el-motor-en-modo-humano"><span class="n">3.</span>Qué hace hoy el motor en modo humano</h2>
+<p>El motor del curso ya sabe «callarse». Cuando detecta la intención <code>humano</code>, cambia el estado de la sesión a <code>ESPERANDO_HUMANO</code>, marca <code>derivadoHumano = true</code> y responde una sola vez que avisó al equipo. A partir de ahí, <strong>no responde nada</strong> hasta que el cliente escriba <code>menu</code> o <code>cancelar</code>. Mira el comportamiento real, ejecutado en una conversación de prueba:</p>
+<div class="code">
+  <div class="code-head"><span>prueba.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const c = conversacion(&#x27;51999000111&#x27;);
+c.decir(&#x27;2 leches&#x27;);
+c.decir(&#x27;quiero hablar con una persona&#x27;);
+console.log(&#x27;1)&#x27;, c.sesion.estado, c.sesion.derivadoHumano, &#x27;|&#x27;, c.texto);
+c.decir(&#x27;hola? alguien?&#x27;);
+console.log(&#x27;2) respuestas del bot:&#x27;, c.respuestas.length);
+c.enviar({ tipo: &#x27;no_soportado&#x27;, subtipo: &#x27;audio&#x27; });
+console.log(&#x27;3) a un audio:&#x27;, c.respuestas.length);
+c.tocar(&#x27;pago:yape&#x27;);
+console.log(&#x27;4) a un botón viejo:&#x27;, c.respuestas.length, c.sesion.estado);
+c.decir(&#x27;menu&#x27;);
+console.log(&#x27;5)&#x27;, c.sesion.estado, c.sesion.derivadoHumano, &#x27;| carrito:&#x27;, c.sesion.carrito.length);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>1) ESPERANDO_HUMANO true | Listo, avisé a una persona del equipo. Te responderá en este chat lo antes posible. Para volver al asistente escribe &quot;menu&quot;.
+2) respuestas del bot: 0
+3) a un audio: 0
+4) a un botón viejo: 0 ESPERANDO_HUMANO
+5) MENU false | carrito: 1</code></pre>
+</div>
+<p>Observa cuatro cosas:</p>
+<ul>
+<li><strong>El bot se calla de verdad</strong>: ni a un «hola?», ni a un audio, ni a un botón antiguo. Así no pisa a la persona que está escribiendo al cliente.</li>
+<li><strong>El carrito se conserva</strong> (línea 5): al volver, el cliente no pierde lo que había pedido.</li>
+<li><strong>El camino de vuelta existe</strong>: escribir <code>menu</code>. Está dicho en el propio mensaje.</li>
+<li>El código del motor es el que decide el silencio; por eso el aviso al dueño <strong>no</strong> vive en el motor. Recuerda: el motor es puro y no envía nada. El aviso es trabajo de la capa de entrada y salida, el Worker.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · El silencio tiene un riesgo</p>
+<p>Si nadie responde, el cliente queda esperando en silencio hasta que su sesión expire (2 días en el código de referencia). Un cliente ignorado es peor que un cliente atendido por un bot. Más abajo ponemos un tiempo máximo.</p></div>
+<h2 id="y-como-contesta-la-persona"><span class="n">4.</span>¿Y cómo contesta la persona?</h2>
+<p>Esta es una decisión de arquitectura, no de código, y hay tres caminos. Elige según el tamaño del negocio:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Camino</th>
+<th>Cómo funciona</th>
+<th>Cuándo conviene</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>App de WhatsApp Business con el mismo número</strong></td>
+<td>El dueño responde desde la app en su teléfono.</td>
+<td>Negocios muy pequeños. Meta ofrece un modo de convivencia entre app y API que cambia con el tiempo.</td>
+</tr>
+<tr>
+<td><strong>Panel propio</strong></td>
+<td>Un panel web que lista las conversaciones derivadas y envía respuestas por la API.</td>
+<td>Cuando varias personas atienden. Requiere desarrollo extra.</td>
+</tr>
+<tr>
+<td><strong>Bandeja de un proveedor (BSP)</strong></td>
+<td>Herramientas como las de un proveedor de soluciones ya incluyen bandeja de equipo.</td>
+<td>Cuando prefieres pagar a construir.</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Si un mismo número puede usarse a la vez en la app de WhatsApp Business y en la API, y bajo qué condiciones, es un punto que Meta ha cambiado varias veces. Antes de prometérselo a un cliente, revisa la <a href="https://developers.facebook.com/docs/whatsapp/">documentación oficial de WhatsApp Business Platform</a> sobre coexistencia con la app.</p></div>
+<p>Para el curso construimos lo común a los tres caminos: <strong>avisar</strong> a la persona correcta en el momento correcto y <strong>devolver</strong> la conversación al bot.</p>
+<h2 id="horarios-no-prometas-lo-que-no-puedes-cu"><span class="n">5.</span>Horarios: no prometas lo que no puedes cumplir</h2>
+<p>El mensaje «Te responderá lo antes posible» es amable a las 10 de la mañana y engañoso a las 11 de la noche. Si el negocio está cerrado, hay que decirlo con honestidad y dar la hora en que abre.</p>
+<p>Necesitamos una función <code>estaAbierto(ahora)</code>. Dos detalles de diseño:</p>
+<ul>
+<li><strong>Zona horaria.</strong> El Worker corre en servidores de cualquier parte del mundo y <code>Date.now()</code> es un instante universal (UTC). Perú está en UTC-5 y no usa horario de verano, así que restar 5 horas basta. Si tu negocio estuviera en un país con cambio de hora, necesitarías una biblioteca o <code>Intl.DateTimeFormat</code> con zona horaria.</li>
+<li><strong>Horario por día.</strong> El minimarket abre de lunes a sábado de 8:00 a 21:00 y los domingos de 9:00 a 14:00. En una tabla por día de la semana (0 es domingo) queda claro y fácil de cambiar:</li>
+</ul>
+<div class="code">
+  <div class="code-head"><span>humano.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const HORA = 3600 * 1000;
+const HORARIO = { 0: [9, 14], 1: [8, 21], 2: [8, 21], 3: [8, 21], 4: [8, 21], 5: [8, 21], 6: [8, 21] };
+const DESFASE_LIMA_MS = -5 * HORA;
+
+export function estaAbierto(ahora, horario = HORARIO) {
+  const lima = new Date(ahora + DESFASE_LIMA_MS); // leemos los campos UTC de la hora &quot;corrida&quot;
+  const franja = horario[lima.getUTCDay()];
+  if (!franja) return false;
+  const hora = lima.getUTCHours() + lima.getUTCMinutes() / 60;
+  return hora &gt;= franja[0] &amp;&amp; hora &lt; franja[1];
+}</code></pre>
+</div>
+<p>El truco es sumar el desfase y luego leer los campos <code>getUTC...</code>: así el resultado no depende de la zona del servidor. Lo verificamos con fechas concretas (el 7 de octubre de 2026 es miércoles):</p>
+<div class="code">
+  <div class="code-head"><span>humano.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const miercoles10am = Date.UTC(2026, 9, 7, 15, 0); // 15:00 UTC = 10:00 en Lima
+
+test(&#x27;estaAbierto respeta el horario de Lima&#x27;, () =&gt; {
+  assert.equal(estaAbierto(miercoles10am), true);
+  assert.equal(estaAbierto(Date.UTC(2026, 9, 8, 2, 30)), false);   // miércoles 21:30 en Lima
+  assert.equal(estaAbierto(Date.UTC(2026, 9, 11, 13, 0)), false);  // domingo 08:00: aún cerrado
+  assert.equal(estaAbierto(Date.UTC(2026, 9, 11, 15, 0)), true);   // domingo 10:00
+  assert.equal(estaAbierto(Date.UTC(2026, 9, 11, 19, 30)), false); // domingo 14:30
+});</code></pre>
+</div>
+<p>Pasa (nota que el mes de <code>Date.UTC</code> empieza en 0: <code>9</code> es octubre). Cuando el cliente pide una persona fuera de horario, el bot enviará un segundo mensaje honesto, que no promete respuesta inmediata:</p>
+<div class="code">
+  <div class="code-head"><span>humano.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function mensajeFueraDeHorario() {
+  return {
+    tipo: &#x27;texto&#x27;,
+    texto: &#x27;Ahora estamos fuera de horario, pero tu mensaje quedó registrado. Una persona te responderá apenas abramos. &#x27; +
+      &#x27;Atendemos de lunes a sábado de 8:00 a 21:00 y domingos de 9:00 a 14:00. Mientras tanto, escribe &quot;menu&quot; para seguir con el asistente.&#x27;,
+  };
+}</code></pre>
+</div>
+<p>Fíjate en el final: aunque nadie esté, el cliente puede <strong>seguir con el bot</strong> escribiendo «menu». Un traspaso fuera de horario no tiene por qué dejarlo sin poder pedir su compra.</p>
+<h2 id="avisar-al-dueno-y-la-ventana-de-24-horas"><span class="n">6.</span>Avisar al dueño (y la ventana de 24 horas)</h2>
+<p>Para que alguien atienda, alguien tiene que enterarse. El aviso es un mensaje de WhatsApp al teléfono del dueño con lo mínimo para actuar: quién es, qué tiene en el carrito y dónde responder.</p>
+<div class="code">
+  <div class="code-head"><span>humano.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function textoAvisoDueno(sesion, nombre) {
+  const items = sesion.carrito.reduce((n, l) =&gt; n + l.cantidad, 0);
+  const quien = nombre ? `${nombre} (${sesion.telefono})` : sesion.telefono;
+  const carrito = items &gt; 0 ? `Tiene ${items} producto(s) en el carrito.` : &#x27;No tiene nada en el carrito.&#x27;;
+  return `Cliente pide atención: ${quien}. ${carrito} Respóndele desde el chat de WhatsApp del negocio.`;
+}</code></pre>
+</div>
+<p>Aquí reaparece la regla más importante de la plataforma, la <a href="../01-como-funciona-un-bot/">ventana de 24 horas</a>. El dueño es, para la API, <strong>un destinatario más</strong>: solo puedes enviarle texto libre si él te escribió al número del bot en las últimas 24 horas. Si no, necesitas una <strong>plantilla</strong> aprobada. Reutilizamos <code>puedeEnviarTexto</code> y <code>construirPlantilla</code> del código de referencia:</p>
+<div class="code">
+  <div class="code-head"><span>humano.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export async function avisarAlDueno(env, sesion, nombre, ahora, llamar = fetch) {
+  const sesionDueno = await leer(env.BOT_KV, `sesion:${env.DUENO_TEL}`);
+  const cuerpo = puedeEnviarTexto(sesionDueno?.ultimoMensajeCliente, ahora)
+    ? construirEnvio(env.DUENO_TEL, { tipo: &#x27;texto&#x27;, texto: textoAvisoDueno(sesion, nombre) })
+    : construirPlantilla(env.DUENO_TEL, &#x27;aviso_atencion&#x27;, &#x27;es&#x27;, [sesion.telefono]); // plantilla propia, aprobada antes
+  await enviarMensaje(env, cuerpo, llamar);
+}</code></pre>
+</div>
+<p>La plantilla <code>aviso_atencion</code> es un nombre propuesto por nosotros: tendrás que crearla y esperar su aprobación en Meta (lección <a href="../17-plantillas/">17</a>), con un cuerpo como «Un cliente pide atención por WhatsApp: {{1}}. Revisa el chat del negocio». Pide a tu dueño que escriba «hola» al bot al empezar el turno: eso abre su ventana y los avisos salen como texto libre.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>La categoría de una plantilla de aviso interno (utilidad o marketing) y su costo los decide Meta y cambian con el tiempo. Consulta <a href="https://developers.facebook.com/docs/whatsapp/pricing">la página oficial de precios</a> antes de decidir si el aviso por WhatsApp te conviene o si es mejor avisar por otro canal (un correo, o un aviso en tu panel).</p></div>
+<h2 id="conectarlo-al-worker-sin-tocar-el-motor"><span class="n">7.</span>Conectarlo al Worker sin tocar el motor</h2>
+<p>El motor no se modifica: sigue siendo puro. El aviso se agrega con una <strong>envoltura</strong> alrededor de <code>procesarMensaje</code> del Worker. La idea: mira la sesión antes y después; si <strong>acaba de pasar</strong> a <code>ESPERANDO_HUMANO</code>, avisa. Comparar antes y después evita avisar de nuevo cada vez que el cliente insiste («hola?? alguien»).</p>
+<div class="code">
+  <div class="code-head"><span>humano.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export async function procesarConHumano(env, evento, ahora = Date.now(), llamar = fetch) {
+  const kv = env.BOT_KV;
+  const antes = await leer(kv, `sesion:${evento.de}`);
+  await procesarMensaje(env, evento, ahora, llamar);
+  const despues = await leer(kv, `sesion:${evento.de}`);
+  const acabaDeDerivar = despues?.estado === &#x27;ESPERANDO_HUMANO&#x27; &amp;&amp; antes?.estado !== &#x27;ESPERANDO_HUMANO&#x27;;
+  if (!acabaDeDerivar) return;
+
+  await kv.put(`humano:${evento.de}`, JSON.stringify({ desde: ahora }), { expirationTtl: 2 * 24 * 3600 });
+  if (!estaAbierto(ahora)) await enviarMensaje(env, construirEnvio(evento.de, mensajeFueraDeHorario()), llamar);
+  await avisarAlDueno(env, despues, evento.nombre, ahora, llamar);
+}</code></pre>
+</div>
+<p>Además de avisar, guarda <code>humano:&lt;teléfono&gt;</code> con la hora en que empezó el modo humano: la usaremos para el tiempo máximo. En tu <code>worker.js</code> bastaría con llamar a <code>procesarConHumano</code> en lugar de <code>procesarMensaje</code>.</p>
+<p>Probamos con un KV falso y un <code>fetch</code> falso, que anotan lo que el Worker enviaría. Primero, dentro del horario y con el dueño que <strong>nunca</strong> le escribió al bot:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>al cliente: [
+  &#x27;Listo, avisé a una persona del equipo. Te responderá en este chat lo antes posible. Para volver al asistente escribe &quot;menu&quot;.&#x27;
+]
+al dueño: [ &#x27;aviso_atencion&#x27; ]</code></pre>
+</div>
+<p>El cliente recibe un único mensaje y el dueño una plantilla (su ventana estaba cerrada). Ahora, con el dueño que ya había escrito «hola» al bot:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Cliente pide atención: Rosa (51999000111). Tiene 2 producto(s) en el carrito. Respóndele desde el chat de WhatsApp del negocio.</code></pre>
+</div>
+<p>Y a las 22:00, fuera de horario, el cliente recibe <strong>dos</strong> textos: el mensaje normal y el aviso de horario:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[
+  &#x27;Listo, avisé a una persona del equipo. Te responderá en este chat lo antes posible. Para volver al asistente escribe &quot;menu&quot;.&#x27;,
+  &#x27;Ahora estamos fuera de horario, pero tu mensaje quedó registrado. Una persona te responderá apenas abramos. Atendemos de lunes a sábado de 8:00 a 21:00 y domingos de 9:00 a 14:00. Mientras tanto, escribe &quot;menu&quot; para seguir con el asistente.&#x27;
+]</code></pre>
+</div>
+<p>Otra prueba confirma que un segundo «persona» no vuelve a molestar al dueño: tras el primer aviso, los siguientes mensajes del cliente solo producen llamadas de «marcar como leído».</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Mejora de redacción</p>
+<p>Dos mensajes seguidos («te responderá lo antes posible» y «estamos fuera de horario») se contradicen un poco. En tu bot real puedes hacer que <code>mensajes.esperandoHumano()</code> reciba el dato de si está abierto y diga solo una cosa. Aquí lo dejamos como segundo mensaje para no modificar el motor.</p></div>
+<h2 id="volver-al-bot-cuando-nadie-responde"><span class="n">8.</span>Volver al bot: cuando nadie responde</h2>
+<p>Hay dos formas de que el cliente vuelva al modo bot:</p>
+<ol>
+<li><strong>Él mismo</strong>, escribiendo <code>menu</code> (o <code>cancelar</code>). Ya funciona.</li>
+<li><strong>Automáticamente</strong>, si pasó demasiado tiempo sin atención. Es la red de seguridad contra el silencio eterno.</li>
+</ol>
+<p>Para la segunda usamos el cron del Worker, el mismo que ya ejecuta los recordatorios de la <a href="../18-recordatorios-y-seguimiento/">lección 18</a>. Cada vez que corre, revisa las claves <code>humano:*</code> y libera las que llevan 3 horas o más:</p>
+<div class="code">
+  <div class="code-head"><span>humano.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function humanoVencido(desde, ahora, maxMs = 3 * HORA) {
+  return desde != null &amp;&amp; ahora - desde &gt;= maxMs;
+}
+
+export async function liberarHumanosVencidos(env, ahora = Date.now(), llamar = fetch) {
+  const kv = env.BOT_KV;
+  const { keys } = await kv.list({ prefix: &#x27;humano:&#x27; });
+  const liberados = [];
+  for (const { name } of keys) {
+    const { desde } = await leer(kv, name);
+    if (!humanoVencido(desde, ahora)) continue;
+    const tel = name.slice(&#x27;humano:&#x27;.length);
+    const sesion = await leer(kv, `sesion:${tel}`);
+    if (sesion?.estado === &#x27;ESPERANDO_HUMANO&#x27;) {
+      const nueva = { ...sesion, estado: &#x27;MENU&#x27;, derivadoHumano: false };
+      await kv.put(`sesion:${tel}`, JSON.stringify(nueva), { expirationTtl: 2 * 24 * 3600 });
+      if (puedeEnviarTexto(sesion.ultimoMensajeCliente, ahora)) {
+        const texto = &#x27;Seguimos con poco personal y no pudimos responderte aún. Vuelvo a ayudarte yo: escribe &quot;menu&quot; o lo que necesites.&#x27;;
+        await enviarMensaje(env, construirEnvio(tel, { tipo: &#x27;texto&#x27;, texto }), llamar);
+      }
+      liberados.push(tel);
+    }
+    await kv.delete(name);
+  }
+  return liberados;
+}</code></pre>
+</div>
+<p>Lo importante: el mensaje de disculpa <strong>solo</strong> se envía si la ventana de 24 horas sigue abierta; si no, se libera al cliente en silencio (no puedes escribirle texto libre). La prueba usa un reloj falso:</p>
+<div class="code">
+  <div class="code-head"><span>humano.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>test(&#x27;si nadie atiende en 3 h, el bot vuelve&#x27;, async () =&gt; {
+  const env = entorno(); const g = falsoGraph();
+  await procesarConHumano(env, msg(&#x27;w1&#x27;, &#x27;persona&#x27;), miercoles10am, g.llamar);
+  assert.deepEqual(await liberarHumanosVencidos(env, miercoles10am + 2 * H, g.llamar), []);
+  assert.deepEqual(await liberarHumanosVencidos(env, miercoles10am + 3 * H, g.llamar), [&#x27;51999000111&#x27;]);
+  assert.equal(JSON.parse(env.datos.get(&#x27;sesion:51999000111&#x27;)).estado, &#x27;MENU&#x27;);
+  assert.equal(env.datos.has(&#x27;humano:51999000111&#x27;), false);
+});</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>✔ estaAbierto respeta el horario de Lima (0.8961ms)
+✔ pedir una persona dentro del horario: el bot avisa al cliente y al dueño (6.6997ms)
+✔ con la ventana del dueño abierta se le avisa con texto libre (3.1902ms)
+✔ fuera de horario el cliente recibe el aviso de horario (0.8871ms)
+✔ un segundo &quot;persona&quot; no vuelve a avisar al dueño (0.9272ms)
+✔ si nadie atiende en 3 h, el bot vuelve (1.2028ms)
+✔ humanoVencido (0.1265ms)</code></pre>
+</div>
+<p>A las 2 horas no libera a nadie; a las 3 sí, y la sesión queda en <code>MENU</code>. Cuando la persona <strong>sí</strong> atiende y termina, no hay nada que hacer: el cliente escribe <code>menu</code> cuando quiera volver, o la sesión vence sola.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Pendiente de producción</p>
+<p>En el código de referencia, <code>ejecutarRecordatorios</code> es lo que corre en el cron. Para activar la liberación, llamarías a <code>liberarHumanosVencidos(env)</code> desde la función <code>scheduled</code> junto a ella. No lo modificamos aquí; el proyecto final te guía.</p></div>
+<h2 id="privacidad-el-humano-ve-datos-reales"><span class="n">9.</span>Privacidad: el humano ve datos reales</h2>
+<p>Cuando una persona toma la conversación, ve el teléfono del cliente, su nombre de perfil y lo que escribió. Sigue las reglas de la <a href="../24-seguridad-y-privacidad/">lección 24</a>: comparte el acceso solo con quien atiende, no reenvíes pantallazos con datos de clientes a grupos, y no guardes en el aviso al dueño más datos de los necesarios (por eso el aviso lleva el teléfono y la cantidad de productos, no la lista completa del carrito ni la dirección).</p>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Esconder la salida a una persona.</strong> Si el bot solo la ofrece tras seis intentos fallidos, el cliente ya se fue. Debe estar en el menú.</li>
+<li><strong>Que el bot siga hablando mientras una persona escribe.</strong> Dos voces a la vez confunden al cliente. El estado <code>ESPERANDO_HUMANO</code> existe para evitarlo.</li>
+<li><strong>Avisar al dueño en cada mensaje.</strong> Se vuelve ruido y acaba ignorándose. Avisa solo en la transición.</li>
+<li><strong>Olvidar la ventana de 24 horas al avisar.</strong> El dueño también es un destinatario: sin ventana abierta, solo vale una plantilla aprobada.</li>
+<li><strong>Prometer «respuesta inmediata» fuera de horario.</strong> Di cuándo abres. Es honesto y evita reclamos.</li>
+<li><strong>Silencio sin fecha de vencimiento.</strong> Sin tiempo máximo, un cliente puede esperar dos días a nadie.</li>
+<li><strong>Calcular la hora con el reloj del servidor.</strong> Usa un desfase explícito (UTC-5 para Lima), no la zona del servidor, que puede estar en otro continente.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Todo bot debe tener una salida clara a una persona: la pide el cliente, falla dos veces o el tema es delicado (reclamos).</li>
+<li>En el motor, <code>ESPERANDO_HUMANO</code> hace que el bot se calle y conserve el carrito; <code>menu</code> o <code>cancelar</code> devuelven al bot.</li>
+<li>El aviso al dueño no va en el motor (que es puro) sino en el Worker, y solo cuando la sesión <strong>acaba de pasar</strong> a modo humano.</li>
+<li>El dueño es un destinatario más: texto libre si su ventana de 24 horas está abierta; plantilla aprobada si no.</li>
+<li>Fuera de horario, dilo con honestidad, da la hora de apertura y deja que el cliente siga con el bot.</li>
+<li>Pon un tiempo máximo de espera (3 horas en el ejemplo) y libera al cliente para que nunca quede en silencio indefinido.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Handoff (traspaso)</td>
+<td>Momento en que la conversación pasa del bot a una persona.</td>
+</tr>
+<tr>
+<td>ESPERANDO_HUMANO</td>
+<td>Estado del motor en el que el bot no responde para no interferir con la persona.</td>
+</tr>
+<tr>
+<td>Envoltura (wrapper)</td>
+<td>Función que llama a otra y le añade comportamiento sin modificarla.</td>
+</tr>
+<tr>
+<td>Desfase horario</td>
+<td>Diferencia con UTC; Lima es UTC-5 todo el año.</td>
+</tr>
+<tr>
+<td>Plantilla de aviso</td>
+<td>Plantilla aprobada que se envía al dueño cuando su ventana de 24 h está cerrada.</td>
+</tr>
+<tr>
+<td>Tiempo máximo de espera</td>
+<td>Plazo tras el cual el bot retoma la conversación si nadie atendió.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Por qué el aviso al dueño no se programa dentro de <code>procesar</code> (el motor)?</p><ul class="opts"><li><button type="button" class="opt">Porque Meta lo prohíbe</button></li><li><button type="button" class="opt" data-ok>Porque el motor es una función pura sin entrada ni salida; enviar mensajes es trabajo del Worker</button></li><li><button type="button" class="opt">Porque el motor no conoce el teléfono del dueño</button></li><li><button type="button" class="opt">Porque los avisos siempre deben ir por correo</button></li></ul><p class="explain" hidden>Mantener el motor puro lo hace fácil de probar; el Worker es la capa que habla con la red.</p></div>
+<div class="quiz-q"><p>Un cliente en estado ESPERANDO_HUMANO escribe «hola? alguien?». ¿Qué responde el bot?</p><ul class="opts"><li><button type="button" class="opt">Vuelve a mostrar el menú</button></li><li><button type="button" class="opt">Repite «avisé a una persona»</button></li><li><button type="button" class="opt" data-ok>Nada: se calla para no interferir con la persona que atiende</button></li><li><button type="button" class="opt">Le pide que espere 24 horas</button></li></ul><p class="explain" hidden>En ese estado solo <code>menu</code> o <code>cancelar</code> sacan al cliente del silencio.</p></div>
+<div class="quiz-q"><p>El dueño nunca ha escrito al bot. Un cliente pide una persona. ¿Cómo se le avisa?</p><ul class="opts"><li><button type="button" class="opt">Con texto libre, siempre</button></li><li><button type="button" class="opt" data-ok>Con una plantilla aprobada, porque su ventana de 24 horas está cerrada</button></li><li><button type="button" class="opt">No se le puede avisar</button></li><li><button type="button" class="opt">Con una imagen</button></li></ul><p class="explain" hidden>Para la API el dueño es un destinatario más: sin ventana abierta solo valen plantillas.</p></div>
+<div class="quiz-q"><p>¿Por qué se compara la sesión antes y después de procesar el mensaje?</p><ul class="opts"><li><button type="button" class="opt">Para guardar un historial</button></li><li><button type="button" class="opt" data-ok>Para avisar solo cuando la sesión acaba de pasar a modo humano, no en cada mensaje posterior</button></li><li><button type="button" class="opt">Para ahorrar memoria en KV</button></li><li><button type="button" class="opt">Para saber qué hora es</button></li></ul><p class="explain" hidden>Sin la comparación, cada «hola??» del cliente generaría un nuevo aviso al dueño.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve el tiempo máximo de espera en modo humano?</p><ul class="opts"><li><button type="button" class="opt">Para cobrar menos a Meta</button></li><li><button type="button" class="opt" data-ok>Para que un cliente no quede en silencio indefinido si nadie lo atiende</button></li><li><button type="button" class="opt">Para borrar su carrito</button></li><li><button type="button" class="opt">Para cambiar el horario del negocio</button></li></ul><p class="explain" hidden>Pasadas las 3 horas el bot retoma la conversación y puede ofrecer el menú.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-25">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../24-seguridad-y-privacidad/"><small>← Anterior</small>Seguridad y privacidad</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 25 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2025:%20Atención%20humana%20y%20traspaso&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

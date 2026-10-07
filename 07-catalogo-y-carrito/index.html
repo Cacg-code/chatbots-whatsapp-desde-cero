@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo y carrito · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Modela el catálogo del minimarket como datos, respeta los límites de botones y listas de WhatsApp y construye un carrito puro e inmutable que suma en céntimos.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/07-catalogo-y-carrito/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Catálogo y carrito · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Modela el catálogo del minimarket como datos, respeta los límites de botones y listas de WhatsApp y construye un carrito puro e inmutable que suma en céntimos.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/07-catalogo-y-carrito/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#el-catalogo-es-un-dato-no-codigo">El catálogo es un dato, no código</a></li><li><a href="#el-catalogo-debe-caber-en-whatsapp">El catálogo debe caber en WhatsApp</a></li><li><a href="#el-problema-de-los-decimales">El problema de los decimales</a></li><li><a href="#un-carrito-puro-e-inmutable">Un carrito puro e inmutable</a></li><li><a href="#total-cantidades-y-formato">Total, cantidades y formato</a></li><li><a href="#conducir-al-cliente-por-el-catalogo">Conducir al cliente por el catálogo</a></li><li><a href="#ver-quitar-y-vaciar">Ver, quitar y vaciar</a></li><li><a href="#probar-todo-sin-whatsapp">Probar todo sin WhatsApp</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 7</div>
+        <h1>Catálogo y carrito</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Modelar un catálogo de productos como datos (id, nombre, precio, categoría, sinónimos) separados de la lógica.</li><li>Adaptar el catálogo a los límites de las listas y botones de WhatsApp.</li><li>Escribir un carrito con funciones puras e inmutables (agregar, quitar, cambiar cantidad).</li><li>Calcular totales en céntimos para evitar errores de decimales y formatear soles.</li><li>Conducir al cliente por el catálogo con listas, botones de cantidad y texto libre.</li></ul>
+</div>
+
+<h2 id="el-catalogo-es-un-dato-no-codigo"><span class="n">1.</span>El catálogo es un dato, no código</h2>
+<p>Un error típico de quien empieza es escribir el catálogo dentro de la lógica: un <code>if</code> por producto, un <code>switch</code> gigante, precios repartidos por todas partes. Cambiar el precio de la leche exige buscar en cien líneas. La alternativa es separar:</p>
+<ul>
+<li><strong>Los datos</strong> (productos, precios, categorías, horarios) viven en un archivo que casi cualquiera puede editar: <code>src/catalogo.js</code>.</li>
+<li><strong>La lógica</strong> (cómo se agrega al carrito, cómo se muestra una lista) vive en otros archivos y trata a los datos como entrada.</li>
+</ul>
+<p>El negocio ficticio y todos sus datos están en <code>NEGOCIO</code>:</p>
+<div class="code">
+  <div class="code-head"><span>src/catalogo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export const NEGOCIO = {
+  nombre: &#x27;Minimarket La Esquina&#x27;,
+  horario: &#x27;Lunes a sábado de 8:00 a 21:00. Domingos de 9:00 a 14:00.&#x27;,
+  direccion: &#x27;Av. Los Olivos 123, Distrito Ejemplo (dirección ficticia)&#x27;,
+  costoDelivery: 3, // soles
+  minimoDelivery: 25, // soles de productos para poder pedir delivery
+  zonas: [&#x27;Urb. Los Olivos&#x27;, &#x27;Urb. Las Palmeras&#x27;, &#x27;Centro&#x27;],
+  yape: &#x27;51999000111&#x27;, // número de ejemplo
+  cuentaTransferencia: &#x27;Cuenta de ejemplo 000-000000000-0-00 a nombre de La Esquina SAC&#x27;,
+};</code></pre>
+</div>
+<p>Todo es inventado: la dirección, el número de Yape y la cuenta son datos de ejemplo. En tu propio proyecto los reemplazarás por los reales, y <strong>solo en ese archivo</strong>.</p>
+<p>Cada producto es un objeto con seis campos. Mira cuatro del catálogo (los 31 completos están en el archivo):</p>
+<div class="code">
+  <div class="code-head"><span>src/catalogo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{ id: &#x27;arroz&#x27;, nombre: &#x27;Arroz extra 1 kg&#x27;, precio: 4.2, categoria: &#x27;abarrotes&#x27;, unidad: &#x27;bolsa&#x27;, sinonimos: [&#x27;arroz&#x27;] },
+{ id: &#x27;leche&#x27;, nombre: &#x27;Leche entera 1 L&#x27;, precio: 4.3, categoria: &#x27;lacteos&#x27;, unidad: &#x27;caja&#x27;, sinonimos: [&#x27;leche&#x27;, &#x27;leche entera&#x27;] },
+{ id: &#x27;pan&#x27;, nombre: &#x27;Pan francés&#x27;, precio: 0.3, categoria: &#x27;panaderia&#x27;, unidad: &#x27;unidad&#x27;, sinonimos: [&#x27;pan&#x27;, &#x27;pan frances&#x27;] },
+{ id: &#x27;gaseosa-cola&#x27;, nombre: &#x27;Gaseosa cola 1.5 L&#x27;, precio: 7.5, categoria: &#x27;bebidas&#x27;, unidad: &#x27;botella&#x27;, sinonimos: [&#x27;gaseosa&#x27;, &#x27;gaseosa cola&#x27;, &#x27;cola&#x27;] },</code></pre>
+</div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Para qué sirve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Identificador interno, estable y sin espacios (<code>gaseosa-cola</code>). Se usa en botones y filas de lista.</td>
+</tr>
+<tr>
+<td><code>nombre</code></td>
+<td>Lo que lee el cliente. Corto, porque debe caber en una fila de lista.</td>
+</tr>
+<tr>
+<td><code>precio</code></td>
+<td>En soles, como número (<code>4.2</code>, no <code>"S/ 4.20"</code>). El formato se aplica solo al mostrarlo.</td>
+</tr>
+<tr>
+<td><code>categoria</code></td>
+<td>Agrupa los productos para el menú de categorías.</td>
+</tr>
+<tr>
+<td><code>unidad</code></td>
+<td>«caja», «bolsa», «botella»: aparece junto al precio.</td>
+</tr>
+<tr>
+<td><code>sinonimos</code></td>
+<td>Cómo lo nombra la gente; los usa el buscador de la <a href="../06-entender-texto-libre/">lección 6</a>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Dos funciones sencillas consultan el catálogo, y las categorías se declaran aparte:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { PRODUCTOS, CATEGORIAS, productoPorId, productosDeCategoria } from &#x27;./src/catalogo.js&#x27;;
+
+console.log(productoPorId(&#x27;nada&#x27;));
+console.log(productosDeCategoria(&#x27;lacteos&#x27;).map((p) =&gt; p.id));
+console.log(Object.keys(CATEGORIAS));
+console.log(PRODUCTOS.length, Object.keys(CATEGORIAS).map((k) =&gt; k + &#x27;:&#x27; + productosDeCategoria(k).length).join(&#x27; &#x27;));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>null
+[ &#x27;leche&#x27;, &#x27;leche-light&#x27;, &#x27;yogurt&#x27;, &#x27;queso&#x27;, &#x27;mantequilla&#x27; ]
+[
+  &#x27;abarrotes&#x27;,
+  &#x27;bebidas&#x27;,
+  &#x27;lacteos&#x27;,
+  &#x27;panaderia&#x27;,
+  &#x27;limpieza&#x27;,
+  &#x27;snacks&#x27;
+]
+31 abarrotes:9 bebidas:6 lacteos:5 panaderia:3 limpieza:6 snacks:2</code></pre>
+</div>
+<p>Observa que <code>productoPorId</code> devuelve <code>null</code> si el id no existe, en lugar de lanzar un error. El motor siempre lo valida antes de usarlo, porque el id puede venir de un botón viejo o de un mensaje manipulado.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · ¿Y si el catálogo cambia seguido?</p>
+<p>Un archivo de código sirve para aprender y para negocios con pocos cambios. Si el dueño debe actualizar precios él mismo, el catálogo se mueve a una hoja de cálculo o a una base de datos y el bot lo lee desde allí. La <a href="../16-panel-con-google-sheets/">lección 16</a> muestra la idea. La lógica no cambia: sigue recibiendo una lista de productos.</p></div>
+<h2 id="el-catalogo-debe-caber-en-whatsapp"><span class="n">2.</span>El catálogo debe caber en WhatsApp</h2>
+<p>Aquí entra una restricción real de la plataforma. Para mostrar muchas opciones a la vez, WhatsApp ofrece <strong>mensajes interactivos</strong>: botones de respuesta y listas. Ambos tienen límites. Estos son los que usa el código de referencia, válidos al momento de escribirlo:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Límite que respeta el bot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Botones de respuesta</td>
+<td>Máximo 3 por mensaje; título de hasta 20 caracteres</td>
+</tr>
+<tr>
+<td>Lista</td>
+<td>Máximo 10 filas en total; título de fila hasta 24 caracteres; descripción hasta 72</td>
+</tr>
+<tr>
+<td>Texto de un mensaje</td>
+<td>Hasta 4096 caracteres</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los límites de los mensajes interactivos son un dato que Meta puede cambiar. Revisa los valores vigentes en la documentación oficial de <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/">WhatsApp Cloud API</a> (sección de mensajes interactivos). En el código de referencia están en un solo lugar, el objeto <code>LIMITES</code> de <code>src/whatsapp.js</code>, para que cambiarlos sea fácil.</p></div>
+<p>Estos límites explican decisiones de diseño. Los nombres de producto son cortos («Gaseosa cola 1.5 L», no «Gaseosa sabor cola en botella de 1.5 litros») porque deben caber en 24 caracteres. Se muestran <strong>productos por categoría</strong> y no todo el catálogo, porque una lista no admite más de 10 filas: la categoría más grande, Abarrotes, tiene 9. Y un producto pide la cantidad con tres botones (1, 2, 3) y deja el resto al texto libre.</p>
+<p>Si te equivocas, el código lo detecta en el acto. La función <code>construirEnvio</code> (que arma el cuerpo real para la API) lanza un error claro cuando algo rompe un límite. Probado:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { construirEnvio } from &#x27;./src/whatsapp.js&#x27;;
+
+try { construirEnvio(&#x27;51999000111&#x27;, { tipo: &#x27;botones&#x27;, texto: &#x27;x&#x27;,
+  botones: [1, 2, 3, 4].map((n) =&gt; ({ id: &#x27;a&#x27; + n, titulo: &#x27;t&#x27; })) }); } catch (e) { console.log(e.message); }
+try { construirEnvio(&#x27;51999000111&#x27;, { tipo: &#x27;botones&#x27;, texto: &#x27;x&#x27;,
+  botones: [{ id: &#x27;a&#x27;, titulo: &#x27;Un título demasiado largo para WhatsApp&#x27; }] }); } catch (e) { console.log(e.message); }</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Respuesta inválida para WhatsApp: entre 1 y 3 botones
+Respuesta inválida para WhatsApp: título de botón de más de 20 caracteres: &quot;Un título demasiado largo para WhatsApp&quot;</code></pre>
+</div>
+<p>Por eso las pruebas del curso y el simulador <code>consola.js</code> pasan <strong>cada respuesta</strong> por <code>construirEnvio</code>: si un texto nuevo excede un límite, te enteras en tu computadora y no cuando un cliente real lo intenta.</p>
+<h2 id="el-problema-de-los-decimales"><span class="n">3.</span>El problema de los decimales</h2>
+<p>Antes del carrito hay que hablar de dinero. Los computadores guardan los decimales en binario, y algunos números como 0,1 no tienen una representación exacta. El resultado es esto (Node 24):</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>console.log(0.1 + 0.2);
+console.log(4.3 * 3);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>0.30000000000000004
+12.899999999999999</code></pre>
+</div>
+<p>Imagina que un cliente pide 3 leches de S/ 4.30 y el bot responde «Total: S/ 12.899999999999999». Es un error tonto, pero en un negocio rompe la confianza (y en una factura, la contabilidad). Hay dos soluciones habituales:</p>
+<ol>
+<li>Redondear al mostrar. Con <code>toFixed(2)</code> el 12.899999999999999 se ve como «12.90», pero el error sigue dentro y se acumula.</li>
+<li><strong>Calcular en céntimos enteros.</strong> Los enteros sí son exactos: S/ 4.30 son 430 céntimos, y 430 × 3 = 1290, sin error. Solo al final se divide entre 100 para mostrarlo.</li>
+</ol>
+<p>El código de referencia usa la segunda, con dos funciones mínimas al inicio de <code>src/carrito.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>src/carrito.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const aCentimos = (soles) =&gt; Math.round(soles * 100);
+const aSoles = (centimos) =&gt; centimos / 100;</code></pre>
+</div>
+<p>El <code>Math.round</code> es necesario: <code>4.3 * 100</code> no es exactamente 430 en binario, y el redondeo lo corrige.</p>
+<h2 id="un-carrito-puro-e-inmutable"><span class="n">4.</span>Un carrito puro e inmutable</h2>
+<p>Un carrito es un arreglo de <strong>líneas</strong>: <code>{ id, nombre, precio, cantidad }</code>. Recuerda que la lección 5 insistía en que el motor no muta lo que recibe; el carrito sigue el mismo principio y todas sus funciones devuelven un carrito <strong>nuevo</strong>:</p>
+<div class="code">
+  <div class="code-head"><span>src/carrito.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>/** Agrega `cantidad` unidades del producto (si ya estaba, suma a su línea). */
+export function agregar(carrito, producto, cantidad = 1) {
+  const existe = carrito.some((l) =&gt; l.id === producto.id);
+  if (existe) {
+    return carrito.map((l) =&gt; (l.id === producto.id ? { ...l, cantidad: l.cantidad + cantidad } : l));
+  }
+  return [...carrito, { id: producto.id, nombre: producto.nombre, precio: producto.precio, cantidad }];
+}
+
+/** Quita la línea completa de un producto. */
+export function quitar(carrito, productoId) {
+  return carrito.filter((l) =&gt; l.id !== productoId);
+}
+
+/** Cambia la cantidad de una línea. Con cantidad 0 o menos, la línea desaparece. */
+export function cambiarCantidad(carrito, productoId, cantidad) {
+  if (cantidad &lt;= 0) return quitar(carrito, productoId);
+  return carrito.map((l) =&gt; (l.id === productoId ? { ...l, cantidad } : l));
+}</code></pre>
+</div>
+<p>Fíjate en que <code>agregar</code> <strong>copia</strong> el precio y el nombre dentro de la línea. Si mañana el dueño cambia el precio del catálogo, el carrito de un cliente que ya estaba comprando conserva el precio con el que le hablaron. Es lo que querrías en una tienda.</p>
+<p>Veámoslo en acción, con la leche y el arroz del catálogo:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import * as C from &#x27;./src/carrito.js&#x27;;
+import { productoPorId } from &#x27;./src/catalogo.js&#x27;;
+
+const leche = productoPorId(&#x27;leche&#x27;);
+const arroz = productoPorId(&#x27;arroz&#x27;);
+const vacio = [];
+const c1 = C.agregar(vacio, leche, 2);
+const c2 = C.agregar(c1, arroz, 1);
+const c3 = C.agregar(c2, leche, 1);
+
+console.log(vacio.length, c1);
+console.log(c3);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>0 [
+  { id: &#x27;leche&#x27;, nombre: &#x27;Leche entera 1 L&#x27;, precio: 4.3, cantidad: 2 }
+]
+[
+  { id: &#x27;leche&#x27;, nombre: &#x27;Leche entera 1 L&#x27;, precio: 4.3, cantidad: 3 },
+  { id: &#x27;arroz&#x27;, nombre: &#x27;Arroz extra 1 kg&#x27;, precio: 4.2, cantidad: 1 }
+]</code></pre>
+</div>
+<p>El carrito original sigue vacío (longitud 0) y <code>c1</code> conserva sus 2 leches: cada paso produjo un carrito nuevo. Al agregar leche por segunda vez no se duplicó la línea: se sumó a la existente (2 + 1 = 3).</p>
+<p>Con <code>cambiarCantidad</code> y <code>quitar</code>:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>console.log(C.cambiarCantidad(c3, &#x27;leche&#x27;, 0).map((l) =&gt; l.id));
+console.log(C.cambiarCantidad(c3, &#x27;leche&#x27;, 5)[0].cantidad, C.quitar(c3, &#x27;arroz&#x27;).length, C.quitar(c3, &#x27;zzz&#x27;).length);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[ &#x27;arroz&#x27; ]
+5 1 2</code></pre>
+</div>
+<p>Cantidad 0 elimina la línea; quitar un id que no existe devuelve el carrito sin cambios (2 líneas); y las funciones nunca fallan por un id raro.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · ¿Por qué tanto cuidado con no mutar?</p>
+<p>Si <code>agregar</code> modificara el carrito recibido, un error en un paso podría dejar el carrito a medias y sería casi imposible reproducirlo. Con funciones puras, cada paso se puede probar y repetir. Además, el motor usa <code>structuredClone</code> sobre la sesión entera, así que mutar «por comodidad» sería inútil y confuso.</p></div>
+<h2 id="total-cantidades-y-formato"><span class="n">5.</span>Total, cantidades y formato</h2>
+<p>Con el carrito en céntimos, el total es una suma de enteros:</p>
+<div class="code">
+  <div class="code-head"><span>src/carrito.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>/** Total en soles, redondeado a 2 decimales. */
+export function total(carrito) {
+  const centimos = carrito.reduce((suma, l) =&gt; suma + aCentimos(l.precio) * l.cantidad, 0);
+  return aSoles(centimos);
+}
+
+/** Cantidad total de unidades. */
+export function cantidadItems(carrito) {
+  return carrito.reduce((suma, l) =&gt; suma + l.cantidad, 0);
+}
+
+/** 12.5 -&gt; &quot;S/ 12.50&quot; */
+export function formatoSoles(monto) {
+  return `S/ ${monto.toFixed(2)}`;
+}</code></pre>
+</div>
+<p>La diferencia entre sumar mal y bien se ve con los números de antes:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const raro = [{ id: &#x27;a&#x27;, nombre: &#x27;a&#x27;, precio: 0.1, cantidad: 1 }, { id: &#x27;b&#x27;, nombre: &#x27;b&#x27;, precio: 0.2, cantidad: 1 }];
+console.log(raro.reduce((s, l) =&gt; s + l.precio * l.cantidad, 0), C.total(raro));
+
+const muchos = [{ id: &#x27;x&#x27;, nombre: &#x27;x&#x27;, precio: 0.3, cantidad: 3 }];
+console.log(0.3 * 3, C.total(muchos));
+console.log(C.total(c3), C.cantidadItems(c3), C.formatoSoles(C.total(c3)), C.formatoSoles(12.5));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>0.30000000000000004 0.3
+0.8999999999999999 0.9
+17.1 4 S/ 17.10 S/ 12.50</code></pre>
+</div>
+<p>Y <code>resumen</code> produce el texto exacto que el cliente verá en WhatsApp: una línea por producto y un subtotal. Sin emojis, con formato simple (WhatsApp no necesita más):</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>console.log(C.resumen(c3));
+console.log(C.resumen([]));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>- 3 x Leche entera 1 L: S/ 12.90
+- 1 x Arroz extra 1 kg: S/ 4.20
+Subtotal: S/ 17.10
+Tu carrito está vacío.</code></pre>
+</div>
+<h2 id="conducir-al-cliente-por-el-catalogo"><span class="n">6.</span>Conducir al cliente por el catálogo</h2>
+<p>El catálogo y el carrito son datos y funciones. El motor los conecta con una conversación. Hay tres caminos para que un cliente agregue un producto, y conviene ofrecer los tres: cada cliente tiene su estilo.</p>
+<p><strong>1. Con listas y botones (el cliente toca).</strong> «Hacer pedido» muestra una lista de categorías (id <code>cat:&lt;categoría&gt;</code>), luego una lista de productos (id <code>prod:&lt;id&gt;</code>), luego tres botones de cantidad (<code>cant:1</code>, <code>cant:2</code>, <code>cant:3</code>). La primera lista, vista como estructura de datos:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { procesar, crearSesion } from &#x27;./src/motor.js&#x27;;
+const cat = procesar(crearSesion(&#x27;51999000111&#x27;, 0), { tipo: &#x27;interactivo&#x27;, id: &#x27;menu_pedir&#x27; }, 1).respuestas[0];
+console.log(cat.tipo, cat.boton, cat.secciones[0].filas.map((f) =&gt; `${f.id} (${f.descripcion})`));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>lista Ver categorías [
+  &#x27;cat:abarrotes (9 productos)&#x27;,
+  &#x27;cat:bebidas (6 productos)&#x27;,
+  &#x27;cat:lacteos (5 productos)&#x27;,
+  &#x27;cat:panaderia (3 productos)&#x27;,
+  &#x27;cat:limpieza (6 productos)&#x27;,
+  &#x27;cat:snacks (2 productos)&#x27;
+]</code></pre>
+</div>
+<p>Al elegir un producto, el bot pregunta la cantidad con el precio a la vista:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Leche entera 1 L cuesta S/ 4.30 por caja. ¿Cuántas quieres? Toca un botón o escribe el número.</code></pre>
+</div>
+<p><strong>2. Escribiendo la cantidad.</strong> Si el cliente responde «0», recibe «Escribe una cantidad entre 1 y 20.» y el producto sigue pendiente; si responde «dos», se agregan 2. Hay un tope: <strong>20 unidades por producto</strong>, constante <code>MAX_POR_PRODUCTO</code> del motor, para evitar pedidos absurdos o errores de tecleo (un «100» en vez de «10»).</p>
+<p><strong>3. Con texto libre (la forma más rápida).</strong> «2 leches y 1 arroz» agrega las dos líneas de una vez, con la tubería de la lección 6:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Agregué 2 x Leche entera 1 L.
+Agregué 1 x Arroz extra 1 kg.
+Llevas 3 producto(s). Subtotal: S/ 12.80.</code></pre>
+</div>
+<p>Los tres botones que acompañan ese mensaje son «Seguir comprando», «Ver carrito» y «Finalizar pedido». Es un patrón importante: <strong>después de cada acción, el cliente siempre ve qué puede hacer a continuación.</strong></p>
+<h3>Cuando el producto es ambiguo</h3>
+<p>«3 gaseosas» coincide con dos productos. El motor agrega lo que sí es claro, y para lo ambiguo muestra una lista con las opciones, <strong>recordando la cantidad</strong> (<code>cantidadPendiente</code>) para no preguntarla otra vez:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>let s = procesar(crearSesion(&#x27;51999000111&#x27;, 0), { tipo: &#x27;texto&#x27;, texto: &#x27;hola&#x27; }, 1).sesion;
+let r = procesar(s, { tipo: &#x27;texto&#x27;, texto: &#x27;3 gaseosas&#x27; }, 3);
+console.log(r.respuestas.map((x) =&gt; x.tipo), r.sesion.cantidadPendiente);
+console.log(JSON.stringify(r.respuestas[0].secciones));
+r = procesar(r.sesion, { tipo: &#x27;interactivo&#x27;, id: &#x27;prod:gaseosa-cola&#x27; }, 4);
+console.log(r.respuestas[0].texto);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[ &#x27;lista&#x27; ] 3
+[{&quot;titulo&quot;:&quot;Opciones&quot;,&quot;filas&quot;:[{&quot;id&quot;:&quot;prod:gaseosa-cola&quot;,&quot;titulo&quot;:&quot;Gaseosa cola 1.5 L&quot;,&quot;descripcion&quot;:&quot;S/ 7.50 por botella&quot;},{&quot;id&quot;:&quot;prod:gaseosa-naranja&quot;,&quot;titulo&quot;:&quot;Gaseosa naranja 1.5 L&quot;,&quot;descripcion&quot;:&quot;S/ 7.50 por botella&quot;}]}]
+Agregué 3 x Gaseosa cola 1.5 L.
+Llevas 3 producto(s). Subtotal: S/ 22.50.</code></pre>
+</div>
+<p>La cantidad pendiente es otro ejemplo del uso de la sesión que viste en la <a href="../05-estado-de-la-conversacion/">lección 5</a>: un dato a medias que espera el siguiente mensaje.</p>
+<h2 id="ver-quitar-y-vaciar"><span class="n">7.</span>Ver, quitar y vaciar</h2>
+<p>Un cliente debe poder arrepentirse. Tres operaciones, todas desde botones o texto:</p>
+<ul>
+<li><strong>Ver el carrito:</strong> «carrito», «mi pedido» o el botón «Ver carrito». Pasa a <code>CARRITO</code> y muestra el <code>resumen</code> con tres botones («Continuar», «Seguir comprando», «Vaciar carrito»).</li>
+<li><strong>Quitar:</strong> «quita las leches». El motor busca los productos nombrados y los saca del carrito.</li>
+<li><strong>Vaciar:</strong> el botón borra todo y vuelve a mostrar las categorías.</li>
+</ul>
+<p>Probado sobre un carrito con leche, arroz y gaseosa cola:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>r = procesar(s2, { tipo: &#x27;texto&#x27;, texto: &#x27;quita las leches&#x27; }, 5);
+console.log(r.respuestas.map((x) =&gt; x.texto));
+r = procesar(s2, { tipo: &#x27;texto&#x27;, texto: &#x27;quita el atun&#x27; }, 6);
+console.log(r.respuestas.map((x) =&gt; x.texto));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[
+  &#x27;Quité del carrito: Leche entera 1 L.&#x27;,
+  &#x27;Esto llevas:\n&#x27; +
+    &#x27;- 1 x Arroz extra 1 kg: S/ 4.20\n&#x27; +
+    &#x27;- 3 x Gaseosa cola 1.5 L: S/ 22.50\n&#x27; +
+    &#x27;Subtotal: S/ 26.70&#x27;
+]
+[ &#x27;No encontré ese producto en tu carrito.&#x27; ]</code></pre>
+</div>
+<p>(<code>s2</code> es la sesión con ese carrito). Si el producto que pide quitar no está en el carrito, el bot lo dice en vez de quedarse mudo: <strong>nunca ignores a un cliente en silencio.</strong></p>
+<p>Y un caso de borde que muestra el tope de 20 unidades. Con 1 arroz ya en el carrito, el cliente escribe «25 arroz»:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>No pude agregar Arroz extra 1 kg: Por pedido solo puedo anotar hasta 20 unidades de cada producto.
+Llevas 6 producto(s). Subtotal: S/ 35.30.</code></pre>
+</div>
+<p>El bot explica el límite y le muestra el carrito tal como estaba; no agrega a medias.</p>
+<h2 id="probar-todo-sin-whatsapp"><span class="n">8.</span>Probar todo sin WhatsApp</h2>
+<p>Todas estas piezas tienen pruebas automáticas. <code>test/carrito.test.js</code> revisa la suma en céntimos y la inmutabilidad; <code>test/motor.test.js</code> incluye conversaciones completas, y <code>npm test</code> corre las 112 en menos de un segundo. Si algún día cambias un precio o un texto del bot, esas pruebas te avisan qué se rompió. El cierre de esta lección en tu computadora es ejecutar <code>npm run chat</code>, escribir «hola» y armar un carrito moviéndote por listas, botones y texto libre.</p>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Guardar el precio como texto</strong> (<code>"S/ 4.30"</code>). No se puede sumar. Guarda números y formatea al mostrar.</li>
+<li><strong>Sumar decimales directamente.</strong> Calcula en céntimos enteros y redondea con <code>Math.round</code>.</li>
+<li><strong>Mutar el carrito</strong> (<code>carrito.push</code>, <code>linea.cantidad++</code>). Devuelve siempre uno nuevo.</li>
+<li><strong>Pasar de los límites de WhatsApp</strong> (más de 3 botones, más de 10 filas, títulos largos). Valida antes de enviar.</li>
+<li><strong>Mostrar todo el catálogo de una vez.</strong> Divide por categorías y deja que el cliente también pueda escribir.</li>
+<li><strong>No poner tope a la cantidad.</strong> Un «1000» por error de teclado puede arruinar un pedido.</li>
+<li><strong>Olvidar mostrar el carrito tras cada cambio.</strong> El cliente necesita ver que el bot entendió.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>El catálogo es <strong>dato</strong> (en un archivo aparte) y la lógica lo trata como entrada.</li>
+<li>WhatsApp impone <strong>límites</strong> a botones y listas: diseña nombres cortos y categorías de máximo 10 productos, y verifícalos en la documentación oficial.</li>
+<li>El dinero se calcula en <strong>céntimos enteros</strong>; el formato <code>S/ 12.50</code> se aplica solo al mostrar.</li>
+<li>Las funciones del carrito son <strong>puras e inmutables</strong>: devuelven un carrito nuevo y copian nombre y precio en la línea.</li>
+<li>Ofrece tres formas de agregar: listas y botones, cantidad escrita y texto libre.</li>
+<li>Si algo es ambiguo, <strong>pregunta</strong> y recuerda la cantidad; si algo no existe, <strong>avísalo</strong>.</li>
+<li>Pon un <strong>tope</strong> de cantidad y explícalo cuando se supere.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Catálogo</td>
+<td>Lista de productos con sus datos (id, nombre, precio, categoría, sinónimos).</td>
+</tr>
+<tr>
+<td>Línea</td>
+<td>Una fila del carrito: <code>{ id, nombre, precio, cantidad }</code>.</td>
+</tr>
+<tr>
+<td>Inmutable</td>
+<td>Que no se modifica: toda operación devuelve una copia nueva.</td>
+</tr>
+<tr>
+<td>Céntimos</td>
+<td>Unidad entera (1/100 de sol) que evita errores de decimales.</td>
+</tr>
+<tr>
+<td>Lista interactiva</td>
+<td>Mensaje de WhatsApp con hasta 10 filas elegibles.</td>
+</tr>
+<tr>
+<td>Botón de respuesta</td>
+<td>Botón tocable de un mensaje interactivo (máximo 3).</td>
+</tr>
+<tr>
+<td><code>cantidadPendiente</code></td>
+<td>Cantidad ya dicha por el cliente mientras elige entre productos parecidos.</td>
+</tr>
+<tr>
+<td>Tope</td>
+<td>Cantidad máxima aceptada por producto (20 en el minimarket).</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Por qué el carrito suma en céntimos enteros?</p><ul class="opts"><li><button type="button" class="opt">Porque WhatsApp lo exige</button></li><li><button type="button" class="opt" data-ok>Porque los decimales binarios dan errores como 0.1 + 0.2 = 0.30000000000000004</button></li><li><button type="button" class="opt">Porque los céntimos ocupan menos memoria</button></li><li><button type="button" class="opt">Porque así se puede mostrar el precio sin formato</button></li></ul><p class="explain" hidden>Los enteros son exactos; se divide entre 100 solo al final para mostrar soles.</p></div>
+<div class="quiz-q"><p>¿Qué significa que <code>agregar(carrito, producto, cantidad)</code> sea inmutable?</p><ul class="opts"><li><button type="button" class="opt">Que solo puede usarse una vez</button></li><li><button type="button" class="opt" data-ok>Que devuelve un carrito nuevo y no modifica el que recibió</button></li><li><button type="button" class="opt">Que no permite agregar dos veces el mismo producto</button></li><li><button type="button" class="opt">Que guarda el carrito en un archivo</button></li></ul><p class="explain" hidden>Cada operación produce una copia; así se pueden probar y repetir los pasos.</p></div>
+<div class="quiz-q"><p>¿Por qué se muestran los productos por categoría y no todos juntos?</p><ul class="opts"><li><button type="button" class="opt">Porque queda más bonito</button></li><li><button type="button" class="opt" data-ok>Porque una lista de WhatsApp admite un máximo de filas (10 en el código de referencia) y conviene verificar el límite vigente</button></li><li><button type="button" class="opt">Porque el catálogo es secreto</button></li><li><button type="button" class="opt">Porque los botones no admiten texto</button></li></ul><p class="explain" hidden>Los límites de listas y botones obligan a dividir el catálogo; verifica los valores en la documentación oficial de Meta.</p></div>
+<div class="quiz-q"><p>El cliente escribe «3 gaseosas» y hay dos gaseosas en el catálogo. ¿Qué hace el motor?</p><ul class="opts"><li><button type="button" class="opt">Agrega la primera</button></li><li><button type="button" class="opt" data-ok>Muestra una lista con las opciones y recuerda la cantidad 3 mientras el cliente elige</button></li><li><button type="button" class="opt">Descarta el mensaje</button></li><li><button type="button" class="opt">Agrega las tres de cada tipo</button></li></ul><p class="explain" hidden>La cantidad pendiente evita volver a preguntarla; se pregunta solo por lo ambiguo.</p></div>
+<div class="quiz-q"><p>¿Por qué <code>agregar</code> copia <code>nombre</code> y <code>precio</code> dentro de la línea del carrito?</p><ul class="opts"><li><button type="button" class="opt">Para ahorrar memoria</button></li><li><button type="button" class="opt" data-ok>Para que el cliente conserve el precio con el que se le habló aunque el catálogo cambie después</button></li><li><button type="button" class="opt">Porque el catálogo no tiene precios</button></li><li><button type="button" class="opt">Porque <code>productoPorId</code> lo exige</button></li></ul><p class="explain" hidden>Una línea autosuficiente protege al pedido de cambios posteriores del catálogo.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-07">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../06-entender-texto-libre/"><small>← Anterior</small>Entender texto libre</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 7 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%207:%20Catálogo%20y%20carrito&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/07-catalogo-y-carrito/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

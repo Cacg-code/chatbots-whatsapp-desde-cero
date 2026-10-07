@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Recordatorios y seguimiento automático · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Recordatorios y seguimiento automático.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Recordatorios y seguimiento automático · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Recordatorios y seguimiento automático.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 18</a> › Ejercicio</div>
+        <h1>Ejercicio: Recordatorios y seguimiento automático</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Escribir las cuatro decisiones que toma un recordatorio antes de enviarse: <strong>cómo</strong> enviarlo (texto o plantilla), <strong>cuándo</strong> (horario razonable), <strong>si</strong> corresponde (baja y frecuencia) y <strong>cómo reconocer</strong> que el cliente pidió no recibir más avisos.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real en tu terminal con el código de referencia del curso. La <strong>parte B</strong> son cuatro funciones de JavaScript puro que se comprueban en esta página. Las horas son milisegundos (<code>Date.now()</code>); el minimarket está en Lima (UTC-5, sin horario de verano), así que la hora local es la hora UTC menos 5.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Haz que <code>debeRecordar</code> devuelva un objeto <code>{ ok, motivo }</code> con el motivo del rechazo (<code>"baja"</code>, <code>"frecuencia"</code>, <code>"horario"</code>). Guardar el motivo te ayudará a medir por qué no se envían recordatorios.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En la carpeta <code>codigo/</code> del curso corre <code>node --test test/recordatorios.test.js</code> y confirma que pasan las pruebas de <code>pedidosParaRecordar</code> y <code>carritosAbandonados</code>.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Cambia temporalmente <code>ESPERA_CARRITO_MS</code> en <code>src/recordatorios.js</code> a 3 horas, vuelve a correr las pruebas y anota cuáles fallan y por qué. Restaura el valor.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Con <code>npx wrangler dev</code> corriendo, abre <code>http://localhost:8787/cdn-cgi/local/scheduled</code> para disparar el cron a mano y mira en la consola qué haría el Worker (Verifica este dato en la documentación de Cloudflare: la ruta puede cambiar).</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>tipoDeEnvio(ultimoMensajeCliente, ahora)</code>: devuelve <code>"texto"</code> si el cliente escribió hace menos de 24 horas y <code>"plantilla"</code> en cualquier otro caso (incluido <code>null</code>).</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>horaLima(ahora)</code>: devuelve la hora local de Lima (entero de 0 a 23) a partir de un instante en milisegundos.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>enHorarioPermitido(ahora)</code>: <code>true</code> solo entre las 8:00 y las 20:59 hora de Lima.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>esBaja(texto)</code>: <code>true</code> si el mensaje pide dejar de recibir avisos (<code>baja</code>, <code>stop</code>, <code>no quiero recibir</code>, <code>cancelar suscripcion</code>), sin importar mayúsculas ni tildes. Un <code>"quiero 2 leches"</code> no es baja.</span></label></li><li><label><input type="checkbox" id="p8"><span>Parte B. Escribe <code>debeRecordar(cliente, ahora)</code>: <code>cliente</code> es <code>{ optOut, ultimoRecordatorio }</code>. Devuelve <code>false</code> si <code>optOut</code> es <code>true</code>, si ya se le recordó hace menos de 24 horas o si estamos fuera de horario. En cualquier otro caso, <code>true</code>.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Hora de Lima</summary><p>Resta 5 horas al instante y usa <code>new Date(ms).getUTCHours()</code>. Así no dependes de la zona horaria de tu computadora.</p></details>
+      <details><summary>💡 Pista 2: Texto sin tildes</summary><p><code>texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()</code> quita las tildes. Luego busca cada frase con <code>includes</code>. Cuidado: «no quiero recibir» debe detectarse, pero «baja» no debe confundirse con «bajar el volumen»; para el reto basta <code>includes</code>, para producción usa palabras completas.</p></details>
+      <details><summary>💡 Pista 3: Orden de las reglas en debeRecordar</summary><p>Primero la baja (es lo más importante), después la frecuencia y al final el horario. Si <code>ultimoRecordatorio</code> es <code>null</code>, nunca se le recordó.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`tipoDeEnvio` devuelve `texto` dentro de las 24 h", "h": "Compara `ahora - ultimo` con 24 * 3600000 usando `<`.", "t": "var h=3600000;return tipoDeEnvio(0, 23*h)===\"texto\""}, {"d": "`tipoDeEnvio` devuelve `plantilla` a las 24 h o más, o sin mensaje previo", "h": "Exactamente 24 h ya es fuera de ventana; revisa también `null`.", "t": "var h=3600000;return tipoDeEnvio(0,24*h)===\"plantilla\" && tipoDeEnvio(0,50*h)===\"plantilla\" && tipoDeEnvio(null,5)===\"plantilla\""}, {"d": "`horaLima` convierte de UTC a UTC-5", "h": "Resta 5 horas en milisegundos y lee `getUTCHours()`.", "t": "return horaLima(Date.UTC(2026,9,7,13,30))===8 && horaLima(Date.UTC(2026,9,7,3,0))===22"}, {"d": "`enHorarioPermitido` acepta 8:00 a 20:59 y rechaza el resto", "h": "La hora debe ser >= 8 y < 21.", "t": "var u=function(h,m){return Date.UTC(2026,9,7,h,m)};return enHorarioPermitido(u(13,0))===true && enHorarioPermitido(u(12,59))===false && enHorarioPermitido(u(1,59))===true && enHorarioPermitido(u(2,0))===false"}, {"d": "`esBaja` reconoce frases de baja con mayúsculas y tildes", "h": "Normaliza el texto antes de buscar frases.", "t": "return esBaja(\"BAJA\")===true && esBaja(\"stop\")===true && esBaja(\"Ya no quiero recibir mensajes\")===true && esBaja(\"cancelar suscripción\")===true"}, {"d": "`esBaja` no se activa con un pedido normal", "h": "Revisa que no busques palabras demasiado cortas dentro de otras.", "t": "return esBaja(\"quiero 2 leches\")===false && esBaja(\"hola\")===false && esBaja(\"\")===false"}, {"d": "`debeRecordar` respeta la baja", "h": "Si `cliente.optOut` es `true`, devuelve `false` aunque todo lo demás esté bien.", "t": "var ahora=Date.UTC(2026,9,7,18,0);return debeRecordar({optOut:true,ultimoRecordatorio:null},ahora)===false"}, {"d": "`debeRecordar` aplica la frecuencia y el horario", "h": "Bloquea si pasó menos de 24 h desde `ultimoRecordatorio` o si `enHorarioPermitido(ahora)` es falso.", "t": "var h=3600000,ahora=Date.UTC(2026,9,7,18,0);return debeRecordar({optOut:false,ultimoRecordatorio:null},ahora)===true && debeRecordar({optOut:false,ultimoRecordatorio:ahora-2*h},ahora)===false && debeRecordar({optOut:false,ultimoRecordatorio:ahora-30*h},ahora)===true && debeRecordar({optOut:false,ultimoRecordatorio:null},Date.UTC(2026,9,7,5,0))===false"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>recordatorios-extra.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const VENTANA = 24 * 60 * 60 * 1000;
+const HORA = 60 * 60 * 1000;
+
+function tipoDeEnvio(ultimoMensajeCliente, ahora) {
+  if (ultimoMensajeCliente == null) return &quot;plantilla&quot;;
+  return ahora - ultimoMensajeCliente &lt; VENTANA ? &quot;texto&quot; : &quot;plantilla&quot;;
+}
+
+function horaLima(ahora) {
+  return new Date(ahora - 5 * HORA).getUTCHours();
+}
+
+function enHorarioPermitido(ahora) {
+  const h = horaLima(ahora);
+  return h &gt;= 8 &amp;&amp; h &lt; 21;
+}
+
+function esBaja(texto) {
+  const t = String(texto).normalize(&quot;NFD&quot;).replace(/[̀-ͯ]/g, &quot;&quot;).toLowerCase().trim();
+  if (t === &quot;baja&quot; || t === &quot;stop&quot;) return true;
+  return [&quot;no quiero recibir&quot;, &quot;cancelar suscripcion&quot;, &quot;darme de baja&quot;].some((f) =&gt; t.includes(f));
+}
+
+function debeRecordar(cliente, ahora) {
+  if (cliente.optOut) return false;
+  if (cliente.ultimoRecordatorio != null &amp;&amp; ahora - cliente.ultimoRecordatorio &lt; VENTANA) return false;
+  return enHorarioPermitido(ahora);
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 18</a>
+        <a class="next" href="../19-whatsapp-flows/"><small>Siguiente →</small>Formularios dentro de WhatsApp con Flows</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 18 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Recordatorios%20y%20seguimiento%20automático&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

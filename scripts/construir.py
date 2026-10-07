@@ -187,7 +187,7 @@ def cabecera(titulo, desc, ruta, prof, brand_href):
   <link rel="canonical" href="{url}">
   <link rel="icon" href="{prof}assets/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="{prof}manifest.webmanifest">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#0b7a75">
   <meta name="color-scheme" content="light dark">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="{esc(SITE)}">
@@ -201,7 +201,7 @@ def cabecera(titulo, desc, ruta, prof, brand_href):
 <body>
   <a class="saltar" href="#contenido">Saltar al contenido</a>
   <header class="topbar">
-    <a class="brand" href="{brand_href}"><span class="brand-logo">💬</span> {esc(SITE)}</a>
+    <a class="brand" href="{brand_href}"><span class="brand-logo"><img src="{prof}assets/favicon.svg" alt="" width="34" height="34"></span> {esc(SITE)}</a>
     <div class="topbar-actions">
       @@ACCIONES@@
       <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
@@ -435,7 +435,7 @@ def construir_ejercicio(s):
 def construir_portada():
     P = CUR["portada"]
     h = cabecera(f"{P['titulo']} · {SITE}", P["descripcion"], "", "", "./")
-    h = h.replace("@@ACCIONES@@", '<a class="icon-btn nav-cursos" href="#temario" style="text-decoration:none">Temario</a>')
+    h = h.replace("@@ACCIONES@@", '<a class="icon-btn nav-cursos" href="simulador/" style="text-decoration:none">Simulador</a><a class="icon-btn nav-cursos" href="#temario" style="text-decoration:none">Temario</a>')
     total_min = sum(int(INFO[s]["minutos"]) for s in ORDEN)
     horas = round(total_min / 60)
     lineas = json.dumps(P["demo_lineas"], ensure_ascii=False)
@@ -455,10 +455,17 @@ def construir_portada():
         <a class="btn secondary" href="#temario">Ver el temario</a>
         <div class="avance" id="avance"></div>
       </div>
-      <div class="hero-demo" role="group" aria-label="Demostración: un bot que responde en consola">
+      <div class="hero-visual">
+       <div class="hero-demo" role="group" aria-label="Demostración: un bot que responde en consola">
         <div class="win-bar"><i></i><i></i><i></i></div>
         <pre id="typing" data-lines='{esc(lineas)}' data-outs='{esc(outs)}'></pre>
         <div class="hero-out" id="typing-out"></div>
+       </div>
+       <div class="chat-float" aria-hidden="true">
+        <div class="bub in bub-1">Hola, ¿tienen mesa para hoy?</div>
+        <div class="bub out bub-2">¡Claro! Soy el bot <span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="bub warm bub-3">Reservado ✅</div>
+       </div>
       </div>
     </div>
 
@@ -495,12 +502,12 @@ def tarjeta(s):
 
 
 def construir_extras():
-    urls = [BASE] + [f"{BASE}{s}/" for s in ORDEN] + [f"{BASE}{s}/ejercicio.html" for s in ORDEN if (RAIZ / "contenido" / f"{s}.ej.md").exists()]
+    urls = [BASE, f"{BASE}simulador/"] + [f"{BASE}{s}/" for s in ORDEN] + [f"{BASE}{s}/ejercicio.html" for s in ORDEN if (RAIZ / "contenido" / f"{s}.ej.md").exists()]
     sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n"
     (RAIZ / "sitemap.xml").write_text(sm, encoding="utf8")
     (RAIZ / "manifest.webmanifest").write_text(json.dumps({
         "name": SITE, "short_name": "Bots WhatsApp", "description": CUR["portada"]["descripcion"], "lang": "es",
-        "start_url": "./", "scope": "./", "display": "standalone", "background_color": "#0f1222", "theme_color": "#4f46e5",
+        "start_url": "./", "scope": "./", "display": "standalone", "background_color": "#08191c", "theme_color": "#0b7a75",
         "icons": [{"src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
                   {"src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]}, ensure_ascii=False, indent=2), encoding="utf8")
     (RAIZ / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE}sitemap.xml\n", encoding="utf8")

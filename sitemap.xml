@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/simulador/</loc></url>
   <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/01-como-funciona-un-bot/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/05-estado-de-la-conversacion/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/07-catalogo-y-carrito/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/10-servidor-del-bot/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/15-memoria-con-kv/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/20-marketing-responsable/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/22-ia-como-complemento/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/26-vender-tu-bot/</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/</loc></url>
   <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/01-como-funciona-un-bot/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/05-estado-de-la-conversacion/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/07-catalogo-y-carrito/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/10-servidor-del-bot/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/14-enviar-mensajes/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/28-otros-proveedores/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/15-memoria-con-kv/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/20-marketing-responsable/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/22-ia-como-complemento/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/26-vender-tu-bot/ejercicio.html</loc></url>
+  <url><loc>https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/ejercicio.html</loc></url>
 </urlset>

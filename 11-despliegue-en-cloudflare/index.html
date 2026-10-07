@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Despliegue en Cloudflare · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Publicar el bot en Cloudflare Workers paso a paso: cuenta, Wrangler, KV, secretos, wrangler.toml, dry-run, deploy, logs con tail y cómo volver atrás.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Despliegue en Cloudflare · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Publicar el bot en Cloudflare Workers paso a paso: cuenta, Wrangler, KV, secretos, wrangler.toml, dry-run, deploy, logs con tail y cómo volver atrás.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#que-significa-desplegar">Qué significa «desplegar»</a></li><li><a href="#la-cuenta-de-cloudflare">La cuenta de Cloudflare</a></li><li><a href="#wrangler-instalar-y-autenticar">Wrangler: instalar y autenticar</a></li><li><a href="#leer-wrangler-toml">Leer wrangler.toml</a></li><li><a href="#crear-el-kv-de-verdad">Crear el KV de verdad</a></li><li><a href="#cargar-los-secretos">Cargar los secretos</a></li><li><a href="#probar-el-empaquetado-wrangler-deploy-dr">Probar el empaquetado: wrangler deploy --dry-run</a></li><li><a href="#el-despliegue-real">El despliegue real</a></li><li><a href="#ver-que-pasa-wrangler-tail">Ver qué pasa: wrangler tail</a></li><li><a href="#volver-atras-versiones-y-rollback">Volver atrás: versiones y rollback</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 11</div>
+        <h1>Despliegue en Cloudflare</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Crear una cuenta de Cloudflare y autenticar Wrangler en tu computadora.</li><li>Leer y adaptar <code>wrangler.toml</code> (nombre, KV, cron y variables) sin exponer secretos.</li><li>Crear el namespace KV y cargar <code>VERIFY_TOKEN</code>, <code>WA_TOKEN</code> y <code>APP_SECRET</code> con <code>wrangler secret put</code>.</li><li>Comprobar el empaquetado con <code>wrangler deploy --dry-run</code> y describir qué hará el despliegue real.</li><li>Observar el bot en producción con <code>wrangler tail</code> y revertir con <code>wrangler rollback</code>.</li></ul>
+</div>
+
+<h2 id="que-significa-desplegar"><span class="n">1.</span>Qué significa «desplegar»</h2>
+<p>Tu Worker ya corre en tu computadora (lección <a href="../10-servidor-del-bot/">10</a>). <strong>Desplegar</strong> es subirlo a Cloudflare para que viva en una dirección pública con HTTPS, lista para que Meta la llame las 24 horas aunque tu computadora esté apagada.</p>
+<p>El proceso tiene cuatro piezas, que ordenaremos en este orden porque cada una depende de la anterior:</p>
+<div class="flow"><div class="node"><strong>Cuenta</strong><span>Cloudflare</span></div><div class="arrow">→<code>wrangler login</code></div><div class="node"><strong>KV y secretos</strong><span>BOT_KV, tokens</span></div><div class="arrow">→<code>wrangler deploy</code></div><div class="node"><strong>Worker público</strong><span>workers.dev</span></div><div class="arrow">→<code>wrangler tail</code></div><div class="node"><strong>Observarlo</strong><span>logs en vivo</span></div></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Alcance de esta lección</p>
+<p>Aquí aprenderás y practicarás todo lo que no gasta ni arriesga nada: instalar, autenticar, revisar la configuración y ejecutar <code>wrangler deploy --dry-run</code> (que empaqueta sin subir). El <strong>despliegue real</strong> lo harás cuando tengas tus credenciales de Meta (lecciones <a href="../12-cuenta-y-app-de-meta/">12</a> y <a href="../13-recibir-mensajes-reales/">13</a>); los comandos están explicados para que ese día sea mecánico. En el proyecto de referencia, el dry-run se ejecutó y funciona, pero <strong>no se ha desplegado contra la nube real</strong>.</p></div>
+<h2 id="la-cuenta-de-cloudflare"><span class="n">2.</span>La cuenta de Cloudflare</h2>
+<ol>
+<li>Entra a <a href="https://dash.cloudflare.com/">dash.cloudflare.com</a> y crea una cuenta con tu correo (es gratuita; no se pide tarjeta para el plan gratuito de Workers, pero verifica las condiciones actuales).</li>
+<li>Confirma tu correo.</li>
+<li>No necesitas comprar un dominio: Cloudflare te asigna una dirección gratuita del tipo <code>https://nombre-del-worker.tu-subdominio.workers.dev</code>.</li>
+</ol>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los planes, límites y requisitos de la cuenta de Cloudflare (por ejemplo, qué incluye el plan gratuito de Workers y KV) cambian con el tiempo. Revisa <a href="https://developers.cloudflare.com/workers/platform/pricing/">Workers: Pricing</a>, <a href="https://developers.cloudflare.com/workers/platform/limits/">Workers: Limits</a> y <a href="https://developers.cloudflare.com/kv/platform/pricing/">KV: Pricing</a> antes de decidir.</p></div>
+<p>La primera vez que despliegues, Cloudflare te pedirá elegir un <strong>subdominio</strong> de <code>workers.dev</code> (el «tu-subdominio» de arriba). Se hace una sola vez por cuenta y forma parte de la URL pública de todos tus Workers, así que elige uno neutro y profesional; si trabajas para clientes, no pongas el nombre de un cliente.</p>
+<h2 id="wrangler-instalar-y-autenticar"><span class="n">3.</span>Wrangler: instalar y autenticar</h2>
+<p><strong>Wrangler</strong> es la línea de comandos oficial de Cloudflare para Workers. En el proyecto de referencia ya viene como dependencia de desarrollo (<code>devDependencies</code>), así que basta:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>cd codigo
+npm install
+npx wrangler --version</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code> ⛅️ wrangler 4.148.0</code></pre>
+</div>
+<p>Usamos <code>npx wrangler</code> (la copia local del proyecto) para que todos usen la misma versión. Después autentica tu cuenta:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler login</code></pre>
+</div>
+<p>Se abre el navegador, inicias sesión en Cloudflare y autorizas a Wrangler (usa <strong>OAuth</strong>: no copias contraseñas ni claves). Wrangler guarda un token en una carpeta de configuración de tu usuario. Para comprobar con quién estás conectado:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler whoami</code></pre>
+</div>
+<p>Verás tu correo, el nombre de la cuenta y su <strong>Account ID</strong> (un identificador, no un secreto, pero tampoco hace falta publicarlo). Para cerrar sesión, <code>npx wrangler logout</code>.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Computadoras compartidas</p>
+<p>Si trabajas en un equipo que no es tuyo, cierra la sesión al terminar (<code>wrangler logout</code>). El token de Wrangler permite desplegar en tu cuenta.</p></div>
+<h2 id="leer-wrangler-toml"><span class="n">4.</span>Leer wrangler.toml</h2>
+<p><code>wrangler.toml</code> es el archivo donde le dices a Cloudflare <strong>qué es</strong> tu Worker. Este es el del proyecto, con sus comentarios:</p>
+<div class="code">
+  <div class="code-head"><span>wrangler.toml</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>name = &quot;bot-minimarket&quot;
+main = &quot;src/worker.js&quot;
+compatibility_date = &quot;2026-09-01&quot;
+
+# KV: guarda sesiones, pedidos y los ids de mensajes ya procesados.
+[[kv_namespaces]]
+binding = &quot;BOT_KV&quot;
+id = &quot;00000000000000000000000000000000&quot;          # id de EJEMPLO: reemplázalo
+preview_id = &quot;11111111111111111111111111111111&quot;  # id de EJEMPLO para wrangler dev
+
+# Cron: cada 15 minutos corre scheduled() (recordatorios).
+[triggers]
+crons = [&quot;*/15 * * * *&quot;]
+
+# Variables NO secretas.
+[vars]
+WA_PHONE_ID = &quot;000000000000000&quot;   # id de EJEMPLO</code></pre>
+</div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Línea</th>
+<th>Qué hace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Nombre del Worker; forma parte de la URL (<code>bot-minimarket.&lt;subdominio&gt;.workers.dev</code>).</td>
+</tr>
+<tr>
+<td><code>main</code></td>
+<td>Archivo de entrada. Wrangler empaqueta <code>worker.js</code> y todo lo que importa.</td>
+</tr>
+<tr>
+<td><code>compatibility_date</code></td>
+<td>Fija el comportamiento del entorno de ejecución a una fecha, para que las actualizaciones de Cloudflare no cambien tu Worker por sorpresa.</td>
+</tr>
+<tr>
+<td><code>[[kv_namespaces]]</code></td>
+<td>Conecta la variable <code>env.BOT_KV</code> con un almacén KV real, identificado por su <code>id</code>.</td>
+</tr>
+<tr>
+<td><code>[triggers] crons</code></td>
+<td>Programa <code>scheduled()</code>; <code>*/15 * * * *</code> significa «cada 15 minutos».</td>
+</tr>
+<tr>
+<td><code>[vars]</code></td>
+<td>Variables <strong>no secretas</strong> visibles en el panel. <code>WA_PHONE_ID</code> es un identificador, no una credencial.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Hay una distinción que decide la seguridad de tu bot: <strong>variables</strong> (<code>[vars]</code>, van en el archivo y en Git) frente a <strong>secretos</strong> (se cargan con un comando y nunca se escriben en archivos que subas). Los tres secretos del bot son:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Secreto</th>
+<th>Para qué sirve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VERIFY_TOKEN</code></td>
+<td>Frase que acuerdas con Meta para verificar el webhook (lección 9).</td>
+</tr>
+<tr>
+<td><code>WA_TOKEN</code></td>
+<td>Token de acceso con el que tu bot envía mensajes por la API.</td>
+</tr>
+<tr>
+<td><code>APP_SECRET</code></td>
+<td>Secreto de la app de Meta con el que se firman los webhooks (lección 9).</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los ids del archivo son de <strong>ejemplo</strong> (<code>000…</code>, <code>111…</code>). El despliegue real fallará hasta que los reemplaces por los de tu cuenta. Consulta la <a href="https://developers.cloudflare.com/workers/wrangler/configuration/">referencia de configuración de Wrangler</a> por si cambian los nombres de las claves (Cloudflare también admite <code>wrangler.jsonc</code>).</p></div>
+<h2 id="crear-el-kv-de-verdad"><span class="n">5.</span>Crear el KV de verdad</h2>
+<p>El KV es la memoria del bot. Hasta ahora, en local, Wrangler usaba uno simulado. En la nube necesitas uno real. Un solo comando lo crea:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler kv namespace create BOT_KV</code></pre>
+</div>
+<p>Wrangler crea el namespace en tu cuenta y te muestra su <strong>id</strong> (una cadena de 32 caracteres hexadecimales). Dos formas de usarlo:</p>
+<ul>
+<li>Copiar ese id y reemplazar el valor <code>id = "0000…"</code> de <code>wrangler.toml</code>.</li>
+<li>Añadir <code>--update-config</code> al comando para que Wrangler edite el archivo por ti (esta opción aparece en <code>npx wrangler kv namespace create --help</code>).</li>
+</ul>
+<p>Haz esto una sola vez. El <code>preview_id</code> de ejemplo solo importa si usas <code>wrangler dev --remote</code> (contra la nube); en local no hace falta.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Un KV por proyecto</p>
+<p>No reutilices el mismo namespace entre bots de clientes distintos: mezclarías sesiones y pedidos. Crea uno por proyecto (<code>BOT_KV</code> en cada <code>wrangler.toml</code> apuntando a ids distintos).</p></div>
+<h2 id="cargar-los-secretos"><span class="n">6.</span>Cargar los secretos</h2>
+<p>Cada secreto se carga con <code>wrangler secret put</code>. El comando te pide el valor por teclado (no se muestra ni queda en el historial de la terminal, a diferencia de pegarlo en una línea de comando):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler secret put VERIFY_TOKEN
+npx wrangler secret put WA_TOKEN
+npx wrangler secret put APP_SECRET</code></pre>
+</div>
+<p>Para <code>VERIFY_TOKEN</code> inventas una frase larga y aleatoria (por ejemplo, tres o cuatro palabras al azar más un número) y la guardas en tu gestor de contraseñas: la volverás a escribir en el panel de Meta. Para <code>WA_TOKEN</code> y <code>APP_SECRET</code> los valores vienen de Meta, y los obtendrás en las lecciones 12 y 13.</p>
+<p>Si cargaste todo, puedes ver <strong>solo los nombres</strong> (nunca los valores):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler secret list</code></pre>
+</div>
+<p>Otras dos operaciones útiles: <code>npx wrangler secret delete NOMBRE</code> para borrar uno y <code>npx wrangler secret bulk archivo.json</code> para cargar varios de una vez (hasta 100).</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Qué pasa si un secreto se filtra</p>
+<p>Si pegas un token en un chat, lo subes a Git o lo muestras en pantalla, <strong>considéralo comprometido</strong>: revócalo o regenéralo en Meta, y vuelve a cargarlo con <code>wrangler secret put</code>. Cambiar un secreto no requiere cambiar el código. Más sobre esto en la <a href="../24-seguridad-y-privacidad/">lección 24</a>.</p></div>
+<p>Y en tu computadora sigues usando <code>.dev.vars</code> (que nunca se sube). <strong>No son lo mismo</strong>: <code>.dev.vars</code> es para <code>wrangler dev</code> en local; <code>wrangler secret put</code> es para la nube.</p>
+<h2 id="probar-el-empaquetado-wrangler-deploy-dr"><span class="n">7.</span>Probar el empaquetado: wrangler deploy --dry-run</h2>
+<p>Antes de subir nada, pídele a Wrangler que haga todo menos subir. <code>--dry-run</code> compila, comprueba la configuración y se detiene. No toca tu cuenta ni pide credenciales de red:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler deploy --dry-run</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code> ⛅️ wrangler 4.148.0
+────────────────────
+Total Upload: 49.42 KiB / gzip: 13.76 KiB
+Your Worker has access to the following bindings:
+Binding                                                 Resource                  
+env.BOT_KV (00000000000000000000000000000000)           KV Namespace              
+env.WA_PHONE_ID (&quot;000000000000000&quot;)                     Environment Variable      
+
+--dry-run: exiting now.</code></pre>
+</div>
+<p>Esta es la salida real del proyecto. Léela como una auditoría:</p>
+<ul>
+<li><strong>Total Upload: 49.42 KiB.</strong> El paquete del bot completo pesa unos 49 KiB (13.76 KiB comprimido): <code>worker.js</code> más todos los módulos que importa. Muy por debajo de los límites de tamaño; revisa los vigentes en la documentación de límites.</li>
+<li><strong>Bindings.</strong> Son los recursos conectados: <code>env.BOT_KV</code> (KV) y <code>env.WA_PHONE_ID</code> (variable). <strong>Fíjate en lo que no aparece</strong>: <code>VERIFY_TOKEN</code>, <code>WA_TOKEN</code> y <code>APP_SECRET</code>. No están en el archivo, y así debe ser; viven aparte, como secretos.</li>
+<li>Mientras el <code>id</code> del KV siga siendo el de ejemplo (<code>000…</code>), el dry-run pasa, pero <strong>el despliegue real fallaría</strong>: es una buena razón para no confiar solo en el dry-run.</li>
+</ul>
+<p>Si añades <code>--outdir dist</code>, Wrangler deja el paquete resultante en esa carpeta para que lo inspecciones. Con el bot de referencia se generan <code>worker.js</code> (unos 50 KB) y <code>worker.js.map</code>.</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler deploy --dry-run --outdir dist</code></pre>
+</div>
+<h2 id="el-despliegue-real"><span class="n">8.</span>El despliegue real</h2>
+<p>Cuando tengas el KV creado con su id en <code>wrangler.toml</code> y los secretos cargados, desplegar es un comando (<strong>no lo ejecutes todavía</strong>; ahora solo comprende lo que hará):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler deploy</code></pre>
+</div>
+<p>Wrangler va a:</p>
+<ol>
+<li>empaquetar el Worker (como en el dry-run),</li>
+<li>subirlo a tu cuenta,</li>
+<li>publicarlo en <code>https://bot-minimarket.&lt;tu-subdominio&gt;.workers.dev</code>,</li>
+<li>registrar el cron <code>*/15 * * * *</code>,</li>
+<li>imprimir la URL final y un <strong>id de versión</strong> (anótalo: sirve para revertir).</li>
+</ol>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Variables al desplegar</p>
+<p>Por defecto, <code>wrangler deploy</code> reemplaza las variables del panel por las de <code>wrangler.toml</code>. Si editaste variables a mano en el panel de Cloudflare y no quieres perderlas, existe la opción <code>--keep-vars</code>. Los <strong>secretos</strong> no se ven afectados.</p></div>
+<p>Con la URL en mano, repetirás con el Worker real las pruebas de la lección 10:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl -s https://bot-minimarket.&lt;tu-subdominio&gt;.workers.dev/salud</code></pre>
+</div>
+<p>La respuesta esperada es <code>{"ok":true}</code>. Después, la verificación del webhook con tu token real (cambia los datos):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl -s -w &#x27; [%{http_code}]\n&#x27; &quot;https://bot-minimarket.&lt;tu-subdominio&gt;.workers.dev/webhook?hub.mode=subscribe&amp;hub.verify_token=TU_FRASE&amp;hub.challenge=1158201444&quot;</code></pre>
+</div>
+<p>La respuesta esperada es <code>1158201444 [200]</code>. Esa misma URL, terminada en <code>/webhook</code>, es la que pegarás en el panel de Meta en la lección 13.</p>
+<h2 id="ver-que-pasa-wrangler-tail"><span class="n">9.</span>Ver qué pasa: wrangler tail</h2>
+<p>Un Worker en producción no tiene «terminal». Para ver sus <code>console.log</code> y <code>console.error</code> mientras funciona, usas <code>tail</code>, que transmite los registros en vivo a tu terminal:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler tail bot-minimarket</code></pre>
+</div>
+<p>Mientras llegan mensajes verás cada petición y los errores que ya conoces: <code>Mensaje fallido ...</code>, <code>Error procesando webhook: ...</code>. Algunas opciones de <code>tail</code> (están en <code>npx wrangler tail --help</code>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Opción</th>
+<th>Para qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--format pretty</code> o <code>json</code></td>
+<td>Cómo se muestra cada registro.</td>
+</tr>
+<tr>
+<td><code>--status error</code></td>
+<td>Solo las invocaciones con error.</td>
+</tr>
+<tr>
+<td><code>--method POST</code></td>
+<td>Solo las peticiones POST.</td>
+</tr>
+<tr>
+<td><code>--search "texto"</code></td>
+<td>Solo los registros cuyo <code>console.log</code> contiene ese texto.</td>
+</tr>
+</tbody>
+</table></div>
+<div class="callout consejo">
+<p class="callout-title">💡 Qué registrar y qué no</p>
+<p>En los registros escribe <strong>identificadores</strong> (el <code>wamid</code>, el id de pedido), nunca el texto completo de la conversación ni datos personales. Los registros pueden ser vistos por varias personas y tienen su propia retención. Ya lo hace el bot: <code>console.error('Mensaje fallido', evento.id, evento.errores)</code>.</p></div>
+<p>Cloudflare también ofrece un panel de <strong>Observability</strong> (registros históricos) en su sitio web; sus opciones cambian con frecuencia, así que consúltalo en la <a href="https://developers.cloudflare.com/workers/observability/logs/">documentación de Workers Logs</a> cuando lo necesites.</p>
+<h2 id="volver-atras-versiones-y-rollback"><span class="n">10.</span>Volver atrás: versiones y rollback</h2>
+<p>Todo despliegue crea una <strong>versión</strong> nueva. Si publicaste un cambio y el bot empezó a fallar, no hace falta correr a editar código: vuelve a la versión anterior.</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler deployments list
+npx wrangler rollback &lt;id-de-version&gt;</code></pre>
+</div>
+<p><code>deployments list</code> muestra los 10 despliegues más recientes con sus ids. <code>rollback</code> publica de nuevo la versión que le indiques (sin ella, vuelve a la anterior). Es tu botón de pánico mientras investigas con calma.</p>
+<p>Un hábito sano antes de cada despliegue:</p>
+<ol>
+<li><code>npm test</code> (las 112 pruebas del proyecto en verde).</li>
+<li><code>npx wrangler deploy --dry-run</code>.</li>
+<li><code>npx wrangler deploy</code>.</li>
+<li><code>curl</code> a <code>/salud</code> y un vistazo a <code>wrangler tail</code>.</li>
+</ol>
+<h2 id="errores-frecuentes"><span class="n">11.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Subir <code>.dev.vars</code> o pegar tokens en <code>wrangler.toml</code>.</strong> Los secretos van con <code>wrangler secret put</code>. Si se filtran, regenéralos.</li>
+<li><strong>Desplegar con los ids de ejemplo del KV.</strong> El dry-run pasa pero el despliegue falla. Reemplaza <code>id</code> por el real.</li>
+<li><strong>Confundir <code>.dev.vars</code> con los secretos de la nube.</strong> Cargar <code>.dev.vars</code> no sube nada; la nube necesita <code>secret put</code>.</li>
+<li><strong>Olvidar <code>/webhook</code> en la URL del panel de Meta.</strong> El Worker acepta también <code>/</code>, pero la verificación y el POST deben llegar a la misma dirección que registraste.</li>
+<li><strong>No guardar el <code>VERIFY_TOKEN</code> real.</strong> Lo necesitarás para registrar el webhook; si lo pierdes, define uno nuevo y vuelve a cargarlo.</li>
+<li><strong>Depurar a ciegas.</strong> Con <code>wrangler tail</code> abierto, el 90 % de los fallos de primer despliegue se explican en la primera línea de error.</li>
+<li><strong>Subir cambios sin pasar <code>npm test</code>.</strong> Un 401 inesperado por romper la firma se evita con una prueba que ya existe.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">12.</span>Apuntes para llevar</h2>
+<ul>
+<li><strong>Desplegar</strong> es publicar el Worker en una URL pública HTTPS (<code>workers.dev</code>) sin servidor propio.</li>
+<li>Flujo: cuenta de Cloudflare → <code>wrangler login</code> → <code>kv namespace create</code> → <code>secret put</code> → <code>deploy</code> → <code>tail</code>.</li>
+<li><code>wrangler.toml</code> guarda lo <strong>no secreto</strong> (nombre, KV, cron, <code>WA_PHONE_ID</code>); los secretos (<code>VERIFY_TOKEN</code>, <code>WA_TOKEN</code>, <code>APP_SECRET</code>) se cargan con <code>wrangler secret put</code>.</li>
+<li><code>wrangler deploy --dry-run</code> empaqueta y revisa sin subir: el bot de referencia pesa unos 49 KiB.</li>
+<li><code>wrangler tail</code> muestra los registros en vivo; <code>wrangler rollback</code> vuelve a una versión anterior.</li>
+<li>Límites, precios y menús de Cloudflare cambian: verifica siempre la documentación oficial.</li>
+</ul>
+<h2 id="glosario"><span class="n">13.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Desplegar</td>
+<td>Publicar una nueva versión de tu programa en el servidor para que los usuarios la usen.</td>
+</tr>
+<tr>
+<td><code>workers.dev</code></td>
+<td>Dominio gratuito de Cloudflare donde se publica tu Worker.</td>
+</tr>
+<tr>
+<td>Binding</td>
+<td>Conexión entre tu Worker y un recurso (KV, variable, secreto) accesible por <code>env</code>.</td>
+</tr>
+<tr>
+<td>Namespace de KV</td>
+<td>Un «espacio» de almacén clave-valor, con su propio id.</td>
+</tr>
+<tr>
+<td>Secreto</td>
+<td>Valor sensible cargado con <code>wrangler secret put</code>, que no queda en archivos.</td>
+</tr>
+<tr>
+<td>Variable</td>
+<td>Valor no sensible definido en <code>[vars]</code> de <code>wrangler.toml</code>.</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Ejecuta todo el proceso de empaquetado sin subir nada.</td>
+</tr>
+<tr>
+<td><code>wrangler tail</code></td>
+<td>Comando que transmite en vivo los registros del Worker.</td>
+</tr>
+<tr>
+<td>Rollback</td>
+<td>Volver a publicar una versión anterior del Worker.</td>
+</tr>
+<tr>
+<td><code>compatibility_date</code></td>
+<td>Fecha que fija la versión del comportamiento del entorno de ejecución.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Dónde debe vivir el valor de <code>APP_SECRET</code> en producción?</p><ul class="opts"><li><button type="button" class="opt">En <code>wrangler.toml</code>, dentro de <code>[vars]</code></button></li><li><button type="button" class="opt">En el código de <code>worker.js</code></button></li><li><button type="button" class="opt" data-ok>Cargado con <code>npx wrangler secret put APP_SECRET</code></button></li><li><button type="button" class="opt">En un archivo <code>.dev.vars</code> subido a Git</button></li></ul><p class="explain" hidden>Los secretos no van en archivos que se suban; <code>secret put</code> los guarda cifrados en Cloudflare.</p></div>
+<div class="quiz-q"><p>¿Qué hace <code>npx wrangler deploy --dry-run</code>?</p><ul class="opts"><li><button type="button" class="opt" data-ok>Empaqueta el Worker y revisa la configuración sin subirlo a la nube</button></li><li><button type="button" class="opt">Despliega solo en una cuenta de pruebas</button></li><li><button type="button" class="opt">Borra los secretos antiguos</button></li><li><button type="button" class="opt">Abre el servidor local para probar</button></li></ul><p class="explain" hidden>Es una verificación previa: muestra el tamaño del paquete y los bindings, y se detiene.</p></div>
+<div class="quiz-q"><p>Ejecutaste el dry-run con los ids de ejemplo del KV y pasó sin errores. ¿Qué pasará con un <code>wrangler deploy</code> real?</p><ul class="opts"><li><button type="button" class="opt">Funcionará igual</button></li><li><button type="button" class="opt" data-ok>Probablemente falle, porque esos ids no existen en tu cuenta; primero hay que crear el KV y reemplazar el id</button></li><li><button type="button" class="opt">Cloudflare creará el KV automáticamente con el id de ejemplo</button></li><li><button type="button" class="opt">Meta reemplazará los ids</button></li></ul><p class="explain" hidden>El dry-run no consulta tu cuenta; el despliegue real sí necesita ids válidos.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve <code>npx wrangler tail</code>?</p><ul class="opts"><li><button type="button" class="opt">Para subir archivos al KV</button></li><li><button type="button" class="opt" data-ok>Para ver en vivo los registros (<code>console.log</code>/<code>console.error</code>) del Worker en producción</button></li><li><button type="button" class="opt">Para firmar los webhooks</button></li><li><button type="button" class="opt">Para crear secretos</button></li></ul><p class="explain" hidden>Es la forma más rápida de ver errores de un Worker desplegado.</p></div>
+<div class="quiz-q"><p>Un despliegue nuevo rompió el bot. ¿Qué haces primero para recuperar el servicio?</p><ul class="opts"><li><button type="button" class="opt">Borrar la cuenta de Cloudflare</button></li><li><button type="button" class="opt">Cambiar el <code>VERIFY_TOKEN</code></button></li><li><button type="button" class="opt" data-ok>Revertir con <code>npx wrangler rollback</code> a la versión anterior y luego investigar con calma</button></li><li><button type="button" class="opt">Apagar la computadora</button></li></ul><p class="explain" hidden>Cada despliegue es una versión; volver a la anterior es rápido y no requiere editar código.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-11">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../10-servidor-del-bot/"><small>← Anterior</small>El servidor del bot</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 11 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2011:%20Despliegue%20en%20Cloudflare&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

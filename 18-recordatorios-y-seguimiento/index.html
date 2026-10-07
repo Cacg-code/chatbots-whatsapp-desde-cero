@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recordatorios y seguimiento automático · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo enviar avisos útiles a tiempo con un cron, elegir entre texto libre y plantilla según la ventana de 24 horas, y respetar la baja del cliente.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Recordatorios y seguimiento automático · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo enviar avisos útiles a tiempo con un cron, elegir entre texto libre y plantilla según la ventana de 24 horas, y respetar la baja del cliente.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-un-bot-necesita-un-reloj">Por qué un bot necesita un reloj</a></li><li><a href="#que-conviene-recordar-y-que-no">Qué conviene recordar (y qué no)</a></li><li><a href="#la-ventana-de-24-horas-decide-el-formato">La ventana de 24 horas decide el formato</a></li><li><a href="#que-hacen-pedidospararecordar-y-carritos">Qué hacen pedidosParaRecordar y carritosAbandonados</a></li><li><a href="#el-cron-scheduled-y-wrangler-toml">El cron: scheduled y wrangler.toml</a></li><li><a href="#ejecutar-ejecutarrecordatorios-sin-tocar">Ejecutar ejecutarRecordatorios sin tocar Meta ni Cloudflare</a></li><li><a href="#plantillas-de-recordatorio-lo-que-dicen-">Plantillas de recordatorio: lo que dicen los documentos de Meta</a></li><li><a href="#baja-frecuencia-y-horario-lo-que-el-codi">Baja, frecuencia y horario: lo que el código de referencia aún no hace</a></li><li><a href="#medir-si-el-recordatorio-funciona">Medir si el recordatorio funciona</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 18</div>
+        <h1>Recordatorios y seguimiento automático</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar por qué un recordatorio automático necesita un disparador de tiempo (cron) y no solo el webhook.</li><li>Decidir con código si un recordatorio sale como texto libre o como plantilla según la ventana de 24 horas.</li><li>Leer y ejecutar <code>pedidosParaRecordar</code> y <code>carritosAbandonados</code>, y razonar sobre sus umbrales.</li><li>Configurar un cron trigger de Cloudflare y simular su ejecución con un almacenamiento falso.</li><li>Aplicar baja (opt-out), frecuencia máxima y horario razonable antes de enviar cualquier aviso.</li></ul>
+</div>
+
+<h2 id="por-que-un-bot-necesita-un-reloj"><span class="n">1.</span>Por qué un bot necesita un reloj</h2>
+<p>Hasta ahora tu bot es <strong>reactivo</strong>: no hace nada hasta que Meta llama al webhook con un mensaje. Un recordatorio es lo contrario: el cliente <strong>no escribió nada</strong> y aun así el bot debe actuar. «Hace una hora dejó un carrito sin cerrar» no es un evento que Meta te envíe; es la <strong>ausencia</strong> de un evento. Alguien tiene que mirar el reloj.</p>
+<p>Ese «alguien» es un <strong>cron</strong>: un disparador que ejecuta tu código cada cierto tiempo. En Cloudflare se llama <em>Cron Trigger</em> y llama a la función <code>scheduled</code> de tu Worker. Cada vez que se dispara, tu código hace tres cosas:</p>
+<ol>
+<li><strong>Lee</strong> el estado guardado (pedidos y sesiones en KV).</li>
+<li><strong>Decide</strong> a quién corresponde un aviso (funciones puras, fáciles de probar).</li>
+<li><strong>Envía</strong> los mensajes y <strong>anota</strong> que ya los envió, para no repetirlos.</li>
+</ol>
+<div class="flow"><div class="node"><strong>Cron</strong><span>cada 15 min</span></div><div class="arrow">→<code>scheduled()</code></div><div class="node"><strong>Tu Worker</strong><span>lee KV y decide</span></div><div class="arrow">→<code>API de Meta</code></div><div class="node"><strong>Cliente</strong><span>recibe el aviso</span></div></div>
+<p>Esta separación (decidir vs. enviar) es la misma idea de siempre en el curso: la lógica va en funciones puras sin red, y el Worker es la carcasa con entrada y salida. Si no recuerdas por qué, repasa la <a href="../10-servidor-del-bot/">lección 10</a> y la <a href="../15-memoria-con-kv/">lección 15</a>.</p>
+<h2 id="que-conviene-recordar-y-que-no"><span class="n">2.</span>Qué conviene recordar (y qué no)</h2>
+<p>Un recordatorio vale la pena cuando <strong>ayuda al cliente a terminar algo que él mismo empezó</strong>. En el minimarket hay dos casos claros:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Caso</th>
+<th>Disparador</th>
+<th>Qué dice el mensaje</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pedido recibido sin novedad</strong></td>
+<td>Pasaron más de 30 minutos y el pedido sigue en estado <code>recibido</code></td>
+<td>«Tu pedido LE-102 sigue en preparación. Si necesitas algo, escríbenos.»</td>
+</tr>
+<tr>
+<td><strong>Carrito pendiente</strong></td>
+<td>El cliente armó un carrito y no lo cerró en más de 1 hora</td>
+<td>«Dejaste productos en tu carrito. Escribe "carrito" para retomar tu pedido.»</td>
+</tr>
+</tbody>
+</table></div>
+<p>En un negocio de citas (una clínica, una peluquería) el recordatorio estrella es el de la cita del día siguiente: el cliente se acuerda, o avisa que no irá y liberas el cupo, así que bajan las inasistencias. En el minimarket el equivalente es <strong>evitar pedidos que se enfrían</strong>: el cliente pidió, nadie le confirmó, y se fue a otra tienda. El principio es el mismo: un aviso útil, en el momento justo.</p>
+<p>Lo que <strong>no</strong> es un recordatorio:</p>
+<ul>
+<li>Una promoción disfrazada («te dejamos tu carrito con 5 % de descuento»): eso es marketing y sigue las reglas de la <a href="../20-marketing-responsable/">lección 20</a>.</li>
+<li>Un aviso repetido cada hora hasta que el cliente responda. Un recordatorio se envía <strong>una vez</strong>; dos ya empiezan a molestar.</li>
+<li>Un mensaje a quien dijo que no quería recibir más.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Meta decide la <strong>categoría</strong> de cada plantilla (utilidad o marketing) según su contenido, no según lo que tú elijas al crearla, y los avisos de «carrito abandonado» suelen caer en marketing. Eso cambia el precio y las reglas (opt-in, límites por usuario). Revisa el <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/overview">resumen de plantillas</a> y la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página de precios</a> antes de cotizar.</p></div>
+<h2 id="la-ventana-de-24-horas-decide-el-formato"><span class="n">3.</span>La ventana de 24 horas decide el formato</h2>
+<p>En la <a href="../01-como-funciona-un-bot/">lección 1</a> viste la regla: si el cliente escribió hace <strong>menos de 24 horas</strong>, puedes enviar texto libre; si no, solo una <strong>plantilla aprobada</strong>. El código de referencia la implementa en <code>src/recordatorios.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>recordatorios.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export const VENTANA_MS = 24 * HORA;
+
+/** ¿Seguimos dentro de la ventana de 24 h para escribir texto libre? */
+export function puedeEnviarTexto(ultimoMensajeCliente, ahora) {
+  if (ultimoMensajeCliente == null) return false;
+  return ahora - ultimoMensajeCliente &lt; VENTANA_MS;
+}</code></pre>
+</div>
+<p>La comprobación <code>null</code> es importante: si nunca guardaste cuándo escribió el cliente, lo seguro es suponer que la ventana está <strong>cerrada</strong>. Las pruebas del repositorio verifican estos casos:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>node --test test/recordatorios.test.js</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>✔ pedidosParaRecordar: entre 30 min y 23 h (1.7113ms)
+✔ pedidosParaRecordar: solo estado recibido y sin recordatorio previo (0.1848ms)
+✔ pedidosParaRecordar: usa actualizadoEn si existe (0.9565ms)
+✔ pedidosParaRecordar con lista vacía (0.1546ms)
+✔ carritosAbandonados: carrito lleno, inactivo entre 1 h y 23 h (0.3144ms)
+✔ carritosAbandonados: ignora carritos vacíos, ya avisados y estados fuera de compra (0.1959ms)
+✔ puedeEnviarTexto: ventana de 24 horas (0.2008ms)
+✔ puedeEnviarTexto: sin mensaje previo del cliente no se puede (0.1178ms)
+ℹ tests 8
+ℹ pass 8
+ℹ fail 0</code></pre>
+</div>
+<p>(Los milisegundos varían en tu máquina; se omitieron algunas líneas finales del resumen.)</p>
+<p>¿Por qué los umbrales de los pedidos y carritos terminan en <strong>23 horas</strong> y no en 24? Porque el cron corre cada 15 minutos y el envío tarda unos segundos: si esperaras hasta la hora 23 y 59, el mensaje podría cruzar el límite mientras viaja y salir rechazado. Se deja <strong>una hora de margen</strong>. Esa es una decisión de diseño tuya, no una regla de Meta.</p>
+<h2 id="que-hacen-pedidospararecordar-y-carritos"><span class="n">4.</span>Qué hacen <code>pedidosParaRecordar</code> y <code>carritosAbandonados</code></h2>
+<p>Son funciones <strong>puras</strong>: reciben listas y la hora actual, devuelven una sublista. Mira la primera:</p>
+<div class="code">
+  <div class="code-head"><span>recordatorios.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function pedidosParaRecordar(pedidos, ahora) {
+  return pedidos.filter((p) =&gt; {
+    if (p.estado !== &#x27;recibido&#x27; || p.recordadoEn) return false;
+    const edad = ahora - (p.actualizadoEn ?? p.creadoEn);
+    return edad &gt; ESPERA_PEDIDO_MS &amp;&amp; edad &lt; LIMITE_SEGURO_MS;
+  });
+}</code></pre>
+</div>
+<p>Tres condiciones: el pedido sigue en <code>recibido</code>, no se le avisó antes (<code>recordadoEn</code> vacío) y su <strong>edad</strong> está entre 30 minutos y 23 horas. Ejecutémosla con tres pedidos de ejemplo del minimarket (la hora actual es fija para que el resultado se repita):</p>
+<div class="code">
+  <div class="code-head"><span>prueba-recordatorios.mjs</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { pedidosParaRecordar, carritosAbandonados, puedeEnviarTexto } from &#x27;./src/recordatorios.js&#x27;;
+const MIN = 60000, H = 3600000, AHORA = Date.UTC(2026, 9, 7, 18, 0, 0);
+
+const pedidos = [
+  { id: &#x27;LE-1&#x27;, telefono: &#x27;51999000111&#x27;, estado: &#x27;recibido&#x27;, creadoEn: AHORA - 10 * MIN },
+  { id: &#x27;LE-2&#x27;, telefono: &#x27;51999000222&#x27;, estado: &#x27;recibido&#x27;, creadoEn: AHORA - 2 * H },
+  { id: &#x27;LE-3&#x27;, telefono: &#x27;51999000333&#x27;, estado: &#x27;recibido&#x27;, creadoEn: AHORA - 26 * H },
+];
+console.log(pedidosParaRecordar(pedidos, AHORA).map((p) =&gt; p.id));
+
+const sesiones = [{ telefono: &#x27;51999000444&#x27;, estado: &#x27;CARRITO&#x27;, carrito: [{ id: &#x27;leche&#x27;, cantidad: 2 }],
+  ultimoMensajeCliente: AHORA - 3 * H, recordatorioEnviado: false }];
+console.log(carritosAbandonados(sesiones, AHORA).map((s) =&gt; s.telefono));
+console.log(puedeEnviarTexto(AHORA - 3 * H, AHORA), puedeEnviarTexto(AHORA - 25 * H, AHORA), puedeEnviarTexto(null, AHORA));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[ &#x27;LE-2&#x27; ]
+[ &#x27;51999000444&#x27; ]
+true false false</code></pre>
+</div>
+<ul>
+<li><code>LE-1</code> es demasiado reciente (10 minutos): el equipo aún está atendiendo.</li>
+<li><code>LE-2</code> cumple: dos horas sin novedad.</li>
+<li><code>LE-3</code> tiene 26 horas: quedó <strong>fuera</strong> del límite seguro y ya no se le recuerda por esta vía. Si un pedido lleva un día sin atenderse, no necesita un recordatorio: necesita que una persona lo revise (ver <a href="../25-atencion-humana/">lección 25</a>).</li>
+</ul>
+<p><code>carritosAbandonados</code> funciona igual, con dos diferencias: mira solo sesiones en estados de compra (<code>ELIGIENDO</code>, <code>CARRITO</code>, <code>PAGO</code>, etc.) con <strong>carrito no vacío</strong>, y usa <code>ultimoMensajeCliente</code> como medida de inactividad. Un carrito vacío o una sesión ya terminada (<code>FIN</code>) jamás generan aviso.</p>
+<h2 id="el-cron-scheduled-y-wrangler-toml"><span class="n">5.</span>El cron: <code>scheduled</code> y <code>wrangler.toml</code></h2>
+<p>Para que alguien llame a tu código cada 15 minutos, declaras el cron en <code>wrangler.toml</code>:</p>
+<div class="code">
+  <div class="code-head"><span>wrangler.toml</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>[triggers]
+crons = [&quot;*/15 * * * *&quot;]</code></pre>
+</div>
+<p>Cinco campos: minuto, hora, día del mes, mes y día de la semana. <code>*/15</code> significa «cada 15 minutos». Tres detalles de la <a href="https://developers.cloudflare.com/workers/configuration/cron-triggers/">documentación de Cloudflare</a> que te ahorrarán sustos:</p>
+<ul>
+<li><strong>Los crons corren en hora UTC.</strong> Si quieres «todos los días a las 9:00 en Lima», eso es <code>0 14 * * *</code> (Lima es UTC-5).</li>
+<li>Después de desplegar, el cambio puede tardar <strong>hasta 15 minutos</strong> en aplicarse.</li>
+<li>Para probar en local, con <code>npx wrangler dev</code> encendido se puede disparar a mano visitando <code>/cdn-cgi/local/scheduled</code>.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>La ruta de prueba local y las opciones de Wrangler cambian entre versiones. Confírmalas en la <a href="https://developers.cloudflare.com/workers/configuration/cron-triggers/">documentación de Cron Triggers</a> antes de depender de ellas.</p></div>
+<p>En el Worker, el cron entra por la función <code>scheduled</code>, que delega todo en <code>ejecutarRecordatorios</code>:</p>
+<div class="code">
+  <div class="code-head"><span>worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export default {
+  fetch: manejarFetch,
+  scheduled(_evento, env, ctx) {
+    ctx.waitUntil(ejecutarRecordatorios(env).catch((e) =&gt; console.error(&#x27;Error en recordatorios:&#x27;, e.message)));
+  },
+};</code></pre>
+</div>
+<p><code>ctx.waitUntil</code> le dice a Cloudflare «no cierres el Worker hasta que esta promesa termine». El <code>.catch</code> evita que un error de red tumbe la corrida entera sin dejar rastro.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Cron más frecuente no es mejor</p>
+<p>Cada corrida lee tus datos de KV (lecturas que consumen cuota) y la regla de tu negocio rara vez necesita precisión de minutos. Cada 15 minutos sobra para un minimarket; para recordatorios de citas «el día anterior» basta incluso una vez por hora.</p></div>
+<h2 id="ejecutar-ejecutarrecordatorios-sin-tocar"><span class="n">6.</span>Ejecutar <code>ejecutarRecordatorios</code> sin tocar Meta ni Cloudflare</h2>
+<p>Una ventaja de separar capas es que puedes probar el recorrido completo con un <strong>KV falso</strong> (un <code>Map</code>) y una función <code>llamar</code> que, en vez de hacer <code>fetch</code> a Meta, solo guarda lo que habría enviado. El Worker ya está preparado para esto: <code>ejecutarRecordatorios(env, ahora, llamar)</code> acepta ambos como parámetros.</p>
+<div class="code">
+  <div class="code-head"><span>simular-cron.mjs</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { ejecutarRecordatorios } from &#x27;./src/worker.js&#x27;;
+const MIN = 60000, H = 3600000, AHORA = Date.UTC(2026, 9, 7, 18, 0, 0);
+
+const m = new Map();
+const kv = {
+  get: async (k) =&gt; m.get(k) ?? null,
+  put: async (k, v) =&gt; { m.set(k, v); },
+  list: async ({ prefix }) =&gt; ({ keys: [...m.keys()].filter((k) =&gt; k.startsWith(prefix)).map((name) =&gt; ({ name })) }),
+};
+// LE-2: pedido de hace 2 h, el cliente escribió hace 2 h (ventana abierta)
+m.set(&#x27;pedido:LE-2&#x27;, JSON.stringify({ id: &#x27;LE-2&#x27;, telefono: &#x27;51999000222&#x27;, estado: &#x27;recibido&#x27;, creadoEn: AHORA - 2 * H }));
+m.set(&#x27;sesion:51999000222&#x27;, JSON.stringify({ telefono: &#x27;51999000222&#x27;, estado: &#x27;FIN&#x27;, carrito: [], ultimoMensajeCliente: AHORA - 2 * H }));
+// LE-4: pedido de hace 5 h, pero el cliente escribió hace 30 h (ventana cerrada)
+m.set(&#x27;pedido:LE-4&#x27;, JSON.stringify({ id: &#x27;LE-4&#x27;, telefono: &#x27;51999000555&#x27;, estado: &#x27;recibido&#x27;, creadoEn: AHORA - 5 * H }));
+m.set(&#x27;sesion:51999000555&#x27;, JSON.stringify({ telefono: &#x27;51999000555&#x27;, estado: &#x27;FIN&#x27;, carrito: [], ultimoMensajeCliente: AHORA - 30 * H }));
+// Carrito abandonado de hace 3 h
+m.set(&#x27;sesion:51999000444&#x27;, JSON.stringify({ telefono: &#x27;51999000444&#x27;, estado: &#x27;CARRITO&#x27;, carrito: [{ id: &#x27;leche&#x27;, cantidad: 2 }],
+  ultimoMensajeCliente: AHORA - 3 * H, recordatorioEnviado: false }));
+
+const enviados = [];
+const llamar = async (url, op) =&gt; { enviados.push(JSON.parse(op.body)); return { ok: true, status: 200, json: async () =&gt; ({}) }; };
+
+await ejecutarRecordatorios({ BOT_KV: kv, WA_TOKEN: &#x27;x&#x27;, WA_PHONE_ID: &#x27;000&#x27; }, AHORA, llamar);
+for (const e of enviados) console.log(JSON.stringify(e));
+enviados.length = 0;
+await ejecutarRecordatorios({ BOT_KV: kv, WA_TOKEN: &#x27;x&#x27;, WA_PHONE_ID: &#x27;000&#x27; }, AHORA + MIN, llamar);
+console.log(&#x27;segunda corrida:&#x27;, enviados.length);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;messaging_product&quot;:&quot;whatsapp&quot;,&quot;recipient_type&quot;:&quot;individual&quot;,&quot;to&quot;:&quot;51999000222&quot;,&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:{&quot;preview_url&quot;:false,&quot;body&quot;:&quot;Tu pedido LE-2 sigue en preparación. Si necesitas algo, escríbenos por aquí.&quot;}}
+{&quot;messaging_product&quot;:&quot;whatsapp&quot;,&quot;recipient_type&quot;:&quot;individual&quot;,&quot;to&quot;:&quot;51999000555&quot;,&quot;type&quot;:&quot;template&quot;,&quot;template&quot;:{&quot;name&quot;:&quot;recordatorio_pedido&quot;,&quot;language&quot;:{&quot;code&quot;:&quot;es&quot;},&quot;components&quot;:[{&quot;type&quot;:&quot;body&quot;,&quot;parameters&quot;:[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;LE-4&quot;}]}]}}
+{&quot;messaging_product&quot;:&quot;whatsapp&quot;,&quot;recipient_type&quot;:&quot;individual&quot;,&quot;to&quot;:&quot;51999000444&quot;,&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:{&quot;preview_url&quot;:false,&quot;body&quot;:&quot;Dejaste productos en tu carrito. Escribe \&quot;carrito\&quot; para retomar tu pedido.&quot;}}
+segunda corrida: 0</code></pre>
+</div>
+<p>Esa salida muestra tres cosas a la vez:</p>
+<ol>
+<li>LE-2 (ventana abierta) recibe <strong>texto libre</strong>; LE-4 (ventana cerrada) recibe una <strong>plantilla</strong> <code>recordatorio_pedido</code> con una variable (el id del pedido).</li>
+<li>El carrito pendiente sale como texto porque el cliente escribió hace 3 horas.</li>
+<li>En la <strong>segunda corrida</strong> no se envía nada: después de cada aviso el Worker guarda <code>recordadoEn</code> o <code>recordatorioEnviado: true</code>. Eso se llama <strong>idempotencia</strong>: ejecutar dos veces lo mismo no repite el efecto. Sin ella, tu cron de 15 minutos le escribiría al mismo cliente cuatro veces por hora.</li>
+</ol>
+<div class="callout ejemplo">
+<p class="callout-title">🧪 Ejemplo · Anatomía de la plantilla recordatorio_pedido</p>
+<p>Texto que enviarías a aprobar (idioma <code>es</code>, una variable): «Hola. Tu pedido {{1}} de Minimarket La Esquina sigue en preparación. Si necesitas ayuda, responde a este mensaje.» Fíjate en que <strong>no usa emojis ni promociones</strong>: una plantilla de utilidad debe hablar de una transacción concreta. Cómo se crean y aprueban las plantillas lo ves en la <a href="../17-plantillas/">lección 17</a>.</p></div>
+<h2 id="plantillas-de-recordatorio-lo-que-dicen-"><span class="n">7.</span>Plantillas de recordatorio: lo que dicen los documentos de Meta</h2>
+<p>Lo que <strong>sí</strong> confirma la documentación oficial de plantillas (consultada el 2026-10-07):</p>
+<ul>
+<li>Toda plantilla debe tener una categoría (autenticación, marketing o utilidad) y estar en estado <code>APPROVED</code> para poder enviarse. Cuando cambia de estado, Meta te avisa por el webhook <code>message_template_status_update</code>.</li>
+<li>La revisión es automática y puede tardar <strong>hasta 24 horas</strong>.</li>
+<li>Las plantillas tienen una <strong>calidad</strong> (pendiente, alta, media o baja) basada en las reacciones de los clientes y su tasa de lectura. Si es media o baja, corre el riesgo de ser <strong>pausada</strong> o <strong>deshabilitada</strong>; mientras esté pausada no puedes enviarla.</li>
+<li>Existen límites de envío por cuenta y, para marketing, un tope de plantillas de marketing que <strong>un mismo usuario</strong> puede recibir de todos los negocios.</li>
+</ul>
+<p>Todo eso se resume así: una plantilla de recordatorio que molesta (clientes que la bloquean o la reportan) <strong>pierde calidad y deja de enviarse</strong>. Por eso el cuidado del cliente no es un tema de cortesía: es lo que mantiene vivo tu canal.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Cuánto cuesta cada plantilla, si las de utilidad enviadas dentro de la ventana son gratuitas y los topes exactos de envío cambian con el tiempo. Consulta la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/overview">documentación oficial de plantillas</a> y la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página de precios</a> el día que cotices.</p></div>
+<h2 id="baja-frecuencia-y-horario-lo-que-el-codi"><span class="n">8.</span>Baja, frecuencia y horario: lo que el código de referencia aún no hace</h2>
+<p>Un recordatorio mal pensado es spam con buena intención. Antes de enviar cualquier aviso aplica estas tres reglas <strong>en este orden</strong>:</p>
+<ol>
+<li><strong>Baja (opt-out).</strong> Si el cliente escribió «baja», «stop» o «no quiero recibir mensajes», no se le envía <strong>ningún</strong> aviso más y se le confirma una sola vez. Es lo primero que revisas porque es la regla que más daño hace si se rompe. La <a href="../20-marketing-responsable/">lección 20</a> profundiza en cómo guardar y respetar la baja.</li>
+<li><strong>Frecuencia.</strong> Un máximo de un recordatorio por cliente cada 24 horas. El repositorio ya lo logra con <code>recordadoEn</code> y <code>recordatorioEnviado</code>.</li>
+<li><strong>Horario.</strong> No escribas de madrugada. Un recordatorio a las 3 a. m. produce bloqueos y reportes. Meta no te impone un horario; es una buena práctica tuya. En el curso usamos de 8:00 a 20:59, hora de Lima.</li>
+</ol>
+<p>Honestidad técnica: el código de referencia <strong>ya cumple</strong> la regla 2, pero <strong>no implementa</strong> la 1 ni la 3 (hay que decidir dónde guardar la baja y qué zona horaria usar). Tu ejercicio de esta lección escribe esas piezas como funciones puras. Mira cómo se comportan:</p>
+<div class="code">
+  <div class="code-head"><span>extra.mjs</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const ahora = Date.UTC(2026, 9, 7, 18, 0); // 13:00 en Lima
+console.log(horaLima(ahora), enHorarioPermitido(ahora), enHorarioPermitido(Date.UTC(2026, 9, 7, 5, 0)));
+console.log(tipoDeEnvio(ahora - 3600000, ahora), tipoDeEnvio(ahora - 30 * 3600000, ahora));
+console.log(esBaja(&#x27;  BAJA &#x27;), esBaja(&#x27;Quiero 2 leches&#x27;));
+console.log(debeRecordar({ optOut: false, ultimoRecordatorio: null }, ahora), debeRecordar({ optOut: true, ultimoRecordatorio: null }, ahora));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>13 true false
+texto plantilla
+true false
+true false</code></pre>
+</div>
+<p>La lógica de zona horaria es simple porque Perú <strong>no usa horario de verano</strong>. Si tu negocio está en un país que sí lo usa, no restes una cantidad fija de horas: usa <code>Intl.DateTimeFormat</code> con el nombre de la zona (por ejemplo <code>America/Mexico_City</code>) y deja que el motor haga el cálculo.</p>
+<h2 id="medir-si-el-recordatorio-funciona"><span class="n">9.</span>Medir si el recordatorio funciona</h2>
+<p>Un recordatorio es una hipótesis: «este aviso hará que más pedidos se cierren». Compruébalo con cuatro números, que puedes sacar de los registros de tu Worker y de los eventos de estado (<code>sent</code>, <code>delivered</code>, <code>read</code>, <code>failed</code>) que ya recibes en el webhook:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Cómo se calcula</th>
+<th>Qué te dice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Entrega</strong></td>
+<td>Avisos <code>delivered</code> / avisos enviados</td>
+<td>Si el número del cliente sigue activo y la plantilla se acepta</td>
+</tr>
+<tr>
+<td><strong>Respuesta</strong></td>
+<td>Clientes que escribieron en las siguientes 24 h / avisos entregados</td>
+<td>Si el aviso es relevante</td>
+</tr>
+<tr>
+<td><strong>Recuperación</strong></td>
+<td>Carritos o pedidos cerrados tras el aviso / avisos enviados</td>
+<td>El valor real del recordatorio, en soles</td>
+</tr>
+<tr>
+<td><strong>Bajas</strong></td>
+<td>Clientes que escribieron «baja» tras el aviso / avisos enviados</td>
+<td>Si estás molestando</td>
+</tr>
+</tbody>
+</table></div>
+<p>Si las bajas suben, <strong>recorta</strong> (menos avisos o mensajes más útiles) antes de seguir. Más avisos casi nunca es la solución. La <a href="../21-costos-y-metricas/">lección 21</a> te muestra cómo convertir estos números en costos y ganancia.</p>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Probar el cron solo en producción.</strong> Usa un KV falso y la función <code>llamar</code> inyectada, como en esta lección, y verás los problemas sin molestar a nadie.</li>
+<li><strong>Olvidar la idempotencia.</strong> Si no marcas «ya recordé», el cron repetirá el aviso cada 15 minutos. Guarda la marca justo después de enviar.</li>
+<li><strong>Pensar en la hora local.</strong> Los crons de Cloudflare van en UTC; <code>0 9 * * *</code> son las 4:00 en Lima.</li>
+<li><strong>Enviar texto libre fuera de la ventana.</strong> La API lo rechaza. Decide el formato siempre con <code>puedeEnviarTexto</code>.</li>
+<li><strong>Marcar «enviado» cuando el envío falló.</strong> Si <code>enviarMensaje</code> lanza un error, no guardes la marca: el próximo cron lo reintentará. (El código de referencia lo hace así: la marca se guarda después del <code>await enviarMensaje</code>.)</li>
+<li><strong>Plantillas con promociones disfrazadas.</strong> Meta puede reclasificarlas a marketing, con otro precio y otras reglas.</li>
+<li><strong>No respetar la baja.</strong> Es el error que más bloquea números.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Un recordatorio es una <strong>acción sin evento</strong>: necesita un cron (<code>scheduled</code>) que revise el estado cada cierto tiempo.</li>
+<li>Separa <strong>decidir</strong> (funciones puras como <code>pedidosParaRecordar</code>) de <strong>enviar</strong> (Worker); así lo pruebas sin red.</li>
+<li>El formato lo decide la <strong>ventana de 24 h</strong>: dentro, texto libre; fuera, plantilla aprobada. Deja un margen de una hora.</li>
+<li>Los crons de Cloudflare usan <strong>UTC</strong> y los cambios pueden tardar hasta 15 minutos en aplicarse.</li>
+<li>Marca cada aviso como enviado para ser <strong>idempotente</strong> y no repetir.</li>
+<li>Antes de enviar: <strong>baja</strong>, <strong>frecuencia</strong> y <strong>horario</strong>; sin ellas, un recordatorio es spam.</li>
+<li>Plantillas pausadas o de baja calidad dejan de enviarse: el cuidado del cliente protege tu canal.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cron</td>
+<td>Disparador que ejecuta tu código a intervalos o a horas fijas.</td>
+</tr>
+<tr>
+<td><code>scheduled</code></td>
+<td>Función del Worker que Cloudflare llama cuando se cumple un cron.</td>
+</tr>
+<tr>
+<td>Idempotencia</td>
+<td>Propiedad por la que repetir una operación no repite su efecto.</td>
+</tr>
+<tr>
+<td>Recordatorio</td>
+<td>Mensaje automático sobre algo que el cliente ya inició.</td>
+</tr>
+<tr>
+<td>Carrito abandonado</td>
+<td>Carrito con productos que el cliente dejó sin cerrar.</td>
+</tr>
+<tr>
+<td>Opt-out</td>
+<td>Petición del cliente de no recibir más mensajes (baja).</td>
+</tr>
+<tr>
+<td>Plantilla pausada</td>
+<td>Plantilla que Meta dejó de permitir temporalmente por mala calidad.</td>
+</tr>
+<tr>
+<td>UTC</td>
+<td>Hora universal de referencia en la que corren los crons de Cloudflare.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>Un cliente escribió ayer a las 20:00 y hoy a las 21:00 quieres recordarle su pedido. ¿Cómo lo envías?</p><ul class="opts"><li><button type="button" class="opt">Como texto libre, porque ya hubo una conversación</button></li><li><button type="button" class="opt" data-ok>Como plantilla aprobada, porque pasaron más de 24 horas desde su último mensaje</button></li><li><button type="button" class="opt">Como texto libre pagando un extra</button></li><li><button type="button" class="opt">No se puede enviar de ninguna forma</button></li></ul><p class="explain" hidden>Fuera de la ventana de 24 horas solo se permiten plantillas aprobadas.</p></div>
+<div class="quiz-q"><p>¿Por qué los umbrales de <code>recordatorios.js</code> terminan en 23 horas y no en 24?</p><ul class="opts"><li><button type="button" class="opt">Porque Meta cobra más después de las 23 horas</button></li><li><button type="button" class="opt" data-ok>Para dejar un margen de seguridad: si el envío cruza el límite de la ventana, el texto libre sería rechazado</button></li><li><button type="button" class="opt">Porque los crons de Cloudflare solo duran 23 horas</button></li><li><button type="button" class="opt">Porque WhatsApp bloquea mensajes en la hora 24</button></li></ul><p class="explain" hidden>Es una decisión de diseño: una hora de margen evita que el envío caiga justo fuera de la ventana.</p></div>
+<div class="quiz-q"><p>El cron <code>0 14 * * *</code> de Cloudflare, ¿a qué hora de Lima se ejecuta?</p><ul class="opts"><li><button type="button" class="opt">A las 14:00</button></li><li><button type="button" class="opt">A las 19:00</button></li><li><button type="button" class="opt" data-ok>A las 9:00</button></li><li><button type="button" class="opt">A las 4:00</button></li></ul><p class="explain" hidden>Los crons corren en UTC y Lima es UTC-5: 14:00 UTC son las 9:00 en Lima.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve marcar <code>recordadoEn</code> después de enviar un recordatorio?</p><ul class="opts"><li><button type="button" class="opt">Para que el cliente vea la fecha del aviso</button></li><li><button type="button" class="opt" data-ok>Para que la siguiente corrida del cron no repita el aviso (idempotencia)</button></li><li><button type="button" class="opt">Para que Meta apruebe la plantilla</button></li><li><button type="button" class="opt">Para cobrar el mensaje</button></li></ul><p class="explain" hidden>Sin esa marca, el cron de 15 minutos volvería a avisar al mismo cliente en cada corrida.</p></div>
+<div class="quiz-q"><p>¿Cuál de estas reglas debes revisar primero antes de enviar un recordatorio?</p><ul class="opts"><li><button type="button" class="opt">El horario</button></li><li><button type="button" class="opt">La frecuencia</button></li><li><button type="button" class="opt" data-ok>Que el cliente no haya pedido la baja (opt-out)</button></li><li><button type="button" class="opt">El largo del texto</button></li></ul><p class="explain" hidden>Si el cliente pidió no recibir avisos, ninguna otra regla importa: no se envía nada.</p></div>
+<div class="quiz-q"><p>¿Qué pasa con una plantilla de recordatorio que muchos clientes bloquean o reportan?</p><ul class="opts"><li><button type="button" class="opt">Nada, las plantillas aprobadas son permanentes</button></li><li><button type="button" class="opt" data-ok>Su calidad baja y Meta puede pausarla o deshabilitarla, y deja de poder enviarse</button></li><li><button type="button" class="opt">Se convierte automáticamente en texto libre</button></li><li><button type="button" class="opt">Se envía con más frecuencia</button></li></ul><p class="explain" hidden>La calidad de la plantilla depende de la reacción de los clientes; si es mala, puede pausarse.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-18">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../17-plantillas/"><small>← Anterior</small>Plantillas de mensaje</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 18 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2018:%20Recordatorios%20y%20seguimiento%20automático&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/18-recordatorios-y-seguimiento/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

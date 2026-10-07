@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Diseñar la conversación antes de programar · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Diseñar la conversación antes de programar.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Diseñar la conversación antes de programar · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Diseñar la conversación antes de programar.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 2</a> › Ejercicio</div>
+        <h1>Ejercicio: Diseñar la conversación antes de programar</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: básico</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Convertir las reglas de WhatsApp para mensajes interactivos en <strong>funciones puras</strong> que tu bot usará siempre antes de enviar un menú: recortar títulos, validar botones y listas, y generar la versión de texto de un menú.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es de papel: diseñas la conversación de un negocio antes de tocar código. La <strong>parte B</strong> son cuatro funciones de JavaScript puro que se comprueban en esta página. Los límites están en la lección (3 botones, 20 caracteres por título de botón, 10 filas, 24 caracteres por título de fila). Meta puede cambiarlos: por eso conviene guardarlos en constantes que se modifican en un solo lugar.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Escribe <code>botonesOLista(opciones)</code>: si hay 3 opciones o menos devuelve <code>"botones"</code>, si hay entre 4 y 10 devuelve <code>"lista"</code> y si hay más devuelve <code>"texto"</code>. Es la decisión que tomará tu bot cuando un menú crezca.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Elige un negocio (el de la tabla de la lección u otro que conozcas) y escribe en <code>diseno.md</code>: 3 cosas que el bot <strong>sí</strong> hará, 2 que <strong>no</strong> hará, el tono (tuteo o usted) y la frase exacta del mensaje de bienvenida.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Dibuja en <code>diseno.md</code> el mapa de estados de tu bot como tabla: estado, qué dice el bot, qué entradas acepta y a qué estado pasa.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>recortarTitulo(texto, max)</code>: quita espacios sobrantes en los extremos; si el texto cabe, lo devuelve igual; si no, lo corta para que el resultado no pase de <code>max</code> caracteres, terminando en <code>…</code> (un solo carácter).</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>validarBotones(botones)</code>: recibe un array de <code>{ id, titulo }</code> y devuelve <code>{ ok, errores }</code>, donde <code>errores</code> es un array de textos. Reglas: entre 1 y 3 botones, cada botón con <code>id</code> y <code>titulo</code>, títulos de máximo 20 caracteres e <code>id</code> sin repetir.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>validarLista(filas)</code>: igual que la anterior pero para filas <code>{ id, titulo }</code>: entre 1 y 10 filas y títulos de máximo 24 caracteres.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>menuATexto(opciones)</code>: recibe un array de textos y devuelve el menú numerado, una opción por línea: <code>"1. Ver catálogo\n2. Horario"</code>. Con un array vacío devuelve <code>""</code>. Es la versión de respaldo cuando no puedes usar botones.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Recortar sin pasarte</summary><p>Si el texto es más largo que <code>max</code>, toma <code>texto.slice(0, max - 1)</code> y añade <code>"…"</code>: así el total es <code>max</code>. Si el recorte deja un espacio al final, quítalo con <code>trimEnd()</code> (el resultado mide <code>max</code> o un carácter menos, y la prueba lo admite).</p></details>
+      <details><summary>💡 Pista 2: Acumular errores</summary><p>Crea <code>const errores = []</code>, ve añadiendo textos con <code>push</code> y al final devuelve <code>{ ok: errores.length === 0, errores }</code>. Si el array de entrada no existe o está vacío, devuelve el error enseguida con <code>return</code>.</p></details>
+      <details><summary>💡 Pista 3: Detectar ids repetidos</summary><p>Un <code>Set</code> ayuda: <code>const vistos = new Set()</code>; si <code>vistos.has(b.id)</code> ya había uno igual, anota el error; si no, <code>vistos.add(b.id)</code>.</p></details>
+      <details><summary>💡 Pista 4: Numerar opciones</summary><p><code>opciones.map((o, i) =&gt; (i + 1) + ". " + o).join("\n")</code> hace casi todo el trabajo.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`recortarTitulo` deja igual un texto que cabe", "h": "Si `texto.length <= max`, devuélvelo (sin espacios en los extremos).", "t": "return typeof recortarTitulo === 'function' && recortarTitulo('Horario', 20)==='Horario' && recortarTitulo('  Ayuda  ', 20)==='Ayuda'"}, {"d": "`recortarTitulo` corta y añade `…` sin pasarse del máximo", "h": "Usa `slice(0, max - 1)` y suma `'…'`.", "t": "var r=recortarTitulo('Ver catálogo completo de productos', 20);return r.length<=20 && r.length>=19 && r.endsWith('…') && r.startsWith('Ver catálogo comple')"}, {"d": "`validarBotones` acepta 1 a 3 botones correctos", "h": "Devuelve `{ ok: true, errores: [] }` cuando todo está bien.", "t": "var r=validarBotones([{id:'a',titulo:'Horario'},{id:'b',titulo:'Dirección'},{id:'c',titulo:'Ayuda'}]);return r.ok===true && Array.isArray(r.errores) && r.errores.length===0"}, {"d": "`validarBotones` rechaza más de 3 botones o ninguno", "h": "Revisa `botones.length > 3` y también el caso de array vacío o no array.", "t": "var cuatro=[1,2,3,4].map(function(n){return {id:'i'+n,titulo:'T'+n}});return validarBotones(cuatro).ok===false && validarBotones([]).ok===false && validarBotones(null).ok===false"}, {"d": "`validarBotones` rechaza títulos de más de 20 caracteres", "h": "Compara `titulo.length` con 20; 20 exactos sí es válido.", "t": "var largo='a'.repeat(21), justo='a'.repeat(20);return validarBotones([{id:'x',titulo:largo}]).ok===false && validarBotones([{id:'x',titulo:justo}]).ok===true"}, {"d": "`validarBotones` detecta ids repetidos y botones sin id o título", "h": "Usa un `Set` para los ids; revisa que `id` y `titulo` existan.", "t": "return validarBotones([{id:'a',titulo:'Uno'},{id:'a',titulo:'Dos'}]).ok===false && validarBotones([{titulo:'Sin id'}]).ok===false && validarBotones([{id:'z'}]).ok===false"}, {"d": "`validarBotones` explica cada problema con un texto en `errores`", "h": "Si hay dos fallos distintos, `errores` debe tener al menos 2 textos.", "t": "var cuatro=[1,2,3,4].map(function(n){return {id:'i'+n,titulo:n===1?'a'.repeat(30):'T'}});var r=validarBotones(cuatro);return r.errores.length>=2 && r.errores.every(function(e){return typeof e==='string' && e.length>0})"}, {"d": "`validarLista` permite hasta 10 filas con títulos de hasta 24 caracteres", "h": "Los límites son 10 filas y 24 caracteres.", "t": "var diez=[1,2,3,4,5,6,7,8,9,10].map(function(n){return {id:'f'+n,titulo:'a'.repeat(24)}});return validarLista(diez).ok===true && validarLista(diez.concat([{id:'f11',titulo:'x'}])).ok===false && validarLista([{id:'f',titulo:'a'.repeat(25)}]).ok===false && validarLista([]).ok===false"}, {"d": "`menuATexto` numera las opciones una por línea", "h": "Une con salto de línea las líneas `1. texto`.", "t": "return menuATexto(['Ver catálogo','Horario'])==='1. Ver catálogo\\n2. Horario' && menuATexto([])===''"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>mensajes.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const MAX_BOTONES = 3;
+const MAX_TITULO_BOTON = 20;
+const MAX_FILAS = 10;
+const MAX_TITULO_FILA = 24;
+
+function recortarTitulo(texto, max) {
+  const limpio = String(texto ?? &quot;&quot;).trim();
+  if (limpio.length &lt;= max) return limpio;
+  return limpio.slice(0, max - 1).trimEnd() + &quot;…&quot;;
+}
+
+function validarBotones(botones) {
+  const errores = [];
+  if (!Array.isArray(botones) || botones.length === 0) {
+    return { ok: false, errores: [&quot;Debe haber al menos 1 botón&quot;] };
+  }
+  if (botones.length &gt; MAX_BOTONES) errores.push(&quot;Máximo &quot; + MAX_BOTONES + &quot; botones&quot;);
+  const vistos = new Set();
+  for (const b of botones) {
+    const id = b &amp;&amp; b.id;
+    const titulo = b &amp;&amp; b.titulo;
+    if (!id) errores.push(&quot;Cada botón necesita un id&quot;);
+    else if (vistos.has(id)) errores.push(&quot;Id repetido: &quot; + id);
+    else vistos.add(id);
+    if (!titulo || String(titulo).trim() === &quot;&quot;) errores.push(&quot;Cada botón necesita un título&quot;);
+    else if (String(titulo).length &gt; MAX_TITULO_BOTON) {
+      errores.push(&#x27;El título &quot;&#x27; + titulo + &#x27;&quot; supera &#x27; + MAX_TITULO_BOTON + &quot; caracteres&quot;);
+    }
+  }
+  return { ok: errores.length === 0, errores };
+}
+
+function validarLista(filas) {
+  const errores = [];
+  if (!Array.isArray(filas) || filas.length === 0) {
+    return { ok: false, errores: [&quot;Debe haber al menos 1 fila&quot;] };
+  }
+  if (filas.length &gt; MAX_FILAS) errores.push(&quot;Máximo &quot; + MAX_FILAS + &quot; filas&quot;);
+  for (const f of filas) {
+    if (f &amp;&amp; f.titulo &amp;&amp; String(f.titulo).length &gt; MAX_TITULO_FILA) {
+      errores.push(&#x27;El título &quot;&#x27; + f.titulo + &#x27;&quot; supera &#x27; + MAX_TITULO_FILA + &quot; caracteres&quot;);
+    }
+  }
+  return { ok: errores.length === 0, errores };
+}
+
+function menuATexto(opciones) {
+  return (opciones ?? []).map((o, i) =&gt; (i + 1) + &quot;. &quot; + o).join(&quot;\n&quot;);
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 2</a>
+        <a class="next" href="../03-javascript-y-node-para-bots/"><small>Siguiente →</small>JavaScript y Node.js para bots</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 2 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Diseñar%20la%20conversación%20antes%20de%20programar&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/02-disenar-la-conversacion/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

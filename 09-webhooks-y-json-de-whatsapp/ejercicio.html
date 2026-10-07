@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Webhooks y JSON de WhatsApp · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Webhooks y JSON de WhatsApp.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Webhooks y JSON de WhatsApp · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Webhooks y JSON de WhatsApp.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 9</a> › Ejercicio</div>
+        <h1>Ejercicio: Webhooks y JSON de WhatsApp</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Construir con tus propias manos las cuatro piezas de la puerta de entrada de un bot: leer un payload sin romperse, clasificar eventos, responder la verificación del webhook y validar el formato y la igualdad de una firma.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> se hace en tu computadora con el código de referencia del curso: ejecutas el parser y la firma sobre los ejemplos reales. La <strong>parte B</strong> son cinco funciones de JavaScript puro (sin <code>import</code>, sin Node) que se comprueban en esta página. No calculas el HMAC aquí (necesita <code>crypto</code>); lo que sí practicas es el formato de la cabecera y la comparación en tiempo constante, que son el resto de la lógica de la firma.</p>
+<p>Los payloads de prueba tienen la forma <code>payload.entry[].changes[].value.messages[]</code> (mensajes) o <code>.statuses[]</code> (estados), como en la lección. Los teléfonos son falsos (<code>51999000111</code>).</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Escribe <code>resumenDeEvento(payload)</code> que devuelva un texto como <code>"mensaje de 51999000111: Quiero 2 leches"</code> o <code>"estado delivered de wamid.S"</code>. Después, pásale <code>test/payloads/estado-fallido.json</code> y haz que incluya también el código de error. Es justo lo que querrás ver en los registros del servidor cuando algo falle.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En <code>codigo/</code>, crea <code>probar.mjs</code> con <code>import { readFileSync } from "node:fs"; import { parsearWebhook } from "./src/whatsapp.js";</code> y muestra con <code>console.log(JSON.stringify(parsearWebhook(JSON.parse(readFileSync("test/payloads/boton.json", "utf8"))), null, 1))</code>. Ejecútalo con <code>node probar.mjs</code> y localiza en la salida el <code>id</code> del botón.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Repite con <code>no-soportado.json</code> y <code>estado-fallido.json</code>. Anota en <code>notas.md</code> cuál es el <code>subtipo</code> y qué código de error trae el estado fallido.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Calcula la firma con <code>firmar</code> (importa también esa función) para el texto <code>{}</code> y el secreto <code>secreto</code>; comprueba que obtienes <code>sha256=9b09d74c...17e9</code>. Cambia el secreto por <code>otro</code> y mira cómo cambia por completo.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>tipoDeEvento(payload)</code>: devuelve <code>"mensaje"</code> si algún cambio de <code>messages</code> trae mensajes, <code>"estado"</code> si trae <code>statuses</code> (y ningún mensaje), y <code>"ignorar"</code> en cualquier otro caso (incluido <code>null</code>).</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>extraerTexto(payload)</code>: devuelve el texto (<code>text.body</code>) del primer mensaje de tipo <code>"text"</code>, o <code>null</code> si no hay ninguno. Debe tolerar payloads incompletos sin lanzar errores.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>responderVerificacion(params, tokenEsperado)</code>: <code>params</code> es un objeto con claves <code>"hub.mode"</code>, <code>"hub.verify_token"</code> y <code>"hub.challenge"</code>. Devuelve <code>{ estado: 200, cuerpo: reto }</code> si el modo es <code>"subscribe"</code>, el token coincide y hay reto; en cualquier otro caso <code>{ estado: 403, cuerpo: "Prohibido" }</code>. Si <code>tokenEsperado</code> está vacío o es <code>undefined</code>, siempre 403.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>formatoFirmaValido(cabecera)</code>: <code>true</code> solo si es un texto <code>sha256=</code> seguido de exactamente 64 caracteres hexadecimales (mayúsculas o minúsculas).</span></label></li><li><label><input type="checkbox" id="p8"><span>Parte B. Escribe <code>iguales(a, b)</code>: compara dos textos en tiempo constante (recorre siempre toda la longitud acumulando diferencias, sin salir temprano). Devuelve <code>false</code> si no son texto o si tienen distinta longitud.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Recorrer sin romperse</summary><p>Usa <code>payload?.entry ?? []</code>, luego <code>entrada?.changes ?? []</code> y <code>cambio?.value?.messages ?? []</code>. Comprueba además <code>Array.isArray</code> antes de iterar si quieres blindarlo contra valores raros como <code>entry: "raro"</code>.</p></details>
+      <details><summary>💡 Pista 2: Detectar «mensaje» o «estado»</summary><p>Recorre todos los cambios y levanta dos banderas: <code>hayMensajes</code> si <code>messages</code> tiene longitud mayor a 0, <code>hayEstados</code> si <code>statuses</code> la tiene. Si hay mensajes, devuelve <code>"mensaje"</code>; si no y hay estados, <code>"estado"</code>.</p></details>
+      <details><summary>💡 Pista 3: La comparación en tiempo constante</summary><p>Primero compara las longitudes. Después usa una variable <code>diferencia = 0</code> y, por cada posición, <code>diferencia |= a.charCodeAt(i) ^ b.charCodeAt(i)</code>. Al final, <code>diferencia === 0</code>. Nunca hagas <code>return</code> dentro del bucle.</p></details>
+      <details><summary>💡 Pista 4: La expresión regular de la firma</summary><p><code>/^sha256=[0-9a-f]{64}$/i.test(cabecera)</code>. Antes comprueba que <code>cabecera</code> sea de tipo <code>string</code>, porque <code>test</code> convertiría otros valores a texto.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`tipoDeEvento` reconoce un mensaje", "h": "Busca `value.messages` con al menos un elemento dentro de `entry[].changes[]`.", "t": "var p={object:'whatsapp_business_account',entry:[{changes:[{field:'messages',value:{messages:[{from:'51999000111',id:'wamid.A',type:'text',text:{body:'hola'}}]}}]}]};return tipoDeEvento(p)==='mensaje'"}, {"d": "`tipoDeEvento` reconoce un estado", "h": "Si `value.statuses` trae elementos y no hay mensajes, es `\"estado\"`.", "t": "var p={entry:[{changes:[{value:{statuses:[{id:'wamid.S',status:'delivered'}]}}]}]};return tipoDeEvento(p)==='estado'"}, {"d": "`tipoDeEvento` ignora basura sin lanzar errores", "h": "Devuelve `\"ignorar\"` para `null`, `{}` y valores que no sean listas.", "t": "return tipoDeEvento(null)==='ignorar' && tipoDeEvento({})==='ignorar' && tipoDeEvento({entry:'raro'})==='ignorar' && tipoDeEvento({entry:[{changes:[{value:{}}]}]})==='ignorar'"}, {"d": "`extraerTexto` devuelve el cuerpo del primer mensaje de texto", "h": "El texto está en `message.text.body` cuando `message.type === \"text\"`.", "t": "var p={entry:[{changes:[{value:{messages:[{type:'image',id:'i'},{type:'text',id:'t',text:{body:'Quiero 2 leches'}}]}}]}]};return extraerTexto(p)==='Quiero 2 leches'"}, {"d": "`extraerTexto` devuelve `null` si no hay texto o el payload está incompleto", "h": "Recorre con `?? []` y devuelve `null` al final si no encontraste nada.", "t": "return extraerTexto(null)===null && extraerTexto({entry:[]})===null && extraerTexto({entry:[{changes:[{value:{statuses:[{id:'x'}]}}]}]})===null"}, {"d": "`responderVerificacion` devuelve el reto cuando todo coincide", "h": "Devuelve `{ estado: 200, cuerpo: params[\"hub.challenge\"] }` si el modo es `subscribe` y el token es igual al esperado.", "t": "var r=responderVerificacion({'hub.mode':'subscribe','hub.verify_token':'minimarket-123','hub.challenge':'1158201444'},'minimarket-123');return r.estado===200 && r.cuerpo==='1158201444'"}, {"d": "`responderVerificacion` rechaza token malo, modo distinto, sin reto y token esperado vacío", "h": "Cualquier otro caso es `{ estado: 403, cuerpo: \"Prohibido\" }`; no dejes pasar `undefined === undefined`.", "t": "var m=function(p,t){var r=responderVerificacion(p,t);return r.estado===403 && r.cuerpo==='Prohibido'};return m({'hub.mode':'subscribe','hub.verify_token':'malo','hub.challenge':'1'},'ok') && m({'hub.mode':'unsubscribe','hub.verify_token':'ok','hub.challenge':'1'},'ok') && m({'hub.mode':'subscribe','hub.verify_token':'ok'},'ok') && m({'hub.mode':'subscribe','hub.challenge':'1'},undefined) && m({'hub.mode':'subscribe','hub.verify_token':'','hub.challenge':'1'},'')"}, {"d": "`formatoFirmaValido` acepta solo `sha256=` + 64 hex", "h": "Usa una regular `^sha256=[0-9a-f]{64}$` con la bandera `i` y comprueba que sea texto.", "t": "var ok='sha256='+'ab'.repeat(32);return formatoFirmaValido(ok)===true && formatoFirmaValido(ok.toUpperCase().replace('SHA256','sha256'))===true && formatoFirmaValido('sha256=abc')===false && formatoFirmaValido('sha1='+'ab'.repeat(20))===false && formatoFirmaValido('sha256='+'zz'.repeat(32))===false && formatoFirmaValido(null)===false && formatoFirmaValido(ok+'0')===false"}, {"d": "`iguales` compara textos correctamente", "h": "Si las longitudes difieren devuelve `false`; si no, acumula diferencias con XOR y comprueba que den 0.", "t": "return iguales('sha256=abc','sha256=abc')===true && iguales('sha256=abc','sha256=abd')===false && iguales('abc','abcd')===false && iguales('','')===true && iguales(1,1)===false && iguales(null,'a')===false"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function cambiosDe(payload) {
+  var cambios = [];
+  var entradas = payload &amp;&amp; Array.isArray(payload.entry) ? payload.entry : [];
+  for (var i = 0; i &lt; entradas.length; i++) {
+    var lista = entradas[i] &amp;&amp; Array.isArray(entradas[i].changes) ? entradas[i].changes : [];
+    for (var j = 0; j &lt; lista.length; j++) cambios.push(lista[j]);
+  }
+  return cambios;
+}
+
+function tipoDeEvento(payload) {
+  var hayMensajes = false, hayEstados = false;
+  cambiosDe(payload).forEach(function (c) {
+    var v = (c &amp;&amp; c.value) || {};
+    if (Array.isArray(v.messages) &amp;&amp; v.messages.length &gt; 0) hayMensajes = true;
+    if (Array.isArray(v.statuses) &amp;&amp; v.statuses.length &gt; 0) hayEstados = true;
+  });
+  if (hayMensajes) return &quot;mensaje&quot;;
+  if (hayEstados) return &quot;estado&quot;;
+  return &quot;ignorar&quot;;
+}
+
+function extraerTexto(payload) {
+  var cambios = cambiosDe(payload);
+  for (var i = 0; i &lt; cambios.length; i++) {
+    var v = (cambios[i] &amp;&amp; cambios[i].value) || {};
+    var mensajes = Array.isArray(v.messages) ? v.messages : [];
+    for (var j = 0; j &lt; mensajes.length; j++) {
+      var m = mensajes[j];
+      if (m &amp;&amp; m.type === &quot;text&quot; &amp;&amp; m.text &amp;&amp; typeof m.text.body === &quot;string&quot;) return m.text.body;
+    }
+  }
+  return null;
+}
+
+function responderVerificacion(params, tokenEsperado) {
+  var p = params || {};
+  var reto = p[&quot;hub.challenge&quot;];
+  if (tokenEsperado &amp;&amp; p[&quot;hub.mode&quot;] === &quot;subscribe&quot; &amp;&amp; p[&quot;hub.verify_token&quot;] === tokenEsperado &amp;&amp; reto) {
+    return { estado: 200, cuerpo: reto };
+  }
+  return { estado: 403, cuerpo: &quot;Prohibido&quot; };
+}
+
+function formatoFirmaValido(cabecera) {
+  return typeof cabecera === &quot;string&quot; &amp;&amp; /^sha256=[0-9a-f]{64}$/i.test(cabecera);
+}
+
+function iguales(a, b) {
+  if (typeof a !== &quot;string&quot; || typeof b !== &quot;string&quot;) return false;
+  if (a.length !== b.length) return false;
+  var diferencia = 0;
+  for (var i = 0; i &lt; a.length; i++) diferencia |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diferencia === 0;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 9</a>
+        <a class="next" href="../10-servidor-del-bot/"><small>Siguiente →</small>El servidor del bot</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 9 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Webhooks%20y%20JSON%20de%20WhatsApp&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formularios dentro de WhatsApp con Flows · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Qué son los WhatsApp Flows, cómo es su JSON, cómo se envían y se leen sus respuestas, cuándo hace falta un endpoint y cuándo bastan botones.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Formularios dentro de WhatsApp con Flows · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Qué son los WhatsApp Flows, cómo es su JSON, cómo se envían y se leen sus respuestas, cuándo hace falta un endpoint y cuándo bastan botones.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#el-problema-pedir-tres-datos-por-chat-es">El problema: pedir tres datos por chat es incómodo</a></li><li><a href="#flows-frente-a-botones-listas-y-texto-li">Flows frente a botones, listas y texto libre</a></li><li><a href="#las-dos-formas-de-flow-sin-endpoint-y-co">Las dos formas de Flow: sin endpoint y con endpoint</a></li><li><a href="#el-json-de-un-flow">El JSON de un Flow</a></li><li><a href="#enviar-el-flow-al-cliente">Enviar el Flow al cliente</a></li><li><a href="#la-respuesta-nfm-reply-en-tu-webhook">La respuesta: nfm_reply en tu webhook</a></li><li><a href="#validar-siempre-en-tu-servidor">Validar siempre en tu servidor</a></li><li><a href="#como-encaja-un-flow-en-el-motor-del-mini">Cómo encaja un Flow en el motor del minimarket</a></li><li><a href="#cuanto-cuesta-y-que-mantener">Cuánto cuesta y qué mantener</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 19</div>
+        <h1>Formularios dentro de WhatsApp con Flows</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: avanzado</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar qué es un Flow y en qué se diferencia de botones, listas y texto libre.</li><li>Leer y escribir el JSON de un Flow de dos pantallas, con campos, <code>navigate</code> y <code>complete</code>.</li><li>Construir el mensaje que abre un Flow y leer la respuesta (<code>nfm_reply</code>) que llega al webhook.</li><li>Distinguir un Flow sin endpoint de uno con endpoint y saber qué exige este último (cifrado, respuestas rápidas).</li><li>Decidir con criterio cuándo usar un Flow y cuándo basta con botones o texto.</li></ul>
+</div>
+
+<h2 id="el-problema-pedir-tres-datos-por-chat-es"><span class="n">1.</span>El problema: pedir tres datos por chat es incómodo</h2>
+<p>En la <a href="../08-flujo-de-pedido/">lección 8</a> el bot pide los datos del delivery uno por uno: «¿Zona?», «¿Dirección?», «¿Referencia?». Funciona, pero tiene un costo real: cada pregunta es un mensaje, el cliente puede responder fuera de orden, escribir la dirección en el campo de la zona o abandonar a la mitad. Y si el bot necesita seis datos, la conversación se vuelve un interrogatorio.</p>
+<p>Un <strong>WhatsApp Flow</strong> resuelve justo eso: es un <strong>formulario con pantallas que se abre dentro del chat</strong>, con campos de texto, listas desplegables, casillas, selectores de fecha, y un botón de enviar. El cliente lo llena de una vez, ve los errores en el mismo formulario y, al terminar, tu bot recibe <strong>todos los datos juntos</strong> en un solo mensaje.</p>
+<div class="flow"><div class="node"><strong>Bot</strong><span>envía el mensaje con Flow</span></div><div class="arrow">→<code>botón &quot;Pedir delivery&quot;</code></div><div class="node"><strong>Cliente</strong><span>llena el formulario</span></div><div class="arrow">→<code>enviar</code></div><div class="node"><strong>Webhook</strong><span>recibe nfm_reply</span></div><div class="arrow">→<code>datos juntos</code></div><div class="node"><strong>Bot</strong><span>continúa el pedido</span></div></div>
+<p>Un Flow <strong>no reemplaza</strong> al bot: es una herramienta más, como los botones. Útil sobre todo para reservas, solicitudes de cotización, encuestas y pedidos con varios datos.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los Flows evolucionan rápido: aparecen componentes nuevos, cambian las versiones del JSON y los requisitos de la cuenta. Todo lo de esta lección se contrastó con la <a href="https://developers.facebook.com/docs/whatsapp/flows/gettingstarted">documentación oficial de Flows</a> el 2026-10-07. Antes de construir, confirma la versión actual del Flow JSON y los requisitos de tu cuenta en esa documentación.</p></div>
+<h2 id="flows-frente-a-botones-listas-y-texto-li"><span class="n">2.</span>Flows frente a botones, listas y texto libre</h2>
+<p>Ya conoces tres formas de interactuar. Este es el mapa:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Herramienta</th>
+<th>Ideal para</th>
+<th>Límite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Texto libre</strong></td>
+<td>Que el cliente diga lo que quiere con sus palabras</td>
+<td>Hay que interpretarlo (<a href="../06-entender-texto-libre/">lección 6</a>)</td>
+</tr>
+<tr>
+<td><strong>Botones de respuesta</strong></td>
+<td>Elegir entre 1 y 3 opciones</td>
+<td>Máximo 3 botones</td>
+</tr>
+<tr>
+<td><strong>Lista</strong></td>
+<td>Elegir entre hasta 10 opciones</td>
+<td>Una sola elección por mensaje</td>
+</tr>
+<tr>
+<td><strong>Flow</strong></td>
+<td>Reunir varios datos con validación</td>
+<td>Más trabajo: diseñar, probar, mantener</td>
+</tr>
+</tbody>
+</table></div>
+<p>Una regla práctica para decidir:</p>
+<ul>
+<li><strong>1 o 2 datos y sin validación especial:</strong> botones o preguntas sueltas. Un Flow es demasiado.</li>
+<li><strong>3 o más datos relacionados</strong> (zona + dirección + referencia, o fecha + hora + servicio): un Flow.</li>
+<li><strong>Datos que solo tu servidor puede validar</strong> (¿hay cobertura en esa zona?, ¿hay cupo en esa hora?): Flow con endpoint.</li>
+</ul>
+<p>En el ejercicio escribirás esa regla como una función. No te enamores del Flow por ser vistoso: <strong>un bot sencillo que funciona bate a un Flow elaborado que nadie mantiene</strong>.</p>
+<h2 id="las-dos-formas-de-flow-sin-endpoint-y-co"><span class="n">3.</span>Las dos formas de Flow: sin endpoint y con endpoint</h2>
+<p>Esta es la decisión técnica más importante.</p>
+<p><strong>Flow sin endpoint.</strong> Todo el comportamiento vive en el JSON del Flow. Las pantallas se navegan solas, los campos se validan con lo que ofrece el propio formulario (campo obligatorio, tipo de entrada) y al terminar, WhatsApp te manda los datos por el webhook. <strong>No tienes que programar un servidor extra.</strong> Es suficiente para el 80 % de los formularios.</p>
+<p><strong>Flow con endpoint.</strong> Cada vez que el cliente pasa de pantalla, WhatsApp llama a una URL tuya (el <em>endpoint</em>) para preguntar «¿qué muestro ahora?». Sirve cuando las pantallas dependen de datos dinámicos: horarios disponibles hoy, stock, cobertura de una dirección. A cambio exige:</p>
+<ul>
+<li>Un servidor que responda <strong>rápido</strong>, con una estructura de petición y respuesta fija.</li>
+<li><strong>Cifrado</strong>: las peticiones llegan cifradas y las respuestas deben cifrarse (el estándar descrito en la documentación usa RSA-OAEP con SHA-256 para la clave y AES-GCM para los datos).</li>
+<li>Una respuesta al «ping» de salud que WhatsApp envía de vez en cuando.</li>
+</ul>
+<div class="flow"><div class="node"><strong>Flow</strong><span>pantalla DATOS</span></div><div class="arrow">→<code>data_exchange</code></div><div class="node"><strong>Tu endpoint</strong><span>valida la zona</span></div><div class="arrow">→<code>siguiente pantalla</code></div><div class="node"><strong>Flow</strong><span>pantalla RESUMEN</span></div></div>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Empieza sin endpoint</p>
+<p>En el curso construimos el Flow <strong>sin endpoint</strong>: aprendes el formato sin la complejidad del cifrado. Cuando tengas un caso real que lo necesite, lee la guía oficial de <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/guides/implementingyourflowendpoint">implementación del endpoint</a> y reserva una jornada para pruebas. El código de referencia del curso <strong>no incluye</strong> un endpoint de Flows.</p></div>
+<h2 id="el-json-de-un-flow"><span class="n">4.</span>El JSON de un Flow</h2>
+<p>Un Flow se describe con un JSON: una lista de <strong>pantallas</strong> y, dentro de cada una, una lista de <strong>componentes</strong>. Este es el Flow de «datos de delivery» del minimarket, ejecutado y validado con la función que escribirás en el ejercicio:</p>
+<div class="code">
+  <div class="code-head"><span>flow-delivery.json</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;version&quot;: &quot;5.1&quot;,
+  &quot;screens&quot;: [
+    {
+      &quot;id&quot;: &quot;DATOS&quot;,
+      &quot;title&quot;: &quot;Datos de entrega&quot;,
+      &quot;layout&quot;: {
+        &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+        &quot;children&quot;: [
+          { &quot;type&quot;: &quot;TextHeading&quot;, &quot;text&quot;: &quot;Dónde te lo llevamos&quot; },
+          { &quot;type&quot;: &quot;Dropdown&quot;, &quot;name&quot;: &quot;zona&quot;, &quot;label&quot;: &quot;Zona&quot;, &quot;required&quot;: true,
+            &quot;data-source&quot;: [
+              { &quot;id&quot;: &quot;Urb. Los Olivos&quot;, &quot;title&quot;: &quot;Urb. Los Olivos&quot; },
+              { &quot;id&quot;: &quot;Urb. Las Palmeras&quot;, &quot;title&quot;: &quot;Urb. Las Palmeras&quot; },
+              { &quot;id&quot;: &quot;Centro&quot;, &quot;title&quot;: &quot;Centro&quot; }
+            ] },
+          { &quot;type&quot;: &quot;TextInput&quot;, &quot;name&quot;: &quot;direccion&quot;, &quot;label&quot;: &quot;Dirección&quot;, &quot;input-type&quot;: &quot;text&quot;, &quot;required&quot;: true },
+          { &quot;type&quot;: &quot;TextInput&quot;, &quot;name&quot;: &quot;referencia&quot;, &quot;label&quot;: &quot;Referencia&quot;, &quot;input-type&quot;: &quot;text&quot;, &quot;required&quot;: false },
+          { &quot;type&quot;: &quot;Footer&quot;, &quot;label&quot;: &quot;Continuar&quot;,
+            &quot;on-click-action&quot;: {
+              &quot;name&quot;: &quot;navigate&quot;,
+              &quot;next&quot;: { &quot;type&quot;: &quot;screen&quot;, &quot;name&quot;: &quot;RESUMEN&quot; },
+              &quot;payload&quot;: { &quot;zona&quot;: &quot;${form.zona}&quot;, &quot;direccion&quot;: &quot;${form.direccion}&quot;, &quot;referencia&quot;: &quot;${form.referencia}&quot; }
+            } }
+        ]
+      }
+    },
+    {
+      &quot;id&quot;: &quot;RESUMEN&quot;,
+      &quot;title&quot;: &quot;Confirma&quot;,
+      &quot;terminal&quot;: true,
+      &quot;success&quot;: true,
+      &quot;data&quot;: {
+        &quot;zona&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;__example__&quot;: &quot;Centro&quot; },
+        &quot;direccion&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;__example__&quot;: &quot;Av. Ejemplo 123&quot; },
+        &quot;referencia&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;__example__&quot;: &quot;Frente al parque&quot; }
+      },
+      &quot;layout&quot;: {
+        &quot;type&quot;: &quot;SingleColumnLayout&quot;,
+        &quot;children&quot;: [
+          { &quot;type&quot;: &quot;TextBody&quot;, &quot;text&quot;: &quot;Entregamos en ${data.zona}: ${data.direccion}&quot; },
+          { &quot;type&quot;: &quot;Footer&quot;, &quot;label&quot;: &quot;Enviar datos&quot;,
+            &quot;on-click-action&quot;: {
+              &quot;name&quot;: &quot;complete&quot;,
+              &quot;payload&quot;: { &quot;zona&quot;: &quot;${data.zona}&quot;, &quot;direccion&quot;: &quot;${data.direccion}&quot;, &quot;referencia&quot;: &quot;${data.referencia}&quot; }
+            } }
+        ]
+      }
+    }
+  ]
+}</code></pre>
+</div>
+<p>Lectura guiada:</p>
+<ul>
+<li><strong><code>version</code></strong>: la versión del formato del Flow JSON. Aquí <code>"5.1"</code> es el valor que aparece en los ejemplos de la documentación consultada. Verifica la versión vigente en la <a href="https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson">referencia del Flow JSON</a>.</li>
+<li><strong><code>screens</code></strong>: la lista de pantallas. Cada una tiene un <code>id</code> único (en mayúsculas y con guiones bajos, por convención) y un <code>layout</code>.</li>
+<li><strong><code>layout</code> y <code>children</code></strong>: el layout <code>SingleColumnLayout</code> apila los componentes en una columna. Los hijos son los componentes visibles.</li>
+<li><strong>Componentes de texto</strong> (<code>TextHeading</code>, <code>TextBody</code>): muestran información.</li>
+<li><strong>Componentes de entrada</strong> (<code>TextInput</code>, <code>Dropdown</code>, ...): cada uno lleva un <code>name</code>. Ese nombre es la <strong>clave</strong> con la que llegará el dato. <code>"required": true</code> impide continuar con el campo vacío.</li>
+<li><strong><code>Footer</code></strong>: el botón de la parte inferior. Su <code>on-click-action</code> dice qué pasa al tocarlo.</li>
+<li><strong><code>navigate</code></strong>: va a otra pantalla (<code>next</code>) y le pasa datos con <code>payload</code>. La sintaxis <code>${form.zona}</code> significa «el valor del campo <code>zona</code> de esta pantalla».</li>
+<li><strong><code>complete</code></strong>: termina el Flow y envía el <code>payload</code> al webhook. Solo se usa en la pantalla final, marcada <code>"terminal": true</code>.</li>
+<li><strong><code>data</code> en la pantalla <code>RESUMEN</code></strong>: declara qué datos recibe la pantalla desde la anterior (con un <code>__example__</code> para la vista previa del constructor) y se leen como <code>${data.zona}</code>.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los nombres exactos de las propiedades de cada componente (<code>data-source</code>, <code>input-type</code>, <code>__example__</code>, etc.) deben contrastarse con la <a href="https://developers.facebook.com/docs/whatsapp/flows/reference/components">referencia de componentes</a> de Meta. Pega el JSON en el <strong>Flow Builder</strong> de WhatsApp Manager: te marcará con claridad qué propiedad no acepta tu versión.</p></div>
+<h3>Validar el JSON antes de subirlo</h3>
+<p>Un error típico: una pantalla terminal sin <code>Footer</code>, o un <code>navigate</code> hacia un <code>id</code> mal escrito. Subir el Flow solo para descubrirlo es lento. Con una función de unas veinte líneas (la <code>validarFlow</code> de tu ejercicio) lo detectas en local. Resultado real al validar el Flow anterior y una versión con dos errores introducidos a propósito:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[]
+[&quot;navigate hacia una pantalla inexistente: RESUMN&quot;,&quot;La pantalla terminal RESUMEN no tiene Footer&quot;]</code></pre>
+</div>
+<p>El primer arreglo vacío significa «sin errores». El segundo muestra los dos fallos que se inyectaron: un <code>id</code> mal escrito (<code>RESUMN</code>) y la eliminación del <code>Footer</code> final. Esta validación <strong>no sustituye</strong> al Flow Builder (que valida las reglas oficiales completas), solo te ahorra viajes.</p>
+<h2 id="enviar-el-flow-al-cliente"><span class="n">5.</span>Enviar el Flow al cliente</h2>
+<p>El Flow se envía como un <strong>mensaje interactivo</strong> de tipo <code>flow</code>. Es un mensaje normal de la API, así que <strong>solo puedes enviarlo dentro de la ventana de 24 horas</strong> (como los botones) o dentro de una <strong>plantilla</strong> si quieres abrirlo fuera de ella. Para el caso del minimarket el cliente ya está conversando, así que usamos el mensaje libre. Este es el cuerpo que genera la función <code>armarMensajeFlow</code> del ejercicio:</p>
+<div class="code">
+  <div class="code-head"><span>mensaje-flow.json</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;messaging_product&quot;: &quot;whatsapp&quot;,
+  &quot;recipient_type&quot;: &quot;individual&quot;,
+  &quot;to&quot;: &quot;51999000111&quot;,
+  &quot;type&quot;: &quot;interactive&quot;,
+  &quot;interactive&quot;: {
+    &quot;type&quot;: &quot;flow&quot;,
+    &quot;body&quot;: { &quot;text&quot;: &quot;Completa tus datos de entrega.&quot; },
+    &quot;action&quot;: {
+      &quot;name&quot;: &quot;flow&quot;,
+      &quot;parameters&quot;: {
+        &quot;flow_message_version&quot;: &quot;3&quot;,
+        &quot;flow_token&quot;: &quot;tok-ejemplo-9f3a&quot;,
+        &quot;flow_id&quot;: &quot;123456&quot;,
+        &quot;flow_cta&quot;: &quot;Pedir delivery&quot;,
+        &quot;flow_action&quot;: &quot;navigate&quot;,
+        &quot;flow_action_payload&quot;: { &quot;screen&quot;: &quot;DATOS&quot; }
+      }
+    }
+  }
+}</code></pre>
+</div>
+<p>Los parámetros que importan, según la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/guides/sendingaflow">guía de envío de Flows</a>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Para qué sirve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flow_message_version</code></td>
+<td>Debe ser <code>"3"</code></td>
+</tr>
+<tr>
+<td><code>flow_id</code> (o <code>flow_name</code>)</td>
+<td>El Flow que se abre; usa uno de los dos, no ambos</td>
+</tr>
+<tr>
+<td><code>flow_token</code></td>
+<td>Un identificador <strong>que generas tú</strong> para reconocer esta conversación cuando vuelva la respuesta</td>
+</tr>
+<tr>
+<td><code>flow_cta</code></td>
+<td>Texto del botón que abre el formulario; la documentación aconseja <strong>30 caracteres o menos y sin emojis</strong></td>
+</tr>
+<tr>
+<td><code>flow_action</code></td>
+<td><code>navigate</code> (abre una pantalla) o <code>data_exchange</code> (consulta primero tu endpoint)</td>
+</tr>
+<tr>
+<td><code>flow_action_payload.screen</code></td>
+<td>El <code>id</code> de la primera pantalla</td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td><code>draft</code> para probar el borrador, <code>published</code> (por omisión) para el Flow publicado</td>
+</tr>
+</tbody>
+</table></div>
+<p>El <strong><code>flow_token</code></strong> merece atención. Piensa en él como un <strong>ticket</strong>: lo generas cuando envías el Flow (por ejemplo, ligado al teléfono y al pedido en curso, con una parte aleatoria) y lo guardas. Cuando llegue la respuesta, lo comparas: si no coincide, <strong>ignoras</strong> el mensaje. Así evitas que alguien rellene un Flow viejo o ajeno. Más sobre este tipo de defensas en la <a href="../24-seguridad-y-privacidad/">lección 24</a>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Para enviar Flows la documentación menciona prerequisitos de la cuenta (verificación del negocio y calidad de mensajes) y que un Flow debe estar <strong>publicado</strong> para usarse en producción. Confírmalos en la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/guides/sendingaflow">guía de envío</a>. Mientras practicas, <code>mode: "draft"</code> permite probar el borrador.</p></div>
+<h2 id="la-respuesta-nfm-reply-en-tu-webhook"><span class="n">6.</span>La respuesta: <code>nfm_reply</code> en tu webhook</h2>
+<p>Cuando el cliente toca «Enviar datos», tu webhook recibe un mensaje entrante <strong>interactivo</strong> distinto a los de botones y listas. Su <code>interactive.type</code> es <code>nfm_reply</code> y los datos llegan en <code>response_json</code>, <strong>como texto</strong> (un JSON dentro de un JSON). Un ejemplo:</p>
+<div class="code">
+  <div class="code-head"><span>JSON</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;from&quot;: &quot;51999000111&quot;,
+  &quot;id&quot;: &quot;wamid.X&quot;,
+  &quot;timestamp&quot;: &quot;1790000000&quot;,
+  &quot;type&quot;: &quot;interactive&quot;,
+  &quot;interactive&quot;: {
+    &quot;type&quot;: &quot;nfm_reply&quot;,
+    &quot;nfm_reply&quot;: {
+      &quot;name&quot;: &quot;flow&quot;,
+      &quot;body&quot;: &quot;Sent&quot;,
+      &quot;response_json&quot;: &quot;{\&quot;flow_token\&quot;:\&quot;tok-ejemplo-9f3a\&quot;,\&quot;zona\&quot;:\&quot;Centro\&quot;,\&quot;direccion\&quot;:\&quot;Av. Ejemplo 123\&quot;,\&quot;referencia\&quot;:\&quot;Frente al parque\&quot;}&quot;
+    }
+  }
+}</code></pre>
+</div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>La estructura exacta de <code>nfm_reply</code> y de <code>response_json</code> no estaba en las páginas de documentación que se pudieron consultar para escribir esta lección. El ejemplo sigue el formato más habitual en la práctica. Confírmalo con la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/flows/guides/flowswebhooks">documentación de webhooks de Flows</a> y con un envío real de prueba.</p></div>
+<h3>¿Qué hace hoy el bot de referencia con eso?</h3>
+<p>Esta es la parte honesta: el <code>parsearWebhook</code> del repositorio <strong>no conoce</strong> <code>nfm_reply</code>. Lo trata como «no soportado». Lo comprobé con el mensaje anterior:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;tipo&quot;:&quot;no_soportado&quot;,&quot;subtipo&quot;:&quot;interactive:nfm_reply&quot;}</code></pre>
+</div>
+<p>Eso es lo correcto por diseño (el bot no se rompe ante algo desconocido), pero significa que, para usar Flows, tienes que añadir soporte. La idea es convertir el mensaje en una entrada nueva del motor. Esta adaptación, ejecutada con el mismo mensaje, produce:</p>
+<div class="code">
+  <div class="code-head"><span>adaptar-flow.mjs</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function adaptar(evento, msgCrudo) {
+  if (evento.entrada.subtipo !== &#x27;interactive:nfm_reply&#x27;) return evento;
+  const datos = JSON.parse(msgCrudo.interactive.nfm_reply.response_json);
+  return { ...evento, entrada: { tipo: &#x27;flow&#x27;, datos } };
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;tipo&quot;:&quot;flow&quot;,&quot;datos&quot;:{&quot;flow_token&quot;:&quot;tok-ejemplo-9f3a&quot;,&quot;zona&quot;:&quot;Centro&quot;,&quot;direccion&quot;:&quot;Av. Ejemplo 123&quot;}}</code></pre>
+</div>
+<p>En tu proyecto lo harías <strong>dentro</strong> de <code>parsearEntrada</code> (en <code>whatsapp.js</code>) y con <code>try/catch</code>: el cliente controla ese JSON, así que puede llegar roto. La función <code>leerRespuestaFlow</code> del ejercicio ya hace eso y devuelve <code>null</code> si algo no cuadra.</p>
+<h2 id="validar-siempre-en-tu-servidor"><span class="n">7.</span>Validar siempre en tu servidor</h2>
+<p>Hay una regla que debes grabarte: <strong>los datos de un Flow son entrada del usuario, igual que un texto escrito</strong>. Que el formulario marque «obligatorio» no significa que el dato sea válido: un cliente malicioso puede enviar un <code>response_json</code> armado a mano. Por eso, al recibir la respuesta:</p>
+<ol>
+<li>Comprueba el <code>flow_token</code> contra el que guardaste.</li>
+<li>Valida cada campo como si viniera de texto libre.</li>
+<li>Si algo falla, vuelve a pedir ese dato con un mensaje normal.</li>
+</ol>
+<p>En el minimarket eso es <code>validarDatosDelivery</code>: la zona debe estar en <code>NEGOCIO.zonas</code> y la dirección debe tener al menos 8 caracteres (la misma regla que ya aplica el motor). Resultado real con las zonas ficticias del curso:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;ok&quot;:true}
+{&quot;ok&quot;:false,&quot;error&quot;:&quot;Esa zona no tiene reparto.&quot;}
+{&quot;ok&quot;:false,&quot;error&quot;:&quot;La direccion es muy corta.&quot;}</code></pre>
+</div>
+<p>El orden de las comprobaciones es: <strong>token, zonas, dirección, y solo entonces</strong> el siguiente paso del pedido (pago, confirmación). Si alguna falla, el bot responde en la conversación con un texto claro, sin emojis, y sin perder el carrito.</p>
+<h2 id="como-encaja-un-flow-en-el-motor-del-mini"><span class="n">8.</span>Cómo encaja un Flow en el motor del minimarket</h2>
+<p>El motor de reglas es una máquina de estados (<a href="../05-estado-de-la-conversacion/">lección 5</a>). Un Flow es <strong>un estado más</strong> con su propia entrada. El recorrido de delivery quedaría así:</p>
+<ol>
+<li>El cliente elige «Delivery». El motor pasa al estado <code>DIRECCION</code> y responde con el <strong>mensaje de Flow</strong> (en vez de preguntar «¿cuál es tu dirección?»).</li>
+<li>El cliente llena el formulario. Llega <code>nfm_reply</code> → entrada <code>{ tipo: 'flow', datos }</code>.</li>
+<li>El motor valida (<code>validarDatosDelivery</code>). Si es válido, guarda <code>entrega: 'delivery'</code>, <code>direccion</code> y pasa a <code>PAGO</code>. Si no, vuelve a pedir ese dato.</li>
+<li><strong>Plan B:</strong> si el cliente nunca abre el Flow o prefiere escribir, el bot debe aceptar también la dirección como <strong>texto libre</strong>. No todos los clientes (ni todas las versiones de WhatsApp) soportan Flows igual de bien.</li>
+</ol>
+<p>Ese plan B es una regla de diseño: <strong>todo Flow necesita una ruta alternativa con botones o texto</strong>. Un bot cuyo único camino es un formulario falla justo cuando alguien lo necesita.</p>
+<h2 id="cuanto-cuesta-y-que-mantener"><span class="n">9.</span>Cuánto cuesta y qué mantener</h2>
+<p>Tres puntos que condicionan la decisión de usar Flows en un proyecto real:</p>
+<ul>
+<li><strong>Mantenimiento.</strong> Cada Flow es un JSON que versionas y pruebas. Si cambias un <code>name</code> de campo, debes cambiar el código que lo lee; se rompe en silencio. Guarda el JSON en tu repositorio y escribe una prueba con <code>validarFlow</code>.</li>
+<li><strong>Pruebas.</strong> El Flow Builder de Meta ofrece vista previa; el cifrado del endpoint exige pruebas con la herramienta de Meta. Planifica horas, no minutos.</li>
+<li><strong>Costo.</strong> Cómo se factura el uso de Flows y de los mensajes que los llevan cambia con el tiempo. Revisa la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página de precios</a> y la <a href="../21-costos-y-metricas/">lección 21</a> antes de ofrecerlo a un cliente.</li>
+</ul>
+<div class="callout ejemplo">
+<p class="callout-title">🧪 Ejemplo · Cuándo SÍ y cuándo NO en el minimarket</p>
+<p><strong>Sí:</strong> pedido de delivery con zona, dirección, referencia y hora de entrega (cuatro datos relacionados). <strong>Sí:</strong> encuesta de satisfacción de cuatro preguntas. <strong>No:</strong> «¿recojo o delivery?» (un botón basta). <strong>No:</strong> «¿efectivo, Yape o transferencia?» (tres botones). <strong>No:</strong> consultar el horario (un texto).</p></div>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Usar un Flow para todo.</strong> Más pantallas no son más profesionalismo. Si 2 botones resuelven, usa 2 botones.</li>
+<li><strong>No validar la respuesta.</strong> <code>required: true</code> es comodidad para el cliente, no seguridad para ti.</li>
+<li><strong>Olvidar el plan B.</strong> Sin ruta alternativa, el cliente que no puede abrir el Flow queda varado.</li>
+<li><strong>Cambiar un <code>name</code> de campo y no actualizar el código.</strong> El dato llega con otra clave y el bot cree que falta.</li>
+<li><strong>Pantalla terminal sin <code>Footer</code> o <code>navigate</code> hacia un id mal escrito.</strong> El Flow Builder lo marca y tu <code>validarFlow</code> también.</li>
+<li><strong>Confiar en un <code>flow_token</code> predecible.</strong> Debe ser único y difícil de adivinar.</li>
+<li><strong>Meter un endpoint sin necesitarlo.</strong> El cifrado y las pruebas añaden trabajo; empieza sin endpoint.</li>
+<li><strong>Emojis y textos largos en el botón.</strong> La documentación aconseja un CTA de 30 caracteres o menos y sin emojis.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Un <strong>Flow</strong> es un formulario con pantallas dentro del chat; el bot recibe todos los datos <strong>juntos</strong> al terminar.</li>
+<li>Úsalo con <strong>3 o más datos</strong> relacionados; con 1 o 2, botones o preguntas sueltas.</li>
+<li><strong>Sin endpoint:</strong> todo en el JSON, ideal para empezar. <strong>Con endpoint:</strong> pantallas dinámicas, a cambio de cifrado y respuestas rápidas.</li>
+<li>El JSON: <code>screens</code> con <code>id</code> único, <code>layout</code>, componentes con <code>name</code>, <code>Footer</code> con <code>navigate</code> o <code>complete</code>, y pantalla final <code>terminal</code>.</li>
+<li>Se envía como mensaje interactivo <code>flow</code> con un <strong><code>flow_token</code></strong> que generas tú; la respuesta llega como <code>nfm_reply</code> con <code>response_json</code> <strong>en texto</strong>.</li>
+<li>Los datos del Flow son <strong>entrada de usuario</strong>: valídalos en tu servidor y ten siempre un plan B con botones o texto.</li>
+<li>Versión del JSON, componentes y costos cambian: verifica en la documentación oficial de Meta.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Flow</td>
+<td>Formulario con pantallas que se abre dentro de una conversación de WhatsApp.</td>
+</tr>
+<tr>
+<td>Flow JSON</td>
+<td>Descripción en JSON de las pantallas y componentes de un Flow.</td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td>URL de tu servidor a la que el Flow consulta datos pantalla a pantalla (opcional).</td>
+</tr>
+<tr>
+<td><code>navigate</code></td>
+<td>Acción que lleva a otra pantalla del Flow pasando datos.</td>
+</tr>
+<tr>
+<td><code>complete</code></td>
+<td>Acción que cierra el Flow y envía las respuestas al webhook.</td>
+</tr>
+<tr>
+<td><code>flow_token</code></td>
+<td>Identificador que generas tú para reconocer a qué conversación pertenece una respuesta.</td>
+</tr>
+<tr>
+<td><code>nfm_reply</code></td>
+<td>Tipo de mensaje entrante que contiene las respuestas del Flow.</td>
+</tr>
+<tr>
+<td><code>response_json</code></td>
+<td>Texto JSON con los valores que llenó el cliente.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Cuándo conviene más un Flow que unas preguntas sueltas con botones?</p><ul class="opts"><li><button type="button" class="opt">Cuando solo hay que elegir entre «recojo» y «delivery»</button></li><li><button type="button" class="opt" data-ok>Cuando hay tres o más datos relacionados que se pueden reunir y validar en un solo formulario</button></li><li><button type="button" class="opt">Cuando el cliente escribe en texto libre</button></li><li><button type="button" class="opt">Cuando quieres evitar el cobro por mensajes</button></li></ul><p class="explain" hidden>Un Flow vale la pena para varios datos juntos; para uno o dos, botones son más simples.</p></div>
+<div class="quiz-q"><p>¿Cómo llegan al webhook los datos que el cliente llenó en un Flow?</p><ul class="opts"><li><button type="button" class="opt">Meta los envía a tu correo</button></li><li><button type="button" class="opt" data-ok>Como un mensaje interactivo <code>nfm_reply</code> cuyo <code>response_json</code> es un texto con los valores</button></li><li><button type="button" class="opt">Como una imagen del formulario</button></li><li><button type="button" class="opt">Tu bot los consulta cada minuto en la API</button></li></ul><p class="explain" hidden>La respuesta llega por el webhook como <code>nfm_reply</code>, y <code>response_json</code> viene como texto que hay que convertir con <code>JSON.parse</code>.</p></div>
+<div class="quiz-q"><p>¿Qué diferencia a un Flow con endpoint de uno sin endpoint?</p><ul class="opts"><li><button type="button" class="opt">El que tiene endpoint no necesita pantallas</button></li><li><button type="button" class="opt" data-ok>En el de endpoint, WhatsApp consulta tu servidor en cada paso (con cifrado) para decidir qué mostrar; el otro se resuelve solo con el JSON</button></li><li><button type="button" class="opt">El que no tiene endpoint no puede enviar datos al bot</button></li><li><button type="button" class="opt">Ninguna, solo cambia el precio</button></li></ul><p class="explain" hidden>El endpoint sirve para datos dinámicos (cupos, cobertura) y exige cifrado y respuestas rápidas.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve el <code>flow_token</code>?</p><ul class="opts"><li><button type="button" class="opt">Para pagar el mensaje</button></li><li><button type="button" class="opt" data-ok>Para reconocer a qué conversación o pedido corresponde una respuesta y descartar las que no coinciden</button></li><li><button type="button" class="opt">Para dar permiso a Meta de leer los mensajes</button></li><li><button type="button" class="opt">Para elegir el idioma del formulario</button></li></ul><p class="explain" hidden>Es un identificador que generas tú, difícil de adivinar, y que comparas al recibir la respuesta.</p></div>
+<div class="quiz-q"><p>Un campo marcado <code>required: true</code> en el Flow, ¿te exime de validar el dato en tu servidor?</p><ul class="opts"><li><button type="button" class="opt">Sí, el formulario ya garantiza que es correcto</button></li><li><button type="button" class="opt" data-ok>No: un cliente puede enviar datos armados a mano, así que validas siempre como si fuera texto libre</button></li><li><button type="button" class="opt">Solo si el Flow tiene endpoint</button></li><li><button type="button" class="opt">Solo si el campo es una lista desplegable</button></li></ul><p class="explain" hidden>Los datos del Flow son entrada del usuario y deben validarse en tu servidor.</p></div>
+<div class="quiz-q"><p>¿Qué debe tener todo bot que use un Flow además del formulario?</p><ul class="opts"><li><button type="button" class="opt">Un segundo número de WhatsApp</button></li><li><button type="button" class="opt" data-ok>Una ruta alternativa con botones o texto por si el cliente no puede o no quiere usar el formulario</button></li><li><button type="button" class="opt">Un endpoint cifrado</button></li><li><button type="button" class="opt">Un emoji en el botón</button></li></ul><p class="explain" hidden>Un plan B evita dejar varado al cliente cuyo WhatsApp no soporta el Flow o que prefiere escribir.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-19">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../18-recordatorios-y-seguimiento/"><small>← Anterior</small>Recordatorios y seguimiento automático</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 19 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2019:%20Formularios%20dentro%20de%20WhatsApp%20con%20Flows&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/19-whatsapp-flows/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

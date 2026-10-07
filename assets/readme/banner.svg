@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-label="Chatbots de WhatsApp desde cero">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b5f6b"/></linearGradient>
+<linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0b7a75"/></linearGradient>
+</defs>
+<rect width="1200" height="360" rx="24" fill="url(#g)"/>
+<circle cx="1050" cy="60" r="140" fill="#5eead4" opacity=".08"/>
+<circle cx="120" cy="330" r="110" fill="#ff8a3d" opacity=".08"/>
+<g font-family="Segoe UI,Arial,sans-serif">
+<text x="70" y="140" fill="#5eead4" font-size="22" font-weight="700" letter-spacing="3">CURSO GRATIS · 28 LECCIONES · UN BOT REAL</text>
+<text x="70" y="215" fill="#e4f6f2" font-size="64" font-weight="800">Chatbots de WhatsApp</text>
+<text x="70" y="280" fill="#ff8a3d" font-size="52" font-weight="800">desde cero</text>
+</g>
+<g>
+<rect x="760" y="70" width="340" height="56" rx="18" fill="#143037"/><text x="782" y="105" fill="#e4f6f2" font-size="22" font-family="Segoe UI,Arial">Hola, ¿qué desea pedir?</text>
+<rect x="860" y="146" width="240" height="56" rx="18" fill="url(#b)"/><text x="882" y="181" fill="#fff" font-size="22" font-family="Segoe UI,Arial">2 leches y arroz</text>
+<rect x="760" y="222" width="340" height="56" rx="18" fill="#143037"/><text x="782" y="257" fill="#e4f6f2" font-size="22" font-family="Segoe UI,Arial">Total: S/ 12.80. ¿Confirmas?</text>
+</g>
+</svg>

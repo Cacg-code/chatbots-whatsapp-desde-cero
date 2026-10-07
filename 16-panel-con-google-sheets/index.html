@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel del dueño con Google Sheets · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Guarda cada pedido del bot como una fila en Google Sheets mediante una aplicación web de Apps Script protegida con secreto, y arma un panel sencillo para el dueño.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Panel del dueño con Google Sheets · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Guarda cada pedido del bot como una fila en Google Sheets mediante una aplicación web de Apps Script protegida con secreto, y arma un panel sencillo para el dueño.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-una-hoja-de-calculo-es-un-buen-p">Por qué una hoja de cálculo es un buen panel</a></li><li><a href="#paso-1-preparar-la-hoja">Paso 1: preparar la hoja</a></li><li><a href="#paso-2-el-script-que-recibe-los-pedidos">Paso 2: el script que recibe los pedidos</a></li><li><a href="#paso-3-convertir-un-pedido-en-una-fila">Paso 3: convertir un pedido en una fila</a></li><li><a href="#paso-4-publicar-la-aplicacion-web">Paso 4: publicar la aplicación web</a></li><li><a href="#seguridad-la-url-es-publica-el-secreto-n">Seguridad: la URL es pública, el secreto no</a></li><li><a href="#paso-5-el-panel-del-dueno">Paso 5: el panel del dueño</a></li><li><a href="#cuotas-y-limites">Cuotas y límites</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 16</div>
+        <h1>Panel del dueño con Google Sheets</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar por qué una hoja de cálculo es un buen primer panel para el dueño de un negocio pequeño.</li><li>Escribir un <code>doPost</code> en Google Apps Script que reciba un pedido, valide un secreto y agregue una fila.</li><li>Publicar el script como aplicación web y llamarlo desde el Worker con <code>fetch</code>, sin romper el bot si la hoja falla.</li><li>Convertir un pedido en una fila ordenada y proteger los datos personales de los clientes.</li><li>Armar una pestaña de panel con totales del día y pedidos por estado.</li></ul>
+</div>
+
+<h2 id="por-que-una-hoja-de-calculo-es-un-buen-p"><span class="n">1.</span>Por qué una hoja de cálculo es un buen panel</h2>
+<p>El bot ya guarda los pedidos en KV (<a href="../15-memoria-con-kv/">lección 15</a>), pero KV es un cajón para programadores: el dueño del minimarket no puede abrirlo, filtrarlo ni imprimirlo. Lo que él quiere es <strong>ver los pedidos del día, marcarlos como entregados y saber cuánto vendió</strong>. Casi todo dueño de un negocio pequeño ya sabe usar una hoja de cálculo, y Google Sheets viene con lo que necesitas: es gratis, se abre desde el celular, se comparte con un clic y permite filtros, colores y fórmulas.</p>
+<p>La idea es tratar la hoja como <strong>la libreta de pedidos del local</strong>. El bot escribe una fila por pedido; el dueño la lee y la edita. No necesitas construir una web de administración, ni programar login, ni pagar una base de datos. Para vender un bot a un negocio pequeño, es una de las mejoras con mejor relación entre esfuerzo y valor.</p>
+<p>Hay un obstáculo: el Worker de Cloudflare no puede escribir en una hoja sin un permiso de Google. La solución más simple para empezar es <strong>Google Apps Script</strong>, un entorno de JavaScript que corre en los servidores de Google, ya está conectado a tu cuenta y puede publicarse como una <strong>aplicación web</strong> con su propia URL. El Worker le manda un pedido por HTTP; el script lo escribe en la hoja.</p>
+<div class="flow"><div class="node"><strong>Worker</strong><span>bot en Cloudflare</span></div><div class="arrow">→<code>POST con el pedido (JSON)</code></div><div class="node"><strong>Apps Script</strong><span>aplicación web</span></div><div class="arrow">→<code>appendRow</code></div><div class="node"><strong>Google Sheets</strong><span>hoja Pedidos</span></div><div class="arrow">→<code>la abre</code></div><div class="node"><strong>Dueño</strong><span>celular o PC</span></div></div>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Un camino, no el único</p>
+<p>Existe también la API oficial de Google Sheets con cuenta de servicio. Es más flexible pero exige configurar un proyecto de Google Cloud y firmar tokens. Apps Script es más corto y suficiente para esta etapa. Cuando el volumen crezca, esa será una mejora posible.</p></div>
+<h2 id="paso-1-preparar-la-hoja"><span class="n">2.</span>Paso 1: preparar la hoja</h2>
+<p>Crea una hoja de cálculo nueva con una cuenta de Google <strong>de pruebas</strong> (no la del negocio real de un cliente mientras practicas). Llámala <code>Minimarket La Esquina - Pedidos</code> y renombra la primera pestaña como <code>Pedidos</code>. En la fila 1 escribe los encabezados, en este orden exacto:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+<th>F</th>
+<th>G</th>
+<th>H</th>
+<th>I</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fecha</td>
+<td>Pedido</td>
+<td>Telefono</td>
+<td>Productos</td>
+<td>Total</td>
+<td>Entrega</td>
+<td>Direccion</td>
+<td>Pago</td>
+<td>Estado</td>
+</tr>
+</tbody>
+</table></div>
+<p>Dos ajustes que ahorran problemas:</p>
+<ul>
+<li><strong>Columna C (Telefono) como texto plano.</strong> Selecciónala y aplica <em>Formato &gt; Número &gt; Texto sin formato</em>. Así Sheets no convierte <code>51999000111</code> en número (ni recorta ceros ni usa notación científica).</li>
+<li><strong>Columna A (Fecha) con formato de fecha y hora.</strong> El script escribirá una fecha real; el formato decide cómo se ve.</li>
+</ul>
+<p>Revisa también la <strong>zona horaria</strong> de la hoja en <em>Archivo &gt; Configuración</em>: si no coincide con la del negocio, las horas se verán corridas. (Los nombres exactos de los menús de Google cambian de vez en cuando: si alguno no coincide, busca la opción equivalente.)</p>
+<h2 id="paso-2-el-script-que-recibe-los-pedidos"><span class="n">3.</span>Paso 2: el script que recibe los pedidos</h2>
+<p>En la hoja abre <strong>Extensiones &gt; Apps Script</strong>. Se abrirá un editor con un archivo <code>Código.gs</code>. Reemplaza su contenido por este código. En una aplicación web, una petición <strong>POST</strong> ejecuta la función <code>doPost(e)</code>, y el cuerpo que mandó el Worker llega como texto en <code>e.postData.contents</code> (así lo describe la <a href="https://developers.google.com/apps-script/guides/web">guía de aplicaciones web</a>).</p>
+<div class="code">
+  <div class="code-head"><span>Código.gs</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const HOJA = &#x27;Pedidos&#x27;;
+
+function responder(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  let datos;
+  try {
+    datos = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return responder({ ok: false, error: &#x27;JSON invalido&#x27; });
+  }
+
+  const esperado = PropertiesService.getScriptProperties().getProperty(&#x27;HOJA_SECRETO&#x27;);
+  if (!esperado || datos.secreto !== esperado) {
+    return responder({ ok: false, error: &#x27;no autorizado&#x27; });
+  }
+  if (datos.accion !== &#x27;nuevo_pedido&#x27; || !Array.isArray(datos.fila) || datos.fila.length !== 9) {
+    return responder({ ok: false, error: &#x27;peticion invalida&#x27; });
+  }
+
+  const fila = datos.fila.slice();
+  fila[0] = new Date(fila[0]); // texto ISO -&gt; fecha real de la hoja
+
+  const candado = LockService.getScriptLock();
+  candado.waitLock(10000); // espera hasta 10 s a que otro pedido termine de escribir
+  try {
+    const hoja = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(HOJA);
+    hoja.appendRow(fila);
+  } finally {
+    candado.releaseLock();
+  }
+  return responder({ ok: true });
+}</code></pre>
+</div>
+<p>Qué hace cada parte y por qué:</p>
+<ul>
+<li><strong><code>responder</code>.</strong> Una aplicación web debe devolver un objeto de texto o HTML; devolvemos JSON para que el Worker pueda leer el resultado.</li>
+<li><strong><code>try/catch</code> con <code>JSON.parse</code>.</strong> Si alguien manda basura, respondemos un error en lugar de dejar que el script se caiga.</li>
+<li><strong>El secreto.</strong> Esto es crucial, y lo desarrollamos en la sección de seguridad: la URL de la aplicación web será accesible a cualquiera que la conozca, así que el script exige una clave que solo conocen el Worker y tú.</li>
+<li><strong>Validar <code>accion</code> y la forma de <code>fila</code>.</strong> El script solo sabe hacer una cosa; si le piden otra, se rechaza.</li>
+<li><strong><code>LockService</code>.</strong> Si llegan dos pedidos casi a la vez, el candado hace que las escrituras ocurran una por una. <code>getScriptLock()</code> devuelve un candado que impide que dos ejecuciones corran a la vez la sección protegida; solo se adquiere al llamar a <code>waitLock</code> o <code>tryLock</code> (<a href="https://developers.google.com/apps-script/reference/lock/lock-service">referencia de LockService</a>).</li>
+<li><strong><code>appendRow</code>.</strong> Agrega una fila al final de los datos existentes (<a href="https://developers.google.com/apps-script/reference/spreadsheet/sheet">referencia de Sheet</a>).</li>
+</ul>
+<h3>Probar la lógica sin Google</h3>
+<p>No tienes que esperar a desplegar para saber si la lógica funciona. Ejecuté este mismo código en Node con <strong>dobles de prueba</strong> (objetos falsos que imitan <code>ContentService</code>, <code>PropertiesService</code>, <code>LockService</code> y <code>SpreadsheetApp</code>) y cuatro llamadas distintas: una correcta, otra con secreto equivocado, otra con acción desconocida y una con texto que no es JSON:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;ok&quot;:true}
+{&quot;ok&quot;:false,&quot;error&quot;:&quot;no autorizado&quot;}
+{&quot;ok&quot;:false,&quot;error&quot;:&quot;peticion invalida&quot;}
+{&quot;ok&quot;:false,&quot;error&quot;:&quot;JSON invalido&quot;}
+1 Pedidos true 2026-10-07T15:00:25.000Z</code></pre>
+</div>
+<p>La última línea confirma que solo se escribió <strong>una</strong> fila (la correcta), en la pestaña <code>Pedidos</code>, y que la primera celda es un objeto <code>Date</code> real. Lo que este experimento no prueba es la parte de Google (permisos, despliegue): eso se comprueba en el Paso 4.</p>
+<h3>Guardar el secreto</h3>
+<p>No pegues el secreto dentro del código. En el editor, abre <strong>Configuración del proyecto</strong> (el engranaje), baja a <strong>Propiedades del script</strong> y añade una propiedad <code>HOJA_SECRETO</code> con una frase larga y aleatoria (por ejemplo 32 caracteres que generes tú). El código la lee con <code>PropertiesService.getScriptProperties().getProperty('HOJA_SECRETO')</code>. Guarda ese mismo valor en tu Worker como secreto en el paso siguiente.</p>
+<h2 id="paso-3-convertir-un-pedido-en-una-fila"><span class="n">4.</span>Paso 3: convertir un pedido en una fila</h2>
+<p>Ya sabes cómo se ve un pedido que sale del motor. Es el objeto real que produce <code>procesar</code> al confirmar (el id es aleatorio, el tuyo será distinto):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{
+ &quot;id&quot;: &quot;LE-Y8IDYG&quot;,
+ &quot;telefono&quot;: &quot;51999000111&quot;,
+ &quot;items&quot;: [{ &quot;id&quot;: &quot;leche&quot;, &quot;nombre&quot;: &quot;Leche entera 1 L&quot;, &quot;precio&quot;: 4.3, &quot;cantidad&quot;: 2 }],
+ &quot;total&quot;: 8.6,
+ &quot;entrega&quot;: &quot;recojo&quot;,
+ &quot;direccion&quot;: null,
+ &quot;pago&quot;: &quot;efectivo&quot;,
+ &quot;estado&quot;: &quot;recibido&quot;,
+ &quot;creadoEn&quot;: 1791385225000
+}</code></pre>
+</div>
+<p>(Lo reduje a menos líneas para leerlo mejor; los campos son los mismos.) Necesitamos pasarlo a un arreglo de 9 valores, uno por columna. Creamos un archivo nuevo en tu proyecto, <code>src/hoja.js</code>, <strong>sin tocar los archivos de referencia</strong>:</p>
+<div class="code">
+  <div class="code-head"><span>src/hoja.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function pedidoAFila(p) {
+  return [
+    new Date(p.creadoEn).toISOString(),
+    p.id,
+    p.telefono,
+    p.items.map((i) =&gt; `${i.cantidad} x ${i.nombre}`).join(&#x27;; &#x27;),
+    p.total,
+    p.entrega,
+    p.direccion ?? &#x27;&#x27;,
+    p.pago,
+    p.estado,
+  ];
+}
+
+export async function enviarPedidoAHoja(env, pedido, llamar = fetch) {
+  const r = await llamar(env.HOJA_URL, {
+    method: &#x27;POST&#x27;,
+    headers: { &#x27;Content-Type&#x27;: &#x27;text/plain;charset=utf-8&#x27; },
+    body: JSON.stringify({ secreto: env.HOJA_SECRETO, accion: &#x27;nuevo_pedido&#x27;, fila: pedidoAFila(pedido) }),
+  });
+  const datos = await r.json().catch(() =&gt; ({}));
+  if (!datos.ok) throw new Error(`La hoja respondió: ${datos.error ?? r.status}`);
+  return datos;
+}</code></pre>
+</div>
+<p>Con el pedido de arriba, <code>pedidoAFila</code> entrega (salida real):</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[
+  &#x27;2026-10-07T15:00:25.000Z&#x27;,
+  &#x27;LE-Y8IDYG&#x27;,
+  &#x27;51999000111&#x27;,
+  &#x27;2 x Leche entera 1 L&#x27;,
+  8.6,
+  &#x27;recojo&#x27;,
+  &#x27;&#x27;,
+  &#x27;efectivo&#x27;,
+  &#x27;recibido&#x27;
+]</code></pre>
+</div>
+<p>Detalles de diseño que merecen explicación:</p>
+<ul>
+<li><strong>Un solo texto para los productos.</strong> Un pedido tiene un número variable de productos; si cada uno ocupara una columna, la hoja se volvería ilegible. Una celda con <code>2 x Leche; 1 x Arroz</code> es lo que el dueño lee de un vistazo. (Si algún día necesitas analizar ventas por producto, harás una segunda pestaña con una fila por producto.)</li>
+<li><strong>Fecha ISO.</strong> Es un formato sin ambigüedades; el script la convierte en fecha de la hoja.</li>
+<li><strong><code>Content-Type: text/plain</code>.</strong> Con <code>text/plain</code> evitamos una verificación previa (<em>preflight</em>) que algunos servicios aplican a las llamadas con <code>application/json</code> y que las aplicaciones web de Apps Script no manejan. Es una receta frecuente, pero no pude confirmarla en la documentación oficial. <strong>Verifica este dato</strong> en la <a href="https://developers.google.com/apps-script/guides/web">guía de aplicaciones web</a> y, sobre todo, pruébalo con tu despliegue: es la forma más segura de saber.</li>
+<li><strong>Revisión de <code>ok</code>.</strong> Nuestro script responde con estado HTTP 200 aunque el contenido sea un error (devuelve <code>{"ok":false}</code>), así que no basta mirar el código HTTP: leemos el JSON.</li>
+</ul>
+<p>El Worker, a su vez, necesita conocer la URL y el secreto. En <code>wrangler.toml</code> deja un valor de ejemplo y guarda los reales como secretos:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler secret put HOJA_URL
+npx wrangler secret put HOJA_SECRETO</code></pre>
+</div>
+<p>La URL de una aplicación web contiene un identificador largo y permite escribir a tu hoja si alguien sabe el secreto: trátala como un dato <strong>privado</strong>, no la publiques en tu repositorio.</p>
+<h3>Conectarlo al bot sin romper nada</h3>
+<p>Un principio de diseño: <strong>la hoja es un extra; si falla, el cliente debe seguir recibiendo su confirmación</strong>. Por eso la llamada va en un <code>try/catch</code> que solo registra el error. En <code>procesarMensaje</code>, justo después de guardar el pedido en KV, añadirías:</p>
+<div class="code">
+  <div class="code-head"><span>worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>if (sesion.pedidoNuevo) {
+  await guardarJson(kv, `pedido:${sesion.pedidoNuevo.id}`, sesion.pedidoNuevo, TTL_PEDIDO);
+  await enviarPedidoAHoja(env, sesion.pedidoNuevo, llamar)
+    .catch((e) =&gt; console.error(&#x27;No se pudo escribir en la hoja:&#x27;, e.message));
+}</code></pre>
+</div>
+<p>Y no olvides <code>import { enviarPedidoAHoja } from './hoja.js';</code> al inicio. Esto es un cambio que <strong>tú</strong> haces en tu copia del proyecto: el archivo de referencia del curso no lo incluye.</p>
+<p>Probé el lado Worker uniendo todo con un <code>fetch</code> falso que llama directamente al <code>doPost</code> de arriba. Con el secreto correcto escribe una fila; con un secreto incorrecto el Worker se queda con el error y la hoja no recibe nada:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{ ok: true }
+1
+La hoja respondió: no autorizado
+1</code></pre>
+</div>
+<p>Las dos últimas líneas son el número de filas escritas antes y después del intento no autorizado: sigue siendo 1.</p>
+<h3>¿Y si la hoja está caída?</h3>
+<p>El pedido ya está a salvo en KV (30 días), pero no llegó a la hoja. Una mejora sencilla es guardar una marca de «pendiente de hoja» y reintentarlo en el cron de la <a href="../18-recordatorios-y-seguimiento/">lección 18</a>. No la implementamos aquí para mantener la lección enfocada, pero que el dato siga en KV es justamente lo que te permite reintentar.</p>
+<h2 id="paso-4-publicar-la-aplicacion-web"><span class="n">5.</span>Paso 4: publicar la aplicación web</h2>
+<p>En el editor de Apps Script:</p>
+<ol>
+<li>Pulsa <strong>Implementar &gt; Nueva implementación</strong>.</li>
+<li>Junto a «Seleccionar tipo», elige <strong>Aplicación web</strong>.</li>
+<li>Configura <strong>Ejecutar como: Yo</strong> (el script corre con tus permisos aunque quien llame sea el Worker) y <strong>Quién tiene acceso: Cualquier persona</strong>.</li>
+<li>Pulsa <strong>Implementar</strong>, concede los permisos que Google solicite (acceso a tus hojas) y copia la URL que termina en <code>/exec</code>.</li>
+</ol>
+<p>La <a href="https://developers.google.com/apps-script/guides/web">guía oficial</a> explica estas dos opciones: con «Ejecutar la aplicación como yo» el script siempre corre como el propietario; con «como el usuario que accede» corre con la identidad de quien visita. Para un Worker sin cuenta de Google necesitas la primera.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los nombres de menús y opciones de Google cambian con el tiempo (en este texto los traduje del inglés habitual). Si no los encuentras, sigue la <a href="https://developers.google.com/apps-script/guides/web">guía oficial de aplicaciones web</a>. Dos reglas que sí son estables: la implementación de <strong>prueba</strong> (URL terminada en <code>/dev</code>) solo funciona para quien edita el script y ejecuta siempre el código guardado más reciente; la URL <code>/exec</code> ejecuta la <strong>versión implementada</strong>, así que después de cambiar el código debes publicar una nueva versión de la implementación para que el cambio tenga efecto.</p></div>
+<h3>Probar con curl</h3>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl -L -X POST &quot;https://script.google.com/macros/s/EJEMPLO/exec&quot; \
+  -H &quot;Content-Type: text/plain;charset=utf-8&quot; \
+  -d &#x27;{&quot;secreto&quot;:&quot;clave-larga-de-ejemplo&quot;,&quot;accion&quot;:&quot;nuevo_pedido&quot;,&quot;fila&quot;:[&quot;2026-10-07T15:00:25.000Z&quot;,&quot;LE-PRUEBA&quot;,&quot;51999000111&quot;,&quot;1 x Pan de molde&quot;,6.5,&quot;recojo&quot;,&quot;&quot;,&quot;efectivo&quot;,&quot;recibido&quot;]}&#x27;</code></pre>
+</div>
+<p>La opción <code>-L</code> hace que <code>curl</code> siga redirecciones. La razón: según lo que se observa habitualmente, las aplicaciones web de Apps Script responden a un POST con una redirección (código 302) hacia otra dirección de Google donde está el resultado. Esa redirección no está descrita en la página oficial que consulté, así que <strong>verifica este dato</strong> con tu propio despliegue: si ves <code>Moved Temporarily</code> o un HTML en lugar de <code>{"ok":true}</code>, falta el <code>-L</code>. El <code>fetch</code> de un Worker sigue redirecciones por defecto, por lo que <code>enviarPedidoAHoja</code> no necesita nada especial. Lo importante: el script se ejecuta (y la fila se escribe) en la primera petición; la redirección solo sirve para entregarte la respuesta.</p>
+<p>Cambia el secreto por uno incorrecto y deberías ver <code>{"ok":false,"error":"no autorizado"}</code>. Si en cambio recibes una página de inicio de sesión de Google, el acceso no está en «Cualquier persona».</p>
+<h2 id="seguridad-la-url-es-publica-el-secreto-n"><span class="n">6.</span>Seguridad: la URL es pública, el secreto no</h2>
+<p>Cuando eliges «Cualquier persona», cualquiera que conozca la URL puede llamarla. No puedes limitar por dirección IP, y el evento <code>e</code> de <code>doPost</code> no incluye las cabeceras HTTP, así que no puedes validar una firma como la del webhook de Meta (<strong>verifica este dato</strong> en la guía oficial si Google lo cambia). Tu defensa es el <strong>secreto compartido</strong> dentro del cuerpo. Aplica estas reglas:</p>
+<ul>
+<li><strong>Largo y aleatorio.</strong> Una frase fácil se adivina. Genera un valor de al menos 32 caracteres.</li>
+<li><strong>Solo en secretos.</strong> En el Worker (<code>wrangler secret put</code>) y en las propiedades del script; nunca en GitHub ni en capturas de pantalla.</li>
+<li><strong>Una sola acción permitida.</strong> Nuestro script solo agrega filas; no borra ni lee. Si alguien consiguiera el secreto, lo peor que puede hacer es llenar la hoja de pedidos falsos.</li>
+<li><strong>Rota el secreto</strong> si sospechas que se filtró: cambia la propiedad y el secreto del Worker a la vez.</li>
+<li><strong>Datos personales mínimos.</strong> La hoja guarda teléfonos y direcciones de clientes. Compártela solo con quienes la necesiten, con permiso de <strong>lectura</strong> cuando baste, y avisa al dueño de que esa información es sensible (<a href="../24-seguridad-y-privacidad/">lección 24</a>). Y en tus pruebas, usa siempre datos falsos como <code>51999000111</code>.</li>
+</ul>
+<h2 id="paso-5-el-panel-del-dueno"><span class="n">7.</span>Paso 5: el panel del dueño</h2>
+<p>Una hoja con filas es un registro; un <strong>panel</strong> es lo que el dueño mira primero: «¿cuánto vendí hoy y qué falta entregar?». Crea una segunda pestaña llamada <code>Panel</code>. Las fórmulas siguientes usan la sintaxis en inglés y comas; en una hoja configurada en español, Google traduce los nombres de las funciones (por ejemplo <code>COUNTIFS</code> se muestra como <code>CONTAR.SI.CONJUNTO</code>) y puede pedir punto y coma como separador. No las ejecuté aquí; pruébalas con tus datos y, si Sheets marca error, usa el autocompletado de la propia hoja.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Celda</th>
+<th>Qué muestra</th>
+<th>Fórmula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A1</code></td>
+<td>Día a consultar</td>
+<td>una fecha, por ejemplo <code>07/10/2026</code></td>
+</tr>
+<tr>
+<td><code>B2</code></td>
+<td>Pedidos del día</td>
+<td><code>=COUNTIFS(Pedidos!A:A,"&gt;="&amp;A1,Pedidos!A:A,"&lt;"&amp;A1+1,Pedidos!I:I,"&lt;&gt;cancelado")</code></td>
+</tr>
+<tr>
+<td><code>B3</code></td>
+<td>Ventas del día (S/)</td>
+<td><code>=SUMIFS(Pedidos!E:E,Pedidos!A:A,"&gt;="&amp;A1,Pedidos!A:A,"&lt;"&amp;A1+1,Pedidos!I:I,"&lt;&gt;cancelado")</code></td>
+</tr>
+<tr>
+<td><code>B4</code></td>
+<td>Pedidos por entregar</td>
+<td><code>=COUNTIF(Pedidos!I:I,"recibido")</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Esto replica la lógica del ejercicio: contar y sumar las filas del día que no estén canceladas. Para que el dueño cambie el estado sin escribir:</p>
+<ul>
+<li>Selecciona la columna <strong>I</strong> (Estado) y usa <strong>Datos &gt; Validación de datos</strong> con una lista: <code>recibido, preparando, entregado, cancelado</code>.</li>
+<li>Aplica <strong>Formato condicional</strong> para pintar de verde <code>entregado</code> y de rojo <code>cancelado</code>.</li>
+<li>Activa un <strong>filtro</strong> en la fila 1 para que pueda ver solo los pedidos pendientes.</li>
+</ul>
+<p>Un punto importante de diseño: este panel es <strong>de una vía</strong>. El bot escribe en la hoja, pero si el dueño cambia el estado a «entregado», el bot <strong>no se entera</strong> (el pedido en KV sigue como <code>recibido</code>, y por eso podría salir un recordatorio de un pedido que ya se entregó). Cerrar ese ciclo es posible, por ejemplo con un <em>trigger</em> que avise al Worker al editar la hoja, pero añade complejidad. Para la primera versión, avisa al dueño de esa limitación y evita enviar recordatorios de pedidos que ya están marcados como entregados en el negocio real.</p>
+<div class="callout ejemplo">
+<p class="callout-title">🧪 Ejemplo · Una mañana con el panel</p>
+<p><strong>Dueño:</strong> abre la hoja en su celular a las 8:00 a. m. y ve en <code>Panel</code> 3 pedidos del día por S/ 41.10. Filtra por <code>recibido</code>, prepara las bolsas, y al entregar cada una cambia la celda de Estado a <code>entregado</code>. Al cierre, el total del día ya está calculado: no hace cuentas a mano.</p></div>
+<h2 id="cuotas-y-limites"><span class="n">8.</span>Cuotas y límites</h2>
+<p>Apps Script tiene cuotas por día. Para cuentas personales (como las de gmail.com), la <a href="https://developers.google.com/apps-script/guides/services/quotas">página de cuotas</a> indica, entre otras, 6 minutos de ejecución por llamada y hasta 30 ejecuciones simultáneas por usuario. Para escribir una fila por pedido no es un problema; si tu bot recibiera cientos de pedidos por minuto, tendrías que cambiar de enfoque. <strong>Verifica este dato</strong> en esa página, porque las cuotas se actualizan y difieren entre cuentas gratuitas y Workspace.</p>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Probar el script con una URL <code>/dev</code> desde el Worker.</strong> Esa URL solo sirve para quien edita el script. El Worker debe usar la <code>/exec</code>.</li>
+<li><strong>Cambiar el código y no crear una nueva versión de la implementación.</strong> La URL <code>/exec</code> seguirá ejecutando la versión anterior.</li>
+<li><strong>Elegir «Solo yo» como acceso.</strong> El Worker recibirá una página de inicio de sesión en lugar de JSON.</li>
+<li><strong>Olvidar <code>-L</code> en <code>curl</code></strong> y pensar que «no funciona» cuando la fila sí se escribió.</li>
+<li><strong>Poner el secreto en el código o en el repositorio.</strong> Va en propiedades del script y en <code>wrangler secret</code>.</li>
+<li><strong>Dejar que un fallo de la hoja detenga el bot.</strong> Siempre <code>try/catch</code> o <code>.catch</code>: el cliente debe recibir su confirmación igual.</li>
+<li><strong>Sumar con decimales sin cuidado.</strong> <code>0.1 + 0.2</code> no da <code>0.3</code> en JavaScript; suma en céntimos o deja que las fórmulas de la hoja lo hagan.</li>
+<li><strong>Compartir la hoja con edición pública.</strong> Contiene teléfonos y direcciones: comparte solo con personas concretas.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>Una hoja de Google es un panel excelente para empezar: gratis, conocida por el dueño y editable desde el celular.</li>
+<li>El Worker llama a una aplicación web de Apps Script cuyo <code>doPost(e)</code> lee <code>e.postData.contents</code>, valida un secreto y hace <code>appendRow</code>.</li>
+<li>La URL de la aplicación es accesible para quien la conozca: la protección es un secreto largo guardado en propiedades del script y en <code>wrangler secret</code>.</li>
+<li><code>LockService</code> ordena las escrituras simultáneas; nuestro script responde 200 aunque haya error, así que lee el JSON.</li>
+<li>La hoja es un extra: si falla, el pedido sigue en KV y el cliente recibe su confirmación.</li>
+<li>El panel es de una vía: lo que el dueño edita en la hoja no vuelve al bot.</li>
+<li>Las hojas guardan datos personales: comparte lo mínimo y usa datos falsos al practicar.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apps Script</td>
+<td>Entorno de JavaScript de Google que automatiza Sheets, Docs y otros servicios.</td>
+</tr>
+<tr>
+<td>Aplicación web</td>
+<td>Script publicado con una URL que responde a peticiones HTTP (<code>doGet</code>, <code>doPost</code>).</td>
+</tr>
+<tr>
+<td><code>doPost(e)</code></td>
+<td>Función que se ejecuta cuando la aplicación web recibe un POST.</td>
+</tr>
+<tr>
+<td>Secreto compartido</td>
+<td>Clave que solo conocen quien llama y quien recibe, para validar la petición.</td>
+</tr>
+<tr>
+<td><code>appendRow</code></td>
+<td>Método que añade una fila al final de los datos de una hoja.</td>
+</tr>
+<tr>
+<td>LockService</td>
+<td>Servicio que evita que dos ejecuciones escriban a la vez.</td>
+</tr>
+<tr>
+<td>Propiedades del script</td>
+<td>Lugar para guardar valores como el secreto, fuera del código.</td>
+</tr>
+<tr>
+<td>Panel</td>
+<td>Pestaña con totales y estados que el dueño consulta de un vistazo.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Por qué se usa Apps Script en vez de escribir directo a Sheets desde el Worker?</p><ul class="opts"><li><button type="button" class="opt">Porque Cloudflare no permite hacer peticiones HTTP</button></li><li><button type="button" class="opt" data-ok>Porque Apps Script ya está autenticado con tu cuenta de Google y evita configurar un proyecto de Google Cloud y firmar tokens</button></li><li><button type="button" class="opt">Porque Sheets solo acepta datos desde Apps Script</button></li><li><button type="button" class="opt">Porque Apps Script es más rápido que cualquier API</button></li></ul><p class="explain" hidden>Es el camino más corto para empezar; la API de Sheets con cuenta de servicio es más flexible pero más trabajosa.</p></div>
+<div class="quiz-q"><p>¿Qué función ejecuta una aplicación web de Apps Script cuando recibe un POST?</p><ul class="opts"><li><button type="button" class="opt"><code>onPost(e)</code></button></li><li><button type="button" class="opt"><code>recibir(e)</code></button></li><li><button type="button" class="opt" data-ok><code>doPost(e)</code></button></li><li><button type="button" class="opt"><code>main(e)</code></button></li></ul><p class="explain" hidden><code>doPost(e)</code> recibe el evento; el cuerpo llega como texto en <code>e.postData.contents</code>.</p></div>
+<div class="quiz-q"><p>La aplicación web está abierta a «Cualquier persona». ¿Qué protege tu hoja de pedidos falsos?</p><ul class="opts"><li><button type="button" class="opt">La longitud de la URL</button></li><li><button type="button" class="opt">Que la URL termine en <code>/exec</code></button></li><li><button type="button" class="opt" data-ok>Un secreto largo en el cuerpo, validado dentro de <code>doPost</code> contra una propiedad del script</button></li><li><button type="button" class="opt">Nada: cualquiera puede escribir siempre</button></li></ul><p class="explain" hidden><code>doPost</code> no recibe las cabeceras para validar una firma, así que el secreto compartido es la defensa principal.</p></div>
+<div class="quiz-q"><p>El Worker recibe HTTP 200 de la hoja pero la fila no aparece. ¿Qué debes revisar primero?</p><ul class="opts"><li><button type="button" class="opt">Que el cliente tenga WhatsApp Business</button></li><li><button type="button" class="opt" data-ok>El JSON de la respuesta: nuestro script responde 200 aunque devuelva <code>{"ok":false,...}</code></button></li><li><button type="button" class="opt">La zona horaria del Worker</button></li><li><button type="button" class="opt">Que la hoja tenga menos de mil filas</button></li></ul><p class="explain" hidden>No basta con el código HTTP: hay que leer <code>ok</code> y <code>error</code> en el cuerpo.</p></div>
+<div class="quiz-q"><p>Si Google Sheets falla justo al confirmar un pedido, ¿cuál es el comportamiento correcto del bot?</p><ul class="opts"><li><button type="button" class="opt">Anular el pedido y pedir disculpas al cliente</button></li><li><button type="button" class="opt">Reintentar sin parar hasta que la hoja responda</button></li><li><button type="button" class="opt" data-ok>Registrar el error y confirmar igual al cliente, porque el pedido sigue guardado en KV</button></li><li><button type="button" class="opt">Enviar el pedido por correo al cliente</button></li></ul><p class="explain" hidden>La hoja es un complemento: no debe poder romper la conversación; el dato queda en KV para reintentarlo.</p></div>
+<div class="quiz-q"><p>El dueño cambia el estado de un pedido a «entregado» en la hoja. ¿Qué pasa con el pedido en KV en este diseño?</p><ul class="opts"><li><button type="button" class="opt">Se actualiza automáticamente</button></li><li><button type="button" class="opt">Se borra</button></li><li><button type="button" class="opt" data-ok>Sigue como <code>recibido</code>, porque el panel es de una sola vía (bot a hoja)</button></li><li><button type="button" class="opt">Se envía una plantilla al cliente</button></li></ul><p class="explain" hidden>Para sincronizar la otra dirección hace falta un mecanismo adicional (por ejemplo, un trigger que llame al Worker).</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-16">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../15-memoria-con-kv/"><small>← Anterior</small>Memoria con Cloudflare KV</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 16 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2016:%20Panel%20del%20dueño%20con%20Google%20Sheets&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

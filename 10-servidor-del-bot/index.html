@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El servidor del bot · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo un Cloudflare Worker une webhook, motor y KV: rutas, firma, idempotencia, respuesta rápida con ctx.waitUntil y pruebas locales con wrangler dev.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/10-servidor-del-bot/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="El servidor del bot · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo un Cloudflare Worker une webhook, motor y KV: rutas, firma, idempotencia, respuesta rápida con ctx.waitUntil y pruebas locales con wrangler dev.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/10-servidor-del-bot/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#una-carcasa-alrededor-del-motor">Una carcasa alrededor del motor</a></li><li><a href="#que-es-un-cloudflare-worker">Qué es un Cloudflare Worker</a></li><li><a href="#las-rutas-del-servidor">Las rutas del servidor</a></li><li><a href="#recibirwebhook-seguridad-primero-rapidez">recibirWebhook: seguridad primero, rapidez después</a></li><li><a href="#idempotencia-el-mismo-mensaje-no-se-proc">Idempotencia: el mismo mensaje no se procesa dos veces</a></li><li><a href="#probarlo-en-local-con-wrangler-dev">Probarlo en local con wrangler dev</a></li><li><a href="#probar-el-worker-sin-servidor-kv-falso-y">Probar el Worker sin servidor: KV falso y fetch falso</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 10</div>
+        <h1>El servidor del bot</h1>
+        <ul class="meta"><li>⏱ 65 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar qué es un Cloudflare Worker y por qué sirve para un bot sin administrar servidores.</li><li>Leer <code>worker.js</code> y describir qué hace cada ruta (<code>/</code>, <code>/salud</code>, <code>GET /webhook</code>, <code>POST /webhook</code>).</li><li>Justificar la idempotencia con claves <code>visto:&lt;wamid&gt;</code> y el uso de <code>ctx.waitUntil</code> para responder 200 de inmediato.</li><li>Levantar el Worker en tu computadora con <code>wrangler dev</code> y probarlo con <code>curl</code> y una firma real.</li><li>Probar la lógica del servidor sin red usando un KV falso y un <code>fetch</code> falso.</li></ul>
+</div>
+
+<h2 id="una-carcasa-alrededor-del-motor"><span class="n">1.</span>Una carcasa alrededor del motor</h2>
+<p>En la <a href="../09-webhooks-y-json-de-whatsapp/">lección anterior</a> aprendiste a leer el JSON de Meta y a validar su firma. Ahora falta la pieza que lo reúne todo y vive en internet: <strong>el servidor del bot</strong>.</p>
+<p>La arquitectura del proyecto de referencia se resume en una idea que conviene tatuarse: <strong><code>motor.js</code> no hace entrada/salida; <code>worker.js</code> sí</strong>. El motor recibe una sesión y un mensaje y devuelve una sesión nueva y respuestas; no sabe nada de HTTP, de WhatsApp ni de bases de datos. El Worker es una <em>carcasa</em> que:</p>
+<ol>
+<li>recibe la petición HTTP,</li>
+<li>verifica que venga de Meta,</li>
+<li>carga la sesión del cliente,</li>
+<li>se la pasa al motor,</li>
+<li>guarda la sesión nueva,</li>
+<li>envía las respuestas.</li>
+</ol>
+<div class="flow"><div class="node"><strong>Meta</strong><span>POST /webhook</span></div><div class="arrow">→<code>firma + JSON</code></div><div class="node"><strong>worker.js</strong><span>carcasa (red + KV)</span></div><div class="arrow">→<code>sesión + entrada</code></div><div class="node"><strong>motor.js</strong><span>procesar()</span></div><div class="arrow">→<code>sesión nueva + respuestas</code></div><div class="node"><strong>worker.js</strong><span>guarda y envía</span></div></div>
+<p>La consola de la <a href="../04-primer-bot-en-consola/">lección 4</a> (<code>consola.js</code>) es <em>otra</em> carcasa del mismo motor. Esa separación es la que te permite probar toda la conversación sin internet y cambiar de plataforma (otro hosting, otro canal) reescribiendo solo la carcasa.</p>
+<h2 id="que-es-un-cloudflare-worker"><span class="n">2.</span>Qué es un Cloudflare Worker</h2>
+<p>Un <strong>Worker</strong> es un programa de JavaScript que corre en la red de Cloudflare, cerca del usuario, sin que tengas que alquilar ni mantener un servidor. No hay máquina que encender: Cloudflare lo ejecuta cuando llega una petición y lo apaga después.</p>
+<p>Para un bot de negocio pequeño eso encaja muy bien:</p>
+<ul>
+<li><strong>Siempre encendido para ti</strong>: el webhook de Meta necesita una dirección pública con HTTPS, y el Worker la trae lista.</li>
+<li><strong>Sin servidor que mantener</strong>: ni parches, ni reinicios.</li>
+<li><strong>Plan gratuito generoso</strong> para empezar (consulta los límites actuales, abajo).</li>
+<li><strong>API estándar de la web</strong>: <code>Request</code>, <code>Response</code>, <code>fetch</code>, <code>crypto.subtle</code>. Lo que aprendes sirve fuera de Cloudflare.</li>
+</ul>
+<p>Un Worker exporta un objeto con «manejadores». El del bot tiene dos:</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export default {
+  fetch: manejarFetch,
+  scheduled(_evento, env, ctx) {
+    ctx.waitUntil(ejecutarRecordatorios(env).catch((e) =&gt; console.error(&#x27;Error en recordatorios:&#x27;, e.message)));
+  },
+};</code></pre>
+</div>
+<ul>
+<li><code>fetch(request, env, ctx)</code>: se ejecuta con cada petición HTTP (Meta llamando a tu webhook).</li>
+<li><code>scheduled(...)</code>: se ejecuta por <strong>cron</strong> (una hora programada). La usaremos en la <a href="../18-recordatorios-y-seguimiento/">lección 18</a> para los recordatorios.</li>
+</ul>
+<p>Los tres parámetros de <code>fetch</code> son: <code>request</code> (la petición), <code>env</code> (las <strong>variables y recursos</strong> que configuraste: secretos y la base KV) y <code>ctx</code> (utilidades de contexto, como <code>waitUntil</code>). En un Worker no hay variables globales de configuración ni <code>process.env</code>: todo llega por <code>env</code>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los límites del plan gratuito (peticiones por día, tiempo de CPU, operaciones de KV) cambian. Consúltalos en la documentación oficial: <a href="https://developers.cloudflare.com/workers/platform/limits/">Workers: Limits</a> y <a href="https://developers.cloudflare.com/workers/platform/pricing/">precios de Workers</a>. Para un bot de un negocio pequeño suelen sobrar, pero compruébalo antes de prometer nada a un cliente.</p></div>
+<h2 id="las-rutas-del-servidor"><span class="n">3.</span>Las rutas del servidor</h2>
+<p><code>manejarFetch</code> es un enrutador de pocas líneas: mira el método HTTP y la ruta, y decide.</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export async function manejarFetch(request, env, ctx) {
+  const url = new URL(request.url);
+
+  // Verificación del webhook: GET con hub.mode (en /webhook o en la raíz).
+  if (request.method === &#x27;GET&#x27; &amp;&amp; url.searchParams.has(&#x27;hub.mode&#x27;)) return verificarWebhook(url, env);
+
+  if (request.method === &#x27;GET&#x27; &amp;&amp; (url.pathname === &#x27;/&#x27; || url.pathname === &#x27;/salud&#x27;)) {
+    return new Response(url.pathname === &#x27;/&#x27; ? &#x27;Bot Minimarket: ok&#x27; : JSON.stringify({ ok: true }), {
+      headers: { &#x27;Content-Type&#x27;: url.pathname === &#x27;/&#x27; ? &#x27;text/plain&#x27; : &#x27;application/json&#x27; },
+    });
+  }
+  if (request.method === &#x27;POST&#x27; &amp;&amp; [&#x27;/&#x27;, &#x27;/webhook&#x27;].includes(url.pathname)) return recibirWebhook(request, env, ctx);
+  if (request.method === &#x27;GET&#x27; &amp;&amp; url.pathname === &#x27;/webhook&#x27;) return verificarWebhook(url, env);
+  return new Response(&#x27;No encontrado&#x27;, { status: 404 });
+}</code></pre>
+</div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Método y ruta</th>
+<th>Para qué sirve</th>
+<th>Respuesta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /</code></td>
+<td>Comprobar a ojo que el bot está vivo</td>
+<td><code>Bot Minimarket: ok</code></td>
+</tr>
+<tr>
+<td><code>GET /salud</code></td>
+<td>Chequeo automático de salud (monitores)</td>
+<td><code>{"ok":true}</code></td>
+</tr>
+<tr>
+<td><code>GET /webhook?hub.mode=...</code></td>
+<td>Verificación del webhook por Meta</td>
+<td><code>hub.challenge</code> (200) o <code>Prohibido</code> (403)</td>
+</tr>
+<tr>
+<td><code>POST /webhook</code> (o <code>POST /</code>)</td>
+<td>Eventos reales: mensajes y estados</td>
+<td><code>ok</code> (200), <code>401</code> o <code>400</code></td>
+</tr>
+<tr>
+<td>Cualquier otra</td>
+<td>—</td>
+<td><code>No encontrado</code> (404)</td>
+</tr>
+</tbody>
+</table></div>
+<p>El <code>POST</code> también se acepta en <code>/</code> porque a veces se registra el webhook con la dirección raíz del Worker; así no importa cuál pongas en el panel de Meta, mientras la verificación GET y el POST usen la misma.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Una ruta de salud no es un lujo</p>
+<p><code>/salud</code> no toca la base ni a Meta: solo responde. Sirve para que tú o un monitor automático pregunten «¿el Worker está desplegado y contesta?» sin gastar mensajes ni cuota.</p></div>
+<h2 id="recibirwebhook-seguridad-primero-rapidez"><span class="n">4.</span>recibirWebhook: seguridad primero, rapidez después</h2>
+<p>El <code>POST</code> es la ruta importante. Léela con calma, porque cada línea tiene una razón:</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>async function recibirWebhook(request, env, ctx) {
+  // 1) Leemos el cuerpo como TEXTO crudo: la firma se calcula sobre esos bytes exactos.
+  const cuerpoCrudo = await request.text();
+  const firmaValida = await verificarFirma(env.APP_SECRET, cuerpoCrudo, request.headers.get(&#x27;X-Hub-Signature-256&#x27;));
+  if (!firmaValida) return new Response(&#x27;Firma inválida&#x27;, { status: 401 });
+
+  let payload;
+  try { payload = JSON.parse(cuerpoCrudo); } catch { return new Response(&#x27;JSON inválido&#x27;, { status: 400 }); }
+
+  // 2) Respondemos 200 YA y trabajamos en segundo plano. Si tardamos, Meta reintenta.
+  const eventos = parsearWebhook(payload);
+  ctx.waitUntil(procesarEventos(env, eventos).catch((e) =&gt; console.error(&#x27;Error procesando webhook:&#x27;, e.message)));
+  return new Response(&#x27;ok&#x27;, { status: 200 });
+}</code></pre>
+</div>
+<p><strong>Orden de las decisiones:</strong></p>
+<ol>
+<li><strong>Texto crudo</strong> (<code>request.text()</code>), no <code>request.json()</code>: la firma se calcula sobre los bytes originales, como viste en la lección 9.</li>
+<li><strong>Firma antes que JSON.</strong> Si no es de Meta, ni siquiera intentamos interpretarlo: <code>401</code>. Así un atacante no puede gastar tu CPU con cuerpos enormes que obligue a parsear (y tampoco sabe si su JSON era «válido»).</li>
+<li><strong>JSON roto → 400.</strong> Una firma válida con JSON inválido casi nunca pasa en la práctica, pero el código no confía en eso.</li>
+<li><strong>200 inmediato.</strong> Aquí aparece <code>ctx.waitUntil</code>.</li>
+</ol>
+<h3>ctx.waitUntil: responder ya, trabajar después</h3>
+<p>Procesar un mensaje implica leer KV, ejecutar el motor, guardar y <strong>enviar respuestas a Meta por red</strong>. Eso puede tardar uno o varios segundos. Si Meta no recibe tu <code>200</code> a tiempo, asume que falló y <strong>reintenta</strong> la entrega (y tu cliente verá respuestas duplicadas, o ninguna).</p>
+<p>La solución es separar «acuso recibo» de «hago el trabajo». <code>ctx.waitUntil(promesa)</code> le dice a Cloudflare: «ya puedes devolver la respuesta HTTP, pero mantén vivo el Worker hasta que esta promesa termine». El <code>.catch</code> evita que un error en el procesamiento quede sin registrar.</p>
+<div class="flow"><div class="node"><strong>POST de Meta</strong><span>llega el mensaje</span></div><div class="arrow">→<code>firma OK</code></div><div class="node"><strong>Worker</strong><span>devuelve 200 enseguida</span></div><div class="arrow">→<code>en segundo plano (waitUntil)</code></div><div class="node"><strong>Trabajo</strong><span>KV, motor, envío</span></div></div>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p><code>ctx.waitUntil</code> tiene un tiempo máximo después de que se envía la respuesta, y los límites de CPU y de «subpeticiones» dependen del plan. Revisa <a href="https://developers.cloudflare.com/workers/runtime-apis/context/">la documentación de <code>waitUntil</code></a> y los límites antes de procesar cosas pesadas (por ejemplo, llamadas largas a una IA).</p></div>
+<h2 id="idempotencia-el-mismo-mensaje-no-se-proc"><span class="n">5.</span>Idempotencia: el mismo mensaje no se procesa dos veces</h2>
+<p>Meta garantiza «al menos una vez», no «exactamente una». Si tu servidor tarda, hay un corte o Meta duda, <strong>puede entregar el mismo mensaje otra vez</strong>. Si el cliente escribió «quiero 2 leches» y tu bot lo procesa dos veces, agregará 4 leches al carrito.</p>
+<p>Una operación <strong>idempotente</strong> es la que da el mismo resultado aunque se ejecute varias veces. El truco: cada mensaje trae un <code>id</code> único (<code>wamid.…</code>). Lo anotamos en KV al procesarlo, y si ya está anotado, lo ignoramos:</p>
+<div class="code">
+  <div class="code-head"><span>src/worker.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export async function procesarMensaje(env, evento, ahora = Date.now(), llamar = fetch) {
+  const kv = env.BOT_KV;
+
+  // Idempotencia: Meta puede entregar el mismo mensaje más de una vez.
+  const claveVisto = `visto:${evento.id}`;
+  if (await kv.get(claveVisto)) return;
+  await kv.put(claveVisto, &#x27;1&#x27;, { expirationTtl: TTL_VISTO });
+
+  const claveSesion = `sesion:${evento.de}`;
+  const sesionPrevia = (await leerJson(kv, claveSesion)) ?? crearSesion(evento.de, ahora);
+  const { sesion, respuestas } = procesar(sesionPrevia, evento.entrada, ahora);
+
+  await guardarJson(kv, claveSesion, sesion, TTL_SESION);
+  if (sesion.pedidoNuevo) await guardarJson(kv, `pedido:${sesion.pedidoNuevo.id}`, sesion.pedidoNuevo, TTL_PEDIDO);
+
+  await enviarMensaje(env, construirLeido(evento.id), llamar).catch((e) =&gt; console.error(e.message));
+  for (const respuesta of respuestas) {
+    await enviarMensaje(env, construirEnvio(evento.de, respuesta), llamar);
+  }
+}</code></pre>
+</div>
+<p>Observa los cuatro parámetros: <code>env</code> (recursos), <code>evento</code> (lo que produjo <code>parsearWebhook</code>), <code>ahora</code> (el reloj) y <code>llamar</code> (el <code>fetch</code>). Los dos últimos tienen valores por defecto y existen <strong>para poder probar</strong>: en producción son <code>Date.now()</code> y el <code>fetch</code> real; en una prueba inyectas un reloj fijo y un <code>fetch</code> falso. Es una técnica que usarás mucho: <em>inyección de dependencias</em> sin frameworks, solo parámetros.</p>
+<h3>Las claves de KV</h3>
+<p>El Worker guarda tres tipos de datos en el KV llamado <code>BOT_KV</code>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Clave</th>
+<th>Contenido</th>
+<th>Vida (TTL)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sesion:&lt;teléfono&gt;</code></td>
+<td>La sesión de conversación del cliente (JSON)</td>
+<td>2 días sin actividad</td>
+</tr>
+<tr>
+<td><code>pedido:&lt;id&gt;</code></td>
+<td>Un pedido confirmado</td>
+<td>30 días</td>
+</tr>
+<tr>
+<td><code>visto:&lt;wamid&gt;</code></td>
+<td>Marca de «mensaje ya procesado»</td>
+<td>1 día</td>
+</tr>
+</tbody>
+</table></div>
+<p>El <strong>TTL</strong> (<em>time to live</em>, <code>expirationTtl</code> en segundos) hace que KV borre solo las claves viejas. Los ids de mensajes <code>visto:</code> solo necesitan vivir lo que dure un posible reintento de Meta, por eso un día basta y KV no se llena de basura. (La <a href="../15-memoria-con-kv/">lección 15</a> profundiza en KV.)</p>
+<h3>Probado de verdad: el mismo mensaje dos veces</h3>
+<p>Para demostrarlo sin tocar Meta, usé un KV falso (un <code>Map</code>) y un <code>fetch</code> falso que solo anota las llamadas. Se entrega el mismo evento (<code>wamid.TEXTO001</code>, «Quiero 2 leches») dos veces:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>llamadas tras 1.ª entrega: 2 [ &#x27;read&#x27;, &#x27;interactive&#x27; ]
+llamadas tras entrega repetida: 2
+claves guardadas: [ &#x27;visto:wamid.TEXTO001&#x27;, &#x27;sesion:51999000111&#x27; ]</code></pre>
+</div>
+<p>La primera entrega produjo dos llamadas a Meta (marcar leído y un mensaje con botones). La repetida no produjo ninguna: seguimos en 2.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Una decisión con costo</p>
+<p>El código anota <code>visto:</code> <strong>antes</strong> de enviar. Esto previene duplicados, pero tiene un precio: si el envío a Meta falla (token vencido, por ejemplo), Meta reintentará y esa repetición será ignorada, así que ese mensaje del cliente se pierde. Lo comprobé en local: con un token falso, el primer intento falló y el segundo POST idéntico respondió 200 sin hacer nada. Para un bot pequeño es un compromiso razonable; en la <a href="../23-pruebas-y-errores/">lección 23</a> verás cómo hacerlo más robusto. Y recuerda el límite del propio KV: <strong>no es atómico</strong>, así que dos mensajes simultáneos del mismo cliente pueden pisarse (para mucho volumen existen los <em>Durable Objects</em>).</p></div>
+<h2 id="probarlo-en-local-con-wrangler-dev"><span class="n">6.</span>Probarlo en local con wrangler dev</h2>
+<p><strong>Wrangler</strong> es la herramienta de línea de comandos de Cloudflare. Con <code>wrangler dev</code> levantas tu Worker en <code>http://127.0.0.1:8787</code> (o el puerto que elijas), con un KV <strong>simulado en tu disco</strong>: no necesitas cuenta ni internet para esta parte.</p>
+<p>En la carpeta <code>codigo/</code> del proyecto:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npm install
+cp .dev.vars.example .dev.vars</code></pre>
+</div>
+<p>Edita <code>.dev.vars</code> (está en <code>.gitignore</code>, <strong>nunca</strong> se sube a Git) con tus valores de práctica:</p>
+<div class="code">
+  <div class="code-head"><span>.dev.vars</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>VERIFY_TOKEN=minimarket-123
+WA_TOKEN=token-de-acceso-de-la-api-de-whatsapp
+WA_PHONE_ID=id-del-numero-de-telefono-de-whatsapp
+APP_SECRET=secreto</code></pre>
+</div>
+<p>Los cuatro valores se llaman igual que los nombres que lee el código (<code>env.VERIFY_TOKEN</code>…). En local, <code>.dev.vars</code> hace el papel que en la nube cumplen los secretos (lección 11). Ahora arranca el servidor:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler dev --port 8799</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code> ⛅️ wrangler 4.148.0
+Using secrets defined in .dev.vars
+Your Worker has access to the following bindings:
+env.BOT_KV (11111111111111111111111111111111)   KV Namespace    local
+env.WA_PHONE_ID (&quot;(hidden)&quot;)                    Environment Variable    local
+env.VERIFY_TOKEN (&quot;(hidden)&quot;)                   Environment Variable    local
+env.WA_TOKEN (&quot;(hidden)&quot;)                       Environment Variable    local
+env.APP_SECRET (&quot;(hidden)&quot;)                     Environment Variable    local
+⎔ Starting local server...
+[wrangler:info] Ready on http://127.0.0.1:8799</code></pre>
+</div>
+<p>Fíjate en que <code>BOT_KV</code> dice <code>local</code>: es un KV de mentira en tu disco (carpeta <code>.wrangler/</code>), por eso los ids de ejemplo de <code>wrangler.toml</code> no importan todavía. (Wrangler también avisa de que los Workers programados no se disparan solos en local; para probarlos llamas a <code>http://127.0.0.1:8799/cdn-cgi/local/scheduled</code>.)</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los mensajes exactos de <code>wrangler</code>, sus banderas y la dirección de la prueba de cron cambian entre versiones. Esta salida es de Wrangler 4.148.0. Ante cualquier diferencia, mira <code>npx wrangler dev --help</code> y la <a href="https://developers.cloudflare.com/workers/wrangler/commands/">documentación de Wrangler</a>.</p></div>
+<h3>Probar cada ruta con curl</h3>
+<p>Con el servidor corriendo, desde otra terminal. Estas son las salidas reales:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl -s http://127.0.0.1:8799/
+curl -s http://127.0.0.1:8799/salud
+curl -s -w &#x27; [%{http_code}]\n&#x27; &quot;http://127.0.0.1:8799/webhook?hub.mode=subscribe&amp;hub.verify_token=minimarket-123&amp;hub.challenge=1158201444&quot;
+curl -s -w &#x27; [%{http_code}]\n&#x27; &quot;http://127.0.0.1:8799/webhook?hub.mode=subscribe&amp;hub.verify_token=malo&amp;hub.challenge=1&quot;
+curl -s -w &#x27; [%{http_code}]\n&#x27; http://127.0.0.1:8799/otra
+curl -s -w &#x27; [%{http_code}]\n&#x27; -X POST http://127.0.0.1:8799/webhook -d &#x27;{}&#x27;</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Bot Minimarket: ok
+{&quot;ok&quot;:true}
+1158201444 [200]
+Prohibido [403]
+No encontrado [404]
+Firma inválida [401]</code></pre>
+</div>
+<p>Cada uno cuenta una historia: raíz y salud responden; el token correcto recibe su reto y el incorrecto un 403; una ruta desconocida da 404; un POST sin firma, 401.</p>
+<h3>Un POST firmado, como Meta</h3>
+<p>Para probar el camino feliz necesitas firmar el cuerpo con el mismo <code>APP_SECRET</code>. Con <code>openssl</code> (viene con Git para Windows, macOS y Linux):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>F=test/payloads/texto.json
+SIG=$(openssl dgst -sha256 -hmac secreto -hex &lt; $F | sed &#x27;s/.* //&#x27;)
+curl -s -w &#x27; [%{http_code}]\n&#x27; -X POST http://127.0.0.1:8799/webhook \
+  -H &quot;X-Hub-Signature-256: sha256=$SIG&quot; --data-binary @$F</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ok [200]</code></pre>
+</div>
+<p>Y en la terminal donde corre <code>wrangler dev</code> aparece el registro:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[wrangler:info] POST /webhook 401 Unauthorized (9ms)
+[wrangler:info] POST /webhook 200 OK (23ms)
+✘ [ERROR] WhatsApp respondió 401: Invalid OAuth access token - Cannot parse access token
+✘ [ERROR] Error procesando webhook: WhatsApp respondió 401: Invalid OAuth access token - Cannot parse access token</code></pre>
+</div>
+<p>El <code>200</code> es correcto: la firma era buena y el trabajo se encoló. El error que sigue <strong>es lo esperado</strong> en esta prueba: el motor procesó el mensaje, guardó la sesión y trató de contestar, pero <code>WA_TOKEN</code> es un texto de relleno, así que Meta respondió «token inválido». Ese error, además, nos enseña algo: el mensaje de error no contiene el token (<code>enviarMensaje</code> nunca lo incluye), y el fallo del segundo plano no cambió el <code>200</code> que ya se había entregado. Con credenciales reales (lección 13), esa misma petición enviaría los botones al cliente.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Mira la base mientras pruebas</p>
+<p>La API local de Wrangler permite explorar el KV simulado. Es opcional, pero útil: al arrancar <code>wrangler dev</code> imprime las rutas del «Local Explorer». Verás las claves <code>sesion:51999000111</code> y <code>visto:wamid.TEXTO001</code> que acabamos de generar.</p></div>
+<h2 id="probar-el-worker-sin-servidor-kv-falso-y"><span class="n">7.</span>Probar el Worker sin servidor: KV falso y fetch falso</h2>
+<p><code>wrangler dev</code> es un ensayo general. Pero lo que protege tu bot a largo plazo son las <strong>pruebas automáticas</strong>, y <code>test/worker.test.js</code> prueba el Worker entero sin red ni Cloudflare. La clave es lo que viste en <code>procesarMensaje</code>: todo lo externo entra por parámetros.</p>
+<div class="code">
+  <div class="code-head"><span>test/worker.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function crearEntorno() {
+  const datos = new Map();
+  const BOT_KV = {
+    get: async (k) =&gt; datos.get(k) ?? null,
+    put: async (k, v) =&gt; { datos.set(k, v); },
+    list: async ({ prefix }) =&gt; ({ keys: [...datos.keys()].filter((k) =&gt; k.startsWith(prefix)).map((name) =&gt; ({ name })) }),
+  };
+  return { BOT_KV, datos, VERIFY_TOKEN: &#x27;verifica&#x27;, WA_TOKEN: &#x27;tok&#x27;, WA_PHONE_ID: &#x27;123&#x27;, APP_SECRET: &#x27;secreto&#x27; };
+}</code></pre>
+</div>
+<p>Un KV, para el código, es «algo con <code>get</code>, <code>put</code> y <code>list</code>». Un <code>Map</code> de JavaScript con tres funciones cumple ese contrato, así que el Worker no nota la diferencia. Corriendo solo esa suite:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>node --test test/worker.test.js</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>✔ GET / y /salud responden ok
+✔ ruta desconocida: 404
+✔ verificación del webhook: token correcto devuelve el challenge
+✔ verificación del webhook: token incorrecto es 403
+✔ POST con firma inválida: 401 y no se procesa nada
+✔ POST sin cabecera de firma: 401
+✔ POST válido: responde 200, guarda sesión, marca leído y responde al cliente
+✔ idempotencia: el mismo mensaje reenviado se ignora
+✔ al confirmar, el pedido se guarda en KV
+✔ recordatorios: texto si la ventana está abierta, plantilla si está cerrada
+✔ recordatorios: carrito abandonado se avisa una sola vez
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0</code></pre>
+</div>
+<p>Si un día cambias algo en el Worker y rompes la verificación de firma, una de esas líneas se pondrá roja antes de que lo sepa un cliente.</p>
+<h2 id="errores-frecuentes"><span class="n">8.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Esperar al envío antes de responder 200.</strong> Si Meta no recibe respuesta pronto, reintenta y duplica. Usa <code>ctx.waitUntil</code>.</li>
+<li><strong>Olvidar <code>ctx.waitUntil</code>.</strong> Sin él, Cloudflare puede cortar el trabajo en cuanto devuelves la respuesta y el bot «recibe pero no contesta».</li>
+<li><strong>Leer <code>request.json()</code> y luego querer verificar la firma.</strong> El cuerpo ya se consumió y, además, ya no es el texto original. Lee <code>request.text()</code> una vez.</li>
+<li><strong>No manejar duplicados.</strong> Un mismo <code>wamid</code> puede llegar dos veces: sin idempotencia el cliente ve pedidos dobles.</li>
+<li><strong>Subir <code>.dev.vars</code> a Git.</strong> Contiene secretos. Está en <code>.gitignore</code>: no lo quites, y no copies su contenido al código.</li>
+<li><strong>Confiar en <code>process.env</code> o variables globales.</strong> En un Worker la configuración llega por <code>env</code>.</li>
+<li><strong>Mezclar lógica del negocio en el Worker.</strong> Si <code>worker.js</code> empieza a decidir precios o textos, ya no podrás probar el motor sin red. Mantén esa frontera.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">9.</span>Apuntes para llevar</h2>
+<ul>
+<li>El servidor del bot es una <strong>carcasa</strong>: valida, carga la sesión, llama a <code>procesar()</code>, guarda y envía; la lógica vive en el motor.</li>
+<li>Un <strong>Cloudflare Worker</strong> exporta <code>fetch</code> (peticiones HTTP) y <code>scheduled</code> (cron), y recibe su configuración en <code>env</code>.</li>
+<li>El <code>POST /webhook</code> lee el <strong>cuerpo crudo</strong>, verifica la firma (401 si falla), parsea y responde <strong>200 enseguida</strong>.</li>
+<li><code>ctx.waitUntil</code> mantiene vivo el trabajo en segundo plano después de responder.</li>
+<li>La <strong>idempotencia</strong> con <code>visto:&lt;wamid&gt;</code> evita procesar dos veces el mismo mensaje; las claves tienen TTL para limpiarse solas.</li>
+<li><code>wrangler dev</code> + <code>.dev.vars</code> + <code>curl</code> permiten probar todo en tu máquina; <code>node --test</code> prueba el Worker con un KV y un <code>fetch</code> falsos.</li>
+</ul>
+<h2 id="glosario"><span class="n">10.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Worker</td>
+<td>Programa JavaScript que se ejecuta en la red de Cloudflare sin que administres un servidor.</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td>Objeto con las variables, secretos y recursos (como KV) que recibe el Worker.</td>
+</tr>
+<tr>
+<td><code>ctx.waitUntil</code></td>
+<td>Pide mantener vivo el Worker hasta que termine una tarea, aun después de responder.</td>
+</tr>
+<tr>
+<td>Idempotencia</td>
+<td>Propiedad de una operación que da el mismo resultado aunque se repita.</td>
+</tr>
+<tr>
+<td>KV</td>
+<td>Almacén clave-valor de Cloudflare, simple y de lectura rápida.</td>
+</tr>
+<tr>
+<td>TTL</td>
+<td>«Tiempo de vida» tras el cual KV borra una clave (<code>expirationTtl</code>).</td>
+</tr>
+<tr>
+<td>Wrangler</td>
+<td>Herramienta de línea de comandos de Cloudflare para probar y desplegar Workers.</td>
+</tr>
+<tr>
+<td><code>.dev.vars</code></td>
+<td>Archivo local (fuera de Git) con los secretos que usa <code>wrangler dev</code>.</td>
+</tr>
+<tr>
+<td>Cron trigger</td>
+<td>Programación que ejecuta <code>scheduled()</code> a horas fijas.</td>
+</tr>
+<tr>
+<td>Doble de prueba</td>
+<td>Objeto falso (KV, <code>fetch</code>) que reemplaza a un recurso real en las pruebas.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Por qué el Worker responde 200 enseguida y procesa el mensaje con <code>ctx.waitUntil</code>?</p><ul class="opts"><li><button type="button" class="opt">Para ahorrar dinero en el plan de Cloudflare</button></li><li><button type="button" class="opt">Porque <code>waitUntil</code> hace que el motor sea más rápido</button></li><li><button type="button" class="opt" data-ok>Para que Meta no reintente la entrega por demora mientras el bot guarda y envía en segundo plano</button></li><li><button type="button" class="opt">Porque Meta exige que las respuestas se envíen antes del 200</button></li></ul><p class="explain" hidden>Si Meta no recibe el 200 a tiempo, reenvía el mensaje y el cliente puede ver duplicados.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve guardar <code>visto:&lt;wamid&gt;</code> en KV?</p><ul class="opts"><li><button type="button" class="opt">Para saber cuántos clientes tiene el negocio</button></li><li><button type="button" class="opt" data-ok>Para ignorar un mensaje que Meta entrega más de una vez</button></li><li><button type="button" class="opt">Para cifrar el mensaje del cliente</button></li><li><button type="button" class="opt">Para reiniciar la sesión del cliente</button></li></ul><p class="explain" hidden>Es la clave de idempotencia: si ya existe, el mensaje ya se procesó.</p></div>
+<div class="quiz-q"><p>Un POST llega sin cabecera <code>X-Hub-Signature-256</code>. ¿Qué responde el Worker?</p><ul class="opts"><li><button type="button" class="opt">200, porque igual podría ser un mensaje real</button></li><li><button type="button" class="opt">404</button></li><li><button type="button" class="opt" data-ok>401 y no procesa nada</button></li><li><button type="button" class="opt">500</button></li></ul><p class="explain" hidden>Sin firma válida no se puede confiar en que venga de Meta.</p></div>
+<div class="quiz-q"><p>¿Qué ventaja da inyectar <code>ahora</code> y <code>llamar</code> como parámetros de <code>procesarMensaje</code>?</p><ul class="opts"><li><button type="button" class="opt" data-ok>Permite probar con un reloj fijo y un <code>fetch</code> falso, sin red ni cuenta de Meta</button></li><li><button type="button" class="opt">Hace que el mensaje llegue más rápido</button></li><li><button type="button" class="opt">Evita tener que usar KV</button></li><li><button type="button" class="opt">Es obligatorio para que Cloudflare acepte el Worker</button></li></ul><p class="explain" hidden>Los parámetros con valor por defecto permiten sustituir lo externo en las pruebas.</p></div>
+<div class="quiz-q"><p>¿Qué papel cumple <code>.dev.vars</code> en <code>wrangler dev</code>?</p><ul class="opts"><li><button type="button" class="opt">Es el archivo de configuración del cron</button></li><li><button type="button" class="opt" data-ok>Contiene los secretos de prueba (VERIFY_TOKEN, WA_TOKEN, APP_SECRET...) que el Worker lee desde <code>env</code> en local</button></li><li><button type="button" class="opt">Lista las rutas permitidas</button></li><li><button type="button" class="opt">Se sube a Cloudflare al desplegar</button></li></ul><p class="explain" hidden>Es el equivalente local de los secretos; debe quedar fuera de Git.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-10">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../09-webhooks-y-json-de-whatsapp/"><small>← Anterior</small>Webhooks y JSON de WhatsApp</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 10 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2010:%20El%20servidor%20del%20bot&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/10-servidor-del-bot/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entender texto libre · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo un bot de reglas entiende frases como «quiero dos leches» con normalización, cantidades, sinónimos, tolerancia a errores de tipeo e intenciones, sin usar IA.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Entender texto libre · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo un bot de reglas entiende frases como «quiero dos leches» con normalización, cantidades, sinónimos, tolerancia a errores de tipeo e intenciones, sin usar IA.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#el-problema-la-gente-no-escribe-como-tu-">El problema: la gente no escribe como tú programas</a></li><li><a href="#paso-1-normalizar">Paso 1: normalizar</a></li><li><a href="#paso-2-la-cantidad">Paso 2: la cantidad</a></li><li><a href="#paso-3-encontrar-el-producto">Paso 3: encontrar el producto</a></li><li><a href="#paso-4-varios-productos-en-un-solo-mensa">Paso 4: varios productos en un solo mensaje</a></li><li><a href="#paso-5-la-intencion">Paso 5: la intención</a></li><li><a href="#la-prioridad-completa-intencion-o-produc">La prioridad completa: intención o producto</a></li><li><a href="#cuando-no-se-entiende">Cuando no se entiende</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 6</div>
+        <h1>Entender texto libre</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Normalizar un mensaje (minúsculas, sin tildes ni signos) para poder compararlo de forma fiable.</li><li>Extraer cantidades escritas con cifras, palabras y docenas.</li><li>Buscar productos por sinónimos, con plurales y errores de tipeo, y resolver ambigüedades.</li><li>Detectar la intención de un mensaje con frases clave, orden de prioridad y reglas para mensajes cortos.</li><li>Reconocer los límites de un bot de reglas y decidir qué hacer cuando no entiende.</li></ul>
+</div>
+
+<h2 id="el-problema-la-gente-no-escribe-como-tu-"><span class="n">1.</span>El problema: la gente no escribe como tú programas</h2>
+<p>Cuando diseñaste el menú en la <a href="../02-disenar-la-conversacion/">lección 2</a>, el cliente tocaba botones: respuestas cerradas y fáciles de manejar. Pero en WhatsApp la gente <strong>escribe</strong>, y escribe como habla:</p>
+<ul>
+<li>«hola buenas tienen pan?»</li>
+<li>«Quiero DOS leches porfa»</li>
+<li>«mantequila y media docena de huevos»</li>
+<li>«cuanto cuesta el arroz»</li>
+</ul>
+<p>Nadie escribe «Seleccionar producto: leche; cantidad: 2». Si tu bot solo entiende frases exactas, el cliente se frustra a la segunda respuesta. Esta lección construye, con reglas simples y sin inteligencia artificial, la capa que convierte texto libre en algo que el motor (<a href="../05-estado-de-la-conversacion/">lección 5</a>) pueda ejecutar. Todo está en un archivo del código de referencia: <code>src/texto.js</code>, de funciones <strong>puras</strong> (mismo texto, misma respuesta).</p>
+<p>El enfoque general es una tubería de pasos pequeños:</p>
+<div class="flow"><div class="node"><strong>Texto crudo</strong><span>&quot;Quiero DOS Leches!&quot;</span></div><div class="arrow">→<code>normalizar</code></div><div class="node"><strong>Texto limpio</strong><span>quiero dos leches</span></div><div class="arrow">→<code>extraer</code></div><div class="node"><strong>Cantidad y producto</strong><span>2 x leche</span></div><div class="arrow">→<code>o, si no hay productos</code></div><div class="node"><strong>Intención</strong><span>saludo, menú, cancelar...</span></div></div>
+<h2 id="paso-1-normalizar"><span class="n">2.</span>Paso 1: normalizar</h2>
+<p>Para el computador «Leche», «leche» y «LECHE» son tres cosas distintas, y «Azúcar» no es «azucar». Antes de comparar nada hay que dejar el texto en una forma estándar: <strong>minúsculas, sin tildes, sin signos ni emojis y con un solo espacio entre palabras</strong>.</p>
+<div class="code">
+  <div class="code-head"><span>src/texto.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function normalizar(texto) {
+  if (typeof texto !== &#x27;string&#x27;) return &#x27;&#x27;;
+  return texto
+    .toLowerCase()
+    .normalize(&#x27;NFD&#x27;) // separa la letra de su tilde: &quot;é&quot; -&gt; &quot;e&quot; + &quot;´&quot;
+    .replace(/[̀-ͯ]/g, &#x27;&#x27;) // borra las tildes sueltas
+    .replace(/[^a-z0-9\s]/g, &#x27; &#x27;) // signos y emojis -&gt; espacio
+    .replace(/\s+/g, &#x27; &#x27;)
+    .trim();
+}</code></pre>
+</div>
+<p>La parte menos obvia es <code>normalize('NFD')</code>. En Unicode una «é» puede guardarse como una sola pieza o como la letra «e» más una tilde suelta. Con <code>NFD</code> (descomposición) siempre quedan separadas, y la segunda línea borra las tildes. Se ve así (ejecutado en Node 24):</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { normalizar } from &#x27;./src/texto.js&#x27;;
+
+for (const x of [&#x27;¡Quiero DOS Leches!&#x27;, &#x27;  Atún   en LATA 😀 &#x27;, &#x27;Azúcar&#x27;, &#x27;&#x27;, null]) {
+  console.log(JSON.stringify(x), &#x27;-&gt;&#x27;, JSON.stringify(normalizar(x)));
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;¡Quiero DOS Leches!&quot; -&gt; &quot;quiero dos leches&quot;
+&quot;  Atún   en LATA 😀 &quot; -&gt; &quot;atun en lata&quot;
+&quot;Azúcar&quot; -&gt; &quot;azucar&quot;
+&quot;&quot; -&gt; &quot;&quot;
+null -&gt; &quot;&quot;</code></pre>
+</div>
+<p>Tres detalles de diseño: el emoji desaparece (es un símbolo, no una letra), un valor que no es texto (<code>null</code>) devuelve cadena vacía en lugar de lanzar un error (el bot nunca debe caerse por un mensaje raro), y <strong>todas</strong> las comparaciones del resto de la lección usan texto normalizado. Por eso en el catálogo los sinónimos están escritos sin tildes: <code>'azucar'</code>, <code>'tallarin'</code>, <code>'lejia'</code>.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · La «ñ»</p>
+<p>Con este método «ñ» se vuelve «n» (descomposición <code>n</code> + tilde). Para un bot de pedidos es una ventaja: quien escribe «dueño» y quien escribe «dueno» obtienen lo mismo (<code>dueno</code> está entre las frases de la intención <code>humano</code>).</p></div>
+<h2 id="paso-2-la-cantidad"><span class="n">3.</span>Paso 2: la cantidad</h2>
+<p>«2 leches», «dos leches», «una docena de huevos», «media docena». Hay que sacar el número de cualquiera de esas formas. La función <code>extraerCantidad</code> busca el primer número (en cifras o en palabras) y entiende docenas:</p>
+<div class="code">
+  <div class="code-head"><span>src/texto.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const NUMEROS_EN_PALABRAS = {
+  un: 1, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7,
+  ocho: 8, nueve: 9, diez: 10, once: 11, doce: 12, trece: 13, catorce: 14,
+  quince: 15, veinte: 20,
+};
+
+export function extraerCantidad(texto) {
+  const t = normalizar(texto);
+  if (/\bmedia docena\b/.test(t)) return 6;
+  let n = null;
+  for (const palabra of t.split(&#x27; &#x27;)) {
+    if (/^\d+$/.test(palabra)) { n = Number(palabra); break; }
+    if (palabra in NUMEROS_EN_PALABRAS) { n = NUMEROS_EN_PALABRAS[palabra]; break; }
+  }
+  if (/\bdocenas?\b/.test(t)) return (n ?? 1) * 12;
+  return n ?? 1;
+}</code></pre>
+</div>
+<p>Observa la decisión de fondo: <strong>si el cliente no dice cuántos, es 1</strong> (<code>n ?? 1</code>). Es una suposición razonable en una tienda («quiero leche» = una leche), y el bot siempre muestra «Agregué 1 x Leche entera 1 L», así que el cliente puede corregir. Resultados reales:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { extraerCantidad, cantidadSola } from &#x27;./src/texto.js&#x27;;
+
+for (const x of [&#x27;2 leches&#x27;, &#x27;dos leches&#x27;, &#x27;media docena de huevos&#x27;, &#x27;una docena&#x27;,
+                 &#x27;dos docenas de huevos&#x27;, &#x27;quiero leche&#x27;, &#x27;1 docena y media&#x27;]) {
+  console.log(JSON.stringify(x), extraerCantidad(x));
+}
+console.log(cantidadSola(&#x27;tres&#x27;), cantidadSola(&#x27;3 leches&#x27;));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;2 leches&quot; 2
+&quot;dos leches&quot; 2
+&quot;media docena de huevos&quot; 6
+&quot;una docena&quot; 12
+&quot;dos docenas de huevos&quot; 24
+&quot;quiero leche&quot; 1
+&quot;1 docena y media&quot; 12
+3 null</code></pre>
+</div>
+<p>La última línea imprime <code>3 null</code>. La función hermana <code>cantidadSola</code> devuelve el número <strong>solo si el mensaje es únicamente un número</strong> (<code>"3"</code> o <code>"tres"</code>). Sirve para el paso en que el bot preguntó «¿Cuántas quieres?» y el cliente responde con una sola palabra. Ya viste cómo la usa el motor en la lección 5.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Los límites son parte del diseño</p>
+<p>Fíjate en <code>"1 docena y media"</code>: el resultado es 12, no 18. El bot <strong>no entiende</strong> «docena y media». No pasa nada si lo sabes y lo documentas; el peligro es creer que cubres todo. Cada regla nueva trae más casos raros, y por eso conviene empezar con las frases que tus clientes realmente escriben (las verás cuando midas tu bot en producción; ver la <a href="../21-costos-y-metricas/">lección 21</a>).</p></div>
+<h2 id="paso-3-encontrar-el-producto"><span class="n">4.</span>Paso 3: encontrar el producto</h2>
+<p>Ahora el producto. Una idea ingenua sería buscar el nombre exacto del catálogo, «Leche entera 1 L». Nadie lo escribe así. La gente dice «leche», «leches», «mantequila» (con una sola «l»), «papitas» o «tallarines». La solución es darle a cada producto una lista de <strong>sinónimos</strong>: las formas en que la gente lo nombra. Mira dos entradas de <code>src/catalogo.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>src/catalogo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{ id: &#x27;fideos&#x27;, nombre: &#x27;Fideos spaghetti 500 g&#x27;, precio: 3.1, categoria: &#x27;abarrotes&#x27;, unidad: &#x27;bolsa&#x27;,
+  sinonimos: [&#x27;fideos&#x27;, &#x27;spaghetti&#x27;, &#x27;tallarin&#x27;, &#x27;tallarines&#x27;] },
+{ id: &#x27;papas&#x27;, nombre: &#x27;Papas fritas 100 g&#x27;, precio: 2.5, categoria: &#x27;snacks&#x27;, unidad: &#x27;bolsa&#x27;,
+  sinonimos: [&#x27;papas fritas&#x27;, &#x27;papitas&#x27;, &#x27;snack&#x27;] },</code></pre>
+</div>
+<p>El buscador usa <strong>solo</strong> los sinónimos (no el nombre largo), así que ahí va el nombre «hablado». Esta es una tabla de datos, no lógica: ampliarla no exige tocar el código. Esa es la forma más barata de mejorar un bot: leer qué escribieron los clientes y agregar sinónimos.</p>
+<h3>Cómo decide <code>buscarProductos</code></h3>
+<p>Tiene tres reglas, y las tres se ven en <code>src/texto.js</code>:</p>
+<ol>
+<li><strong>Palabras de relleno fuera.</strong> «quiero», «de», «por favor», «hola»... no ayudan a identificar nada. Se descartan (<code>RELLENO</code>).</li>
+<li><strong>Una frase coincide solo si están todas sus palabras.</strong> «agua con gas» necesita las tres palabras. Cada palabra escrita se usa una sola vez.</li>
+<li><strong>Gana la frase más larga.</strong> Si el cliente escribe «agua con gas», coinciden tanto «agua» (1 palabra) como «agua con gas» (3 palabras); gana la de 3. Si hay empate, se devuelven <strong>todos</strong> los empatados.</li>
+</ol>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { buscarProductos } from &#x27;./src/texto.js&#x27;;
+import { PRODUCTOS } from &#x27;./src/catalogo.js&#x27;;
+
+for (const x of [&#x27;leche&#x27;, &#x27;leches&#x27;, &#x27;agua&#x27;, &#x27;agua con gas&#x27;, &#x27;agua sin gas&#x27;, &#x27;gaseosa&#x27;,
+                 &#x27;una gaseosa cola&#x27;, &#x27;pan&#x27;, &#x27;pan de molde&#x27;, &#x27;papitas&#x27;, &#x27;tallarines&#x27;,
+                 &#x27;detergente de platos&#x27;, &#x27;detergente&#x27;, &#x27;salsa&#x27;, &#x27;xyz&#x27;]) {
+  console.log(JSON.stringify(x), &#x27;-&gt;&#x27;, JSON.stringify(buscarProductos(x, PRODUCTOS).map((p) =&gt; p.id)));
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;leche&quot; -&gt; [&quot;leche&quot;]
+&quot;leches&quot; -&gt; [&quot;leche&quot;]
+&quot;agua&quot; -&gt; [&quot;agua&quot;]
+&quot;agua con gas&quot; -&gt; [&quot;agua-gas&quot;]
+&quot;agua sin gas&quot; -&gt; [&quot;agua&quot;]
+&quot;gaseosa&quot; -&gt; [&quot;gaseosa-cola&quot;,&quot;gaseosa-naranja&quot;]
+&quot;una gaseosa cola&quot; -&gt; [&quot;gaseosa-cola&quot;]
+&quot;pan&quot; -&gt; [&quot;pan&quot;]
+&quot;pan de molde&quot; -&gt; [&quot;pan-molde&quot;]
+&quot;papitas&quot; -&gt; [&quot;papas&quot;]
+&quot;tallarines&quot; -&gt; [&quot;fideos&quot;]
+&quot;detergente de platos&quot; -&gt; [&quot;lavavajillas&quot;]
+&quot;detergente&quot; -&gt; [&quot;detergente&quot;]
+&quot;salsa&quot; -&gt; []
+&quot;xyz&quot; -&gt; []</code></pre>
+</div>
+<p>Cuatro lecturas útiles. «gaseosa» a secas devuelve <strong>dos</strong> productos: es ambigua, y el motor responderá con una lista para que el cliente elija. «detergente de platos» gana a «detergente» porque es una frase más específica (así se evita agregar detergente de ropa por error). «salsa» no coincide con nada: lista vacía. Y «leches» coincide con «leche» gracias al plural simple, que se resuelve así:</p>
+<div class="code">
+  <div class="code-head"><span>src/texto.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function mismaPalabra(escrita, deCatalogo) {
+  if (escrita === deCatalogo) return true;
+  if (escrita === deCatalogo + &#x27;s&#x27; || escrita === deCatalogo + &#x27;es&#x27;) return true; // plural simple
+  if (deCatalogo.endsWith(&#x27;z&#x27;) &amp;&amp; escrita === deCatalogo.slice(0, -1) + &#x27;ces&#x27;) return true; // arroz -&gt; arroces
+  // Un error tipográfico (1 letra) se tolera solo en palabras largas, para no confundir &quot;sal&quot; con &quot;sol&quot;.
+  return escrita.length &gt;= 5 &amp;&amp; deCatalogo.length &gt;= 5 &amp;&amp; levenshtein(escrita, deCatalogo) &lt;= 1;
+}</code></pre>
+</div>
+<h3>Errores de tipeo: la distancia de Levenshtein</h3>
+<p>La última línea de <code>mismaPalabra</code> tolera errores de tipeo con la <strong>distancia de Levenshtein</strong>: el mínimo de cambios (cambiar, borrar o añadir una letra) para convertir una palabra en otra. «mantequila» y «mantequilla» están a distancia 1: falta una «l».</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { levenshtein } from &#x27;./src/texto.js&#x27;;
+console.log(levenshtein(&#x27;mantequila&#x27;, &#x27;mantequilla&#x27;), levenshtein(&#x27;kitten&#x27;, &#x27;sitting&#x27;), levenshtein(&#x27;sal&#x27;, &#x27;sol&#x27;));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>1 3 1</code></pre>
+</div>
+<p>Mira la última cifra: «sal» y «sol» también están a distancia 1. Si el bot aceptara un error en cualquier palabra, el cliente que pide «sal» podría recibir algo que no es sal. Por eso la regla es <strong>solo en palabras de 5 letras o más</strong>. Es una decisión de <strong>precisión contra flexibilidad</strong>: más tolerancia entiende más, pero se equivoca más. En un negocio, una venta equivocada cuesta más que una pregunta de aclaración. Comprobación (el catálogo tiene «arroz» y «sal»):</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>for (const x of [&#x27;mantequila&#x27;, &#x27;arroces&#x27;, &#x27;lechee&#x27;, &#x27;arros&#x27;, &#x27;sol&#x27;, &#x27;sal&#x27;])
+  console.log(JSON.stringify(x), &#x27;-&gt;&#x27;, JSON.stringify(buscarProductos(x, PRODUCTOS).map((p) =&gt; p.id)));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;mantequila&quot; -&gt; [&quot;mantequilla&quot;]
+&quot;arroces&quot; -&gt; [&quot;arroz&quot;]
+&quot;lechee&quot; -&gt; [&quot;leche&quot;]
+&quot;arros&quot; -&gt; [&quot;arroz&quot;]
+&quot;sol&quot; -&gt; []
+&quot;sal&quot; -&gt; [&quot;sal&quot;]</code></pre>
+</div>
+<h2 id="paso-4-varios-productos-en-un-solo-mensa"><span class="n">5.</span>Paso 4: varios productos en un solo mensaje</h2>
+<p>Los clientes juntan cosas: «2 leches y 1 arroz», «pan, leche y atún». <code>separarPedidos</code> parte el mensaje en trozos por comas, «+», « y » o « e », y para cada trozo calcula la cantidad <strong>y</strong> busca los productos. Descarta los trozos sin producto.</p>
+<div class="code">
+  <div class="code-head"><span>src/texto.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function separarPedidos(texto, productos) {
+  return String(texto)
+    .split(/,|\+|\s+y\s+|\s+e\s+/i)
+    .map((trozo) =&gt; ({ cantidad: extraerCantidad(trozo), productos: buscarProductos(trozo, productos) }))
+    .filter((p) =&gt; p.productos.length &gt; 0);
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { separarPedidos } from &#x27;./src/texto.js&#x27;;
+import { PRODUCTOS } from &#x27;./src/catalogo.js&#x27;;
+
+for (const x of [&#x27;2 leches y 1 arroz&#x27;, &#x27;2 leches y media docena de huevos&#x27;,
+                 &#x27;quiero pan, leche y atun&#x27;, &#x27;3 gaseosas + 2 aguas&#x27;, &#x27;hola buenas&#x27;]) {
+  const r = separarPedidos(x, PRODUCTOS).map((p) =&gt; [p.cantidad, p.productos.map((q) =&gt; q.id)]);
+  console.log(JSON.stringify(x), &#x27;-&gt;&#x27;, JSON.stringify(r));
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;2 leches y 1 arroz&quot; -&gt; [[2,[&quot;leche&quot;]],[1,[&quot;arroz&quot;]]]
+&quot;2 leches y media docena de huevos&quot; -&gt; [[2,[&quot;leche&quot;]],[6,[&quot;huevo&quot;]]]
+&quot;quiero pan, leche y atun&quot; -&gt; [[1,[&quot;pan&quot;]],[1,[&quot;leche&quot;]],[1,[&quot;atun&quot;]]]
+&quot;3 gaseosas + 2 aguas&quot; -&gt; [[3,[&quot;gaseosa-cola&quot;,&quot;gaseosa-naranja&quot;]],[2,[&quot;agua&quot;]]]
+&quot;hola buenas&quot; -&gt; []</code></pre>
+</div>
+<p>El resultado de <code>"3 gaseosas + 2 aguas"</code> es instructivo: una parte es ambigua (dos gaseosas posibles) y la otra clara. El motor agrega lo claro y <strong>pregunta solo por lo ambiguo</strong>, recordando la cantidad (3) mientras el cliente elige. Lo verás completo en la <a href="../07-catalogo-y-carrito/">lección 7</a>.</p>
+<p>Probemos de punta a punta, con el motor real, un mensaje largo con un error de tipeo:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { conversacion } from &#x27;./test/ayudas.js&#x27;;
+const c = conversacion();
+c.decir(&#x27;hola&#x27;);
+c.decir(&#x27;1 mantequila y media docena de huevos&#x27;);
+console.log(c.texto);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Agregué 1 x Mantequilla 200 g.
+Agregué 6 x Huevo.
+Llevas 7 producto(s). Subtotal: S/ 9.80.</code></pre>
+</div>
+<p>Y ahora el caso que <strong>no</strong> se entiende bien (límite conocido): «1 docena y media de huevos» se parte en « y », y el segundo trozo, «media de huevos», se queda sin docena:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Agregué 1 x Huevo.
+Llevas 1 producto(s). Subtotal: S/ 0.60.</code></pre>
+</div>
+<p>Un bot de reglas tiene fronteras. Lo importante es que el cliente <strong>ve</strong> lo que el bot entendió («Agregué 1 x Huevo») y puede corregir. Ese eco es la mejor red de seguridad que tienes.</p>
+<h2 id="paso-5-la-intencion"><span class="n">6.</span>Paso 5: la intención</h2>
+<p>Cuando el mensaje no nombra productos («hola», «a qué hora abren», «quiero hablar con una persona»), hay que averiguar <strong>qué quiere hacer</strong> el cliente: su <strong>intención</strong>. El código de referencia las lista en un objeto de frases:</p>
+<div class="code">
+  <div class="code-head"><span>src/texto.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const FRASES = {
+  cancelar: [&#x27;cancelar&#x27;, &#x27;cancela&#x27;, &#x27;cancelo&#x27;, &#x27;anular&#x27;, &#x27;anula&#x27;, &#x27;salir&#x27;, &#x27;olvidalo&#x27;, &#x27;ya no quiero&#x27;, &#x27;no quiero nada&#x27;],
+  humano: [&#x27;persona&#x27;, &#x27;humano&#x27;, &#x27;asesor&#x27;, &#x27;agente&#x27;, &#x27;encargado&#x27;, &#x27;operador&#x27;, &#x27;dueno&#x27;, &#x27;atencion al cliente&#x27;, &#x27;hablar con alguien&#x27;],
+  horario: [&#x27;horario&#x27;, &#x27;horarios&#x27;, &#x27;a que hora&#x27;, &#x27;abren&#x27;, &#x27;cierran&#x27;, &#x27;atienden&#x27;, &#x27;direccion&#x27;, &#x27;ubicacion&#x27;, &#x27;donde estan&#x27;],
+  carrito: [&#x27;carrito&#x27;, &#x27;mi pedido&#x27;, &#x27;ver pedido&#x27;, &#x27;que llevo&#x27;, &#x27;cuanto es&#x27;, &#x27;mi cuenta&#x27;],
+  catalogo: [&#x27;catalogo&#x27;, &#x27;productos&#x27;, &#x27;precios&#x27;, &#x27;que venden&#x27;, &#x27;que tienen&#x27;, &#x27;que hay&#x27;, &#x27;hacer pedido&#x27;, &#x27;hacer un pedido&#x27;, &#x27;pedir&#x27;, &#x27;comprar&#x27;],
+  menu: [&#x27;menu&#x27;, &#x27;opciones&#x27;, &#x27;inicio&#x27;, &#x27;empezar&#x27;],
+  ayuda: [&#x27;ayuda&#x27;, &#x27;ayudame&#x27;, &#x27;help&#x27;, &#x27;como funciona&#x27;, &#x27;no entiendo&#x27;],
+  confirmar: [&#x27;confirmar&#x27;, &#x27;confirmo&#x27;, &#x27;confirmado&#x27;, &#x27;si&#x27;, &#x27;ok&#x27;, &#x27;dale&#x27;, &#x27;listo&#x27;, &#x27;acepto&#x27;, &#x27;correcto&#x27;, &#x27;finalizar&#x27;, &#x27;terminar&#x27;, &#x27;eso es todo&#x27;, &#x27;nada mas&#x27;],
+  saludo: [&#x27;hola&#x27;, &#x27;holaa&#x27;, &#x27;buenas&#x27;, &#x27;buenos dias&#x27;, &#x27;buenas tardes&#x27;, &#x27;buenas noches&#x27;, &#x27;hey&#x27;, &#x27;hi&#x27;, &#x27;ola&#x27;],
+};</code></pre>
+</div>
+<p><code>detectarIntencion</code> recorre las intenciones <strong>en un orden fijo</strong> y devuelve la primera cuya frase aparezca:</p>
+<div class="code">
+  <div class="code-head"><span>src/texto.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const SOLO_CORTOS = new Set([&#x27;confirmar&#x27;, &#x27;saludo&#x27;]);
+const ORDEN = [&#x27;cancelar&#x27;, &#x27;humano&#x27;, &#x27;horario&#x27;, &#x27;carrito&#x27;, &#x27;catalogo&#x27;, &#x27;menu&#x27;, &#x27;ayuda&#x27;, &#x27;confirmar&#x27;, &#x27;saludo&#x27;];
+
+function contiene(textoNormalizado, frase) {
+  return ` ${textoNormalizado} `.includes(` ${frase} `);
+}</code></pre>
+</div>
+<p>Tres ideas clave:</p>
+<ul>
+<li><strong>Palabras completas, no pedazos.</strong> <code>contiene</code> rodea el texto y la frase con espacios. Así «si» no coincide dentro de «simple» ni «ola» dentro de «cola».</li>
+<li><strong>El orden es prioridad.</strong> <code>cancelar</code> y <code>humano</code> van primero: si el cliente escribe «ya no quiero, quiero una persona», lo urgente es atenderlo. Y <code>saludo</code> va al final porque «hola» aparece dentro de muchas frases.</li>
+<li><strong><code>confirmar</code> y <code>saludo</code> solo valen en mensajes cortos</strong> (4 palabras o menos). Si no, «si quiero 2 leches y un arroz» se tomaría como un «sí» a secas. Los mensajes largos suelen traer más información.</li>
+</ul>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { detectarIntencion } from &#x27;./src/texto.js&#x27;;
+
+for (const x of [&#x27;hola&#x27;, &#x27;Buenas tardes!&#x27;, &#x27;que venden&#x27;, &#x27;quiero hablar con una persona&#x27;, &#x27;si&#x27;,
+                 &#x27;ok listo gracias por todo amigo&#x27;, &#x27;a que hora cierran&#x27;, &#x27;ya no quiero&#x27;, &#x27;mi pedido&#x27;,
+                 &#x27;hacer pedido&#x27;, &#x27;confirmar mi pedido&#x27;, &#x27;asdf&#x27;, &#x27;&#x27;]) {
+  console.log(JSON.stringify(x), &#x27;-&gt;&#x27;, detectarIntencion(x));
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;hola&quot; -&gt; saludo
+&quot;Buenas tardes!&quot; -&gt; saludo
+&quot;que venden&quot; -&gt; catalogo
+&quot;quiero hablar con una persona&quot; -&gt; humano
+&quot;si&quot; -&gt; confirmar
+&quot;ok listo gracias por todo amigo&quot; -&gt; desconocida
+&quot;a que hora cierran&quot; -&gt; horario
+&quot;ya no quiero&quot; -&gt; cancelar
+&quot;mi pedido&quot; -&gt; carrito
+&quot;hacer pedido&quot; -&gt; catalogo
+&quot;confirmar mi pedido&quot; -&gt; carrito
+&quot;asdf&quot; -&gt; desconocida
+&quot;&quot; -&gt; desconocida</code></pre>
+</div>
+<p>Mira dos resultados con cuidado. «ok listo gracias por todo amigo» es <code>desconocida</code> porque tiene más de 4 palabras: es una regla que hay que conocer, no un error. Y «confirmar mi pedido» devuelve <code>carrito</code>, no <code>confirmar</code>, porque <code>carrito</code> (con «mi pedido») va antes en el orden. Ese comportamiento es <strong>real</strong> del código de referencia y un buen ejemplo de límite: en la práctica, el motor resuelve esto con el estado (en el paso <code>CONFIRMAR</code> los botones son los protagonistas), pero un diseñador atento sabría ajustarlo.</p>
+<h2 id="la-prioridad-completa-intencion-o-produc"><span class="n">7.</span>La prioridad completa: intención o producto</h2>
+<p>¿Qué gana cuando un mensaje tiene ambas cosas, como «hola quiero 2 leches» o «si quiero 2 leches»? En el motor (<code>accionDeTexto</code>) el orden es:</p>
+<ol>
+<li><strong>Cancelar o hablar con una persona</strong> (valen en cualquier estado).</li>
+<li><strong>Respuestas propias del paso:</strong> la dirección en <code>DIRECCION</code>, «delivery» en <code>TIPO_ENTREGA</code>, «yape» en <code>PAGO</code>, la cantidad suelta si hay un producto pendiente.</li>
+<li><strong>Quitar</strong> («quita las leches»).</li>
+<li><strong>Texto que nombra productos</strong> (<code>separarPedidos</code>).</li>
+<li>Si no hay productos: la <strong>intención</strong> (saludo, menú, catálogo, carrito, confirmar, ayuda, horario).</li>
+</ol>
+<p>Por eso «si quiero 2 leches» agrega leche (regla 4) aunque <code>detectarIntencion</code> lo etiquete <code>confirmar</code>. Y por eso «hola quiero 2 leches» no muestra un saludo vacío, sino que agrega las leches de una vez:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ELIGIENDO Agregué 2 x Leche entera 1 L.
+Llevas 2 producto(s). Subtotal: S/ 8.60.</code></pre>
+</div>
+<p>Esto responde a una regla de experiencia de usuario: <strong>entre dos lecturas posibles, elige la que le ahorra más pasos al cliente.</strong></p>
+<h2 id="cuando-no-se-entiende"><span class="n">8.</span>Cuando no se entiende</h2>
+<p>Algunos mensajes no encajan en nada. «quiero algo rico» no nombra productos ni tiene una intención conocida. El motor suma un fallo, responde «No te entendí bien. Puedes escribir, por ejemplo, "2 leches", o usar los botones.» y repite el paso actual. Con el segundo fallo seguido ofrece hablar con una persona (el contador <code>fallos</code> de la lección 5).</p>
+<p>Hay dos buenas prácticas:</p>
+<ul>
+<li><strong>Da un ejemplo en el mensaje de error.</strong> «Escribe, por ejemplo, "2 leches"» enseña el formato y evita el siguiente error.</li>
+<li><strong>Registra lo que no entendiste.</strong> Cada «no te entendí» es una pista gratis de qué sinónimo o frase te falta. Revisar esos mensajes una vez por semana es la mejor forma de mejorar un bot de reglas.</li>
+</ul>
+<p>Cuando las reglas ya no alcanzan, se puede añadir inteligencia artificial como complemento, <strong>no como reemplazo</strong>; lo veremos en la <a href="../22-ia-como-complemento/">lección 22</a>.</p>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>No normalizar antes de comparar.</strong> «Leche», «LECHE» y «lechè» se vuelven mundos distintos. Normaliza una sola vez, al principio.</li>
+<li><strong>Aceptar errores de tipeo en palabras cortas.</strong> «sal» y «sol» están a distancia 1. Limita la tolerancia a palabras largas.</li>
+<li><strong>Buscar fragmentos en vez de palabras completas.</strong> Con <code>includes('si')</code> sin espacios, «simple» se leería como un «sí».</li>
+<li><strong>Dar a todas las frases la misma prioridad.</strong> Sin orden, «cancelar» y «hacer pedido» pueden chocar. Define quién gana.</li>
+<li><strong>Olvidar el contexto.</strong> «tres» solo es una cantidad si el bot la estaba esperando.</li>
+<li><strong>Callar los límites.</strong> Si sabes que «docena y media» no se entiende, no lo prometas; y haz que el bot muestre siempre lo que entendió.</li>
+<li><strong>Meter la lista de sinónimos dentro del código de lógica.</strong> Mantenla en datos (<code>catalogo.js</code>) para poder crecer sin riesgo.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>Todo empieza con <code>normalizar</code>: minúsculas, sin tildes ni signos, espacios limpios.</li>
+<li>Las cantidades pueden venir en cifras, palabras o docenas; sin dato, vale 1.</li>
+<li>Los productos se buscan por <strong>sinónimos</strong> (datos, no código). Gana la frase más específica; en empate se pregunta.</li>
+<li>La distancia de Levenshtein perdona errores de tipeo, pero solo en palabras largas.</li>
+<li>Las <strong>intenciones</strong> se detectan por frases de palabras completas, con orden de prioridad y límite de longitud para <code>confirmar</code> y <code>saludo</code>.</li>
+<li>Entre producto e intención, el motor prioriza lo que ahorra pasos al cliente y siempre muestra lo que entendió.</li>
+<li>Registra los mensajes no entendidos: son tu lista de mejoras.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Texto libre</td>
+<td>Mensaje escrito por el cliente con sus propias palabras, sin botones.</td>
+</tr>
+<tr>
+<td>Normalizar</td>
+<td>Dejar el texto en una forma estándar (minúsculas, sin tildes ni signos).</td>
+</tr>
+<tr>
+<td>Sinónimo</td>
+<td>Forma alternativa en que la gente nombra un producto.</td>
+</tr>
+<tr>
+<td>Intención</td>
+<td>Lo que quiere hacer el cliente (saludar, ver el catálogo, cancelar...).</td>
+</tr>
+<tr>
+<td>Levenshtein</td>
+<td>Número mínimo de cambios de letras para pasar de una palabra a otra.</td>
+</tr>
+<tr>
+<td>Ambigüedad</td>
+<td>Mensaje que coincide con varios productos y exige preguntar cuál.</td>
+</tr>
+<tr>
+<td>Palabra de relleno</td>
+<td>Palabra que no ayuda a identificar nada («quiero», «de», «por favor»).</td>
+</tr>
+<tr>
+<td>Bot de reglas</td>
+<td>Bot cuyas respuestas salen de reglas escritas por una persona, sin IA.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Para qué sirve normalizar un mensaje antes de analizarlo?</p><ul class="opts"><li><button type="button" class="opt">Para traducirlo al inglés</button></li><li><button type="button" class="opt" data-ok>Para compararlo de forma fiable: minúsculas, sin tildes ni signos y con espacios limpios</button></li><li><button type="button" class="opt">Para enviarlo más rápido a Meta</button></li><li><button type="button" class="opt">Para detectar el idioma del cliente</button></li></ul><p class="explain" hidden>Sin normalizar, «Leche», «LECHE» y «leche» serían cosas distintas para el programa.</p></div>
+<div class="quiz-q"><p>¿Por qué la tolerancia a errores de tipeo se limita a palabras de 5 letras o más?</p><ul class="opts"><li><button type="button" class="opt">Porque Levenshtein no funciona con palabras cortas</button></li><li><button type="button" class="opt" data-ok>Para no confundir palabras cortas distintas, como «sal» y «sol», que están a distancia 1</button></li><li><button type="button" class="opt">Porque el catálogo solo tiene palabras largas</button></li><li><button type="button" class="opt">Porque WhatsApp lo exige</button></li></ul><p class="explain" hidden>Con palabras cortas un solo error cambia el significado; se prefiere preguntar antes que vender el producto equivocado.</p></div>
+<div class="quiz-q"><p>El cliente escribe «gaseosa» y el catálogo tiene dos gaseosas. ¿Qué debe hacer el bot?</p><ul class="opts"><li><button type="button" class="opt">Elegir la primera al azar</button></li><li><button type="button" class="opt">Rechazar el mensaje</button></li><li><button type="button" class="opt" data-ok>Preguntar cuál quiere, recordando la cantidad si la dio</button></li><li><button type="button" class="opt">Agregar las dos</button></li></ul><p class="explain" hidden>Cuando hay empate entre productos, se devuelve a todos los empatados y el motor ofrece una lista para elegir.</p></div>
+<div class="quiz-q"><p>¿Por qué <code>confirmar</code> y <code>saludo</code> solo se detectan en mensajes de 4 palabras o menos?</p><ul class="opts"><li><button type="button" class="opt">Porque son las intenciones menos importantes</button></li><li><button type="button" class="opt" data-ok>Para que «si quiero 2 leches y un arroz» no se tome como un «sí» a secas</button></li><li><button type="button" class="opt">Porque los mensajes largos no se pueden procesar</button></li><li><button type="button" class="opt">Porque Meta limita los mensajes a 4 palabras</button></li></ul><p class="explain" hidden>Un mensaje largo suele traer más información que una simple confirmación o saludo.</p></div>
+<div class="quiz-q"><p>Un cliente escribe «hola quiero 2 leches». ¿Qué hace el motor de referencia?</p><ul class="opts"><li><button type="button" class="opt">Muestra el saludo y pide que repita el pedido</button></li><li><button type="button" class="opt" data-ok>Agrega las 2 leches de una vez, porque un mensaje con productos se prioriza sobre la intención de saludo</button></li><li><button type="button" class="opt">Lo marca como desconocido</button></li><li><button type="button" class="opt">Deriva al cliente a una persona</button></li></ul><p class="explain" hidden>Entre dos lecturas posibles se elige la que le ahorra más pasos al cliente.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-06">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../05-estado-de-la-conversacion/"><small>← Anterior</small>El estado de la conversación</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 6 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%206:%20Entender%20texto%20libre&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/06-entender-texto-libre/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

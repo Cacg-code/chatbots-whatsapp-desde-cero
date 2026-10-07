@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Costos y métricas de tu bot · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Costos y métricas de tu bot.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Costos y métricas de tu bot · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Costos y métricas de tu bot.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 21</a> › Ejercicio</div>
+        <h1>Ejercicio: Costos y métricas de tu bot</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Construir una calculadora de costos con tarifas parametrizables y las funciones que resumen las métricas del bot, para poder presentarle al dueño del minimarket cuánto cuesta y qué resultados da.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es de investigación con la documentación oficial. La <strong>parte B</strong> son tres funciones de JavaScript puro. Las tarifas del ejercicio son <strong>de ejemplo</strong>, no las de Meta.</p>
+<p>Un mensaje del mes se describe así: <code>{ categoria: "marketing" | "utilidad" | "autenticacion" | "servicio", cantidad: 80, enVentana: true | false }</code>. Las tarifas son un objeto como <code>{ marketing: 0.06, utilidad: 0.02, autenticacion: 0.02, servicio: 0 }</code>. Una conversación es <code>{ estado: "resuelta" | "derivada" | "abandonada" }</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade <code>costoPorPedido(costoMeta, costoInfra, pedidos)</code> que devuelva cuánto cuesta cada pedido recibido por el bot (0 si no hubo pedidos). Es la cifra que más le gusta ver a un dueño: «cada pedido por WhatsApp me cuesta S/ 0.20».</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Abre la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página oficial de precios</a>, descarga la tarifa de tu país y anota en <code>notas.md</code> las tarifas de marketing, utilidad y autenticación con la fecha de vigencia. Anota también si hoy los mensajes libres y las plantillas de utilidad dentro de la ventana siguen siendo gratuitos.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Calcula en una hoja de cálculo el costo de un mes de tu minimarket con esas tarifas reales: cuántas confirmaciones, avisos de pedido y promociones esperas enviar.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>costoMensual(mensajes, tarifas)</code>: suma <code>cantidad × tarifa</code> de cada mensaje. Las categorías sin tarifa cuestan 0. Los mensajes de <code>utilidad</code> con <code>enVentana: true</code> cuestan 0, salvo que <code>tarifas.cobrarUtilidadEnVentana</code> sea <code>true</code>. Redondea el total a 2 decimales.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>tasaDeResolucion(conversaciones)</code>: fracción de conversaciones con <code>estado === "resuelta"</code>, redondeada a 3 decimales. Si la lista está vacía, devuelve 0.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>resumenMetricas(eventos)</code>: recibe eventos <code>{ tipo, ms? }</code> y devuelve <code>{ conversaciones, tasaResolucion, pedidosPorConversacion, tiempoRespuestaMedioMs, tasaLectura, bajas }</code>. Los tipos son <code>conversacion_iniciada</code>, <code>conversacion_resuelta</code>, <code>pedido</code>, <code>respuesta</code> (con <code>ms</code>), <code>plantilla_enviada</code>, <code>plantilla_leida</code> y <code>baja</code>. Las razones se redondean a 3 decimales; el tiempo medio, a entero; sin datos, 0.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Cobrar o no cobrar</summary><p>Calcula el precio de cada mensaje con <code>tarifas[m.categoria] ?? 0</code> y ponlo a 0 solo en el caso de <code>utilidad</code> en ventana sin la opción <code>cobrarUtilidadEnVentana</code>.</p></details>
+      <details><summary>💡 Pista 2: Redondear</summary><p><code>Math.round(x * 100) / 100</code> redondea a 2 decimales y <code>Math.round(x * 1000) / 1000</code> a 3. Los errores de coma flotante son normales; el redondeo final los arregla.</p></details>
+      <details><summary>💡 Pista 3: Contar eventos</summary><p>Una función auxiliar <code>n = tipo =&gt; eventos.filter(e =&gt; e.tipo === tipo).length</code> evita repetir código. Para el tiempo medio, filtra los eventos <code>respuesta</code> y promedia su <code>ms</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`costoMensual` suma cantidad por tarifa", "h": "Multiplica la tarifa de cada categoría por su cantidad y suma todo.", "t": "return costoMensual([{categoria:'marketing',cantidad:10}],{marketing:0.06})===0.6 && costoMensual([{categoria:'marketing',cantidad:10},{categoria:'autenticacion',cantidad:5}],{marketing:0.06,autenticacion:0.02})===0.7"}, {"d": "`costoMensual` trata como gratis el servicio y las categorías sin tarifa", "h": "Usa `tarifas[categoria] ?? 0`.", "t": "return costoMensual([{categoria:'servicio',cantidad:900}],{marketing:0.06})===0 && costoMensual([{categoria:'utilidad',cantidad:3,enVentana:false}],{})===0"}, {"d": "`costoMensual` no cobra utilidad dentro de la ventana", "h": "Si `categoria === 'utilidad'` y `enVentana`, el precio es 0.", "t": "var t={marketing:0.06,utilidad:0.02};return costoMensual([{categoria:'utilidad',cantidad:300,enVentana:true},{categoria:'utilidad',cantidad:120,enVentana:false}],t)===2.4"}, {"d": "`costoMensual` cobra utilidad en ventana si `cobrarUtilidadEnVentana` es true", "h": "Respeta la opción: si es true, no pongas el precio a 0.", "t": "var t={utilidad:0.02,cobrarUtilidadEnVentana:true};return costoMensual([{categoria:'utilidad',cantidad:300,enVentana:true}],t)===6"}, {"d": "`costoMensual` redondea a 2 decimales", "h": "Aplica `Math.round(total * 100) / 100` al final.", "t": "return costoMensual([{categoria:'marketing',cantidad:3}],{marketing:0.1})===0.3 && costoMensual([{categoria:'marketing',cantidad:7}],{marketing:0.0333})===0.23"}, {"d": "`tasaDeResolucion` calcula la fracción de resueltas", "h": "resueltas ÷ total, redondeado a 3 decimales.", "t": "return tasaDeResolucion([{estado:'resuelta'},{estado:'resuelta'},{estado:'derivada'},{estado:'abandonada'}])===0.5 && tasaDeResolucion([{estado:'resuelta'},{estado:'derivada'},{estado:'derivada'}])===0.333"}, {"d": "`tasaDeResolucion` devuelve 0 con lista vacía", "h": "Evita dividir entre cero.", "t": "return tasaDeResolucion([])===0"}, {"d": "`resumenMetricas` calcula todas las métricas", "h": "Cuenta eventos por tipo; razones redondeadas a 3 decimales y tiempo medio entero.", "t": "var ev=[{tipo:'conversacion_iniciada'},{tipo:'conversacion_iniciada'},{tipo:'conversacion_iniciada'},{tipo:'conversacion_iniciada'},{tipo:'conversacion_resuelta'},{tipo:'conversacion_resuelta'},{tipo:'conversacion_resuelta'},{tipo:'pedido'},{tipo:'pedido'},{tipo:'respuesta',ms:800},{tipo:'respuesta',ms:1200},{tipo:'plantilla_enviada'},{tipo:'plantilla_enviada'},{tipo:'plantilla_enviada'},{tipo:'plantilla_enviada'},{tipo:'plantilla_leida'},{tipo:'plantilla_leida'},{tipo:'plantilla_leida'},{tipo:'baja'}];var r=resumenMetricas(ev);return r.conversaciones===4 && r.tasaResolucion===0.75 && r.pedidosPorConversacion===0.5 && r.tiempoRespuestaMedioMs===1000 && r.tasaLectura===0.75 && r.bajas===1"}, {"d": "`resumenMetricas` devuelve ceros sin eventos", "h": "Controla los divisores: si no hay conversaciones, respuestas o plantillas, el resultado es 0.", "t": "var r=resumenMetricas([]);return r.conversaciones===0 && r.tasaResolucion===0 && r.pedidosPorConversacion===0 && r.tiempoRespuestaMedioMs===0 && r.tasaLectura===0 && r.bajas===0"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>costos.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function costoMensual(mensajes, tarifas) {
+  let total = 0;
+  for (const m of mensajes) {
+    let precio = tarifas[m.categoria] ?? 0;
+    if (m.categoria === &quot;utilidad&quot; &amp;&amp; m.enVentana &amp;&amp; !tarifas.cobrarUtilidadEnVentana) precio = 0;
+    total += precio * m.cantidad;
+  }
+  return Math.round(total * 100) / 100;
+}
+
+function tasaDeResolucion(conversaciones) {
+  if (conversaciones.length === 0) return 0;
+  const resueltas = conversaciones.filter(c =&gt; c.estado === &quot;resuelta&quot;).length;
+  return Math.round((resueltas / conversaciones.length) * 1000) / 1000;
+}
+
+function resumenMetricas(eventos) {
+  const n = tipo =&gt; eventos.filter(e =&gt; e.tipo === tipo).length;
+  const resp = eventos.filter(e =&gt; e.tipo === &quot;respuesta&quot;);
+  const conversaciones = n(&quot;conversacion_iniciada&quot;);
+  const enviadas = n(&quot;plantilla_enviada&quot;);
+  const redondear = (x, d) =&gt; Math.round(x * 10 ** d) / 10 ** d;
+  return {
+    conversaciones,
+    tasaResolucion: conversaciones ? redondear(n(&quot;conversacion_resuelta&quot;) / conversaciones, 3) : 0,
+    pedidosPorConversacion: conversaciones ? redondear(n(&quot;pedido&quot;) / conversaciones, 3) : 0,
+    tiempoRespuestaMedioMs: resp.length ? Math.round(resp.reduce((s, e) =&gt; s + e.ms, 0) / resp.length) : 0,
+    tasaLectura: enviadas ? redondear(n(&quot;plantilla_leida&quot;) / enviadas, 3) : 0,
+    bajas: n(&quot;baja&quot;),
+  };
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 21</a>
+        <a class="next" href="../22-ia-como-complemento/"><small>Siguiente →</small>IA como complemento, no como cerebro</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 21 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Costos%20y%20métricas%20de%20tu%20bot&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

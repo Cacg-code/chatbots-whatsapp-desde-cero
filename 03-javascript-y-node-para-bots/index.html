@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript y Node.js para bots · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Instala Node, aprende a usar la terminal y repasa solo el JavaScript que necesita un bot: arrays, funciones puras, async/await, JSON, fetch y pruebas.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="JavaScript y Node.js para bots · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Instala Node, aprende a usar la terminal y repasa solo el JavaScript que necesita un bot: arrays, funciones puras, async/await, JSON, fetch y pruebas.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#que-necesitas-saber-y-que-no">Qué necesitas saber (y qué no)</a></li><li><a href="#instalar-node-js">Instalar Node.js</a></li><li><a href="#la-terminal-en-cinco-comandos">La terminal en cinco comandos</a></li><li><a href="#crear-un-proyecto-con-npm-y-es-modules">Crear un proyecto con npm y ES Modules</a></li><li><a href="#objetos-y-arrays-la-forma-de-los-datos-d">Objetos y arrays: la forma de los datos de un bot</a></li><li><a href="#map-filter-find-y-reduce">map, filter, find y reduce</a></li><li><a href="#funciones-puras-y-funciones-con-efectos">Funciones puras y funciones con efectos</a></li><li><a href="#async-await-esperar-sin-bloquear">async/await: esperar sin bloquear</a></li><li><a href="#json-el-idioma-de-las-apis">JSON: el idioma de las APIs</a></li><li><a href="#fetch-llamar-a-una-api">fetch: llamar a una API</a></li><li><a href="#variables-de-entorno-y-secretos">Variables de entorno y secretos</a></li><li><a href="#pruebas-con-node-test">Pruebas con node:test</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 3</div>
+        <h1>JavaScript y Node.js para bots</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: básico</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Instalar Node.js, comprobar la versión y crear un proyecto con <code>npm init</code> y ES Modules.</li><li>Usar <code>map</code>, <code>filter</code>, <code>find</code> y <code>reduce</code> sobre objetos y arrays como el catálogo de un minimarket.</li><li>Distinguir una función pura de una función con efectos y explicar por qué un bot gana al separarlas.</li><li>Escribir código con <code>async/await</code>, leer y crear JSON y llamar a una API con <code>fetch</code>.</li><li>Guardar secretos en variables de entorno y escribir una prueba con <code>node:test</code>.</li></ul>
+</div>
+
+<h2 id="que-necesitas-saber-y-que-no"><span class="n">1.</span>Qué necesitas saber (y qué no)</h2>
+<p>Para construir el bot no hace falta dominar JavaScript: hace falta un <strong>subconjunto pequeño y bien conocido</strong>. Esta lección repasa solo lo que se usa en el resto del curso, con ejemplos del minimarket. Si en algún punto te pierdes, refuerza con estos dos cursos gratuitos:</p>
+<ul>
+<li><a href="https://cacg-code.github.io/web-desde-cero/javascript/">Curso de JavaScript</a>: variables, funciones, arrays y objetos.</li>
+<li><a href="https://cacg-code.github.io/web-desde-cero/node/">Curso de Node.js y APIs</a>: módulos, servidores y peticiones.</li>
+</ul>
+<p>Lo que verás aquí: la terminal, instalar Node, crear un proyecto, objetos y arrays, las cuatro funciones de arrays que más usarás, funciones puras, <code>async/await</code>, JSON, <code>fetch</code>, variables de entorno y pruebas.</p>
+<h2 id="instalar-node-js"><span class="n">2.</span>Instalar Node.js</h2>
+<p><strong>Node.js</strong> es el programa que ejecuta JavaScript fuera del navegador. Tu bot será un programa de Node. Descarga la versión <strong>LTS</strong> (soporte a largo plazo) desde <a href="https://nodejs.org/">nodejs.org</a>. Este curso se probó con una versión reciente (Node 24); sirve cualquier LTS actual. Los ejemplos usan <code>node --test</code> y <code>--env-file</code>, que existen desde Node 20.</p>
+<ul>
+<li><strong>Windows:</strong> descarga el instalador <code>.msi</code>, acepta las opciones por defecto y reinicia la terminal. Alternativa con el gestor de paquetes: <code>winget install OpenJS.NodeJS.LTS</code>.</li>
+<li><strong>macOS:</strong> el instalador <code>.pkg</code> de nodejs.org, o con Homebrew: <code>brew install node</code>.</li>
+<li><strong>Linux:</strong> usa el gestor de tu distribución o, mejor, <a href="https://github.com/nvm-sh/nvm">nvm</a> para elegir la versión (<code>nvm install --lts</code>).</li>
+</ul>
+<p>Comprueba la instalación abriendo una <strong>terminal nueva</strong> (Símbolo del sistema o PowerShell en Windows; Terminal en macOS y Linux):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>node -v
+npm -v</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>v24.15.0</code></pre>
+</div>
+<p>El número de versión será el tuyo; lo importante es que no diga «no se reconoce el comando». <code>npm</code> es el administrador de paquetes que viene con Node y mostrará su propio número.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los instaladores y comandos cambian con el tiempo. Si algo de esta sección no coincide con tu pantalla, sigue la guía oficial: <a href="https://nodejs.org/en/download">nodejs.org/en/download</a>.</p></div>
+<h2 id="la-terminal-en-cinco-comandos"><span class="n">3.</span>La terminal en cinco comandos</h2>
+<p>Usarás la terminal todo el curso. Con cinco comandos alcanza:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Qué hace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cd carpeta</code></td>
+<td>Entra en una carpeta (<code>cd ..</code> sube un nivel)</td>
+</tr>
+<tr>
+<td><code>ls</code> (macOS/Linux/PowerShell) o <code>dir</code> (Windows clásico)</td>
+<td>Lista los archivos</td>
+</tr>
+<tr>
+<td><code>mkdir nombre</code></td>
+<td>Crea una carpeta</td>
+</tr>
+<tr>
+<td><code>node archivo.js</code></td>
+<td>Ejecuta un archivo de JavaScript</td>
+</tr>
+<tr>
+<td><code>Ctrl + C</code></td>
+<td>Detiene el programa que está corriendo</td>
+</tr>
+</tbody>
+</table></div>
+<p>Crea tu carpeta de trabajo y entra en ella:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>mkdir bot-minimarket
+cd bot-minimarket</code></pre>
+</div>
+<h2 id="crear-un-proyecto-con-npm-y-es-modules"><span class="n">4.</span>Crear un proyecto con npm y ES Modules</h2>
+<p>Un proyecto de Node es una carpeta con un archivo <code>package.json</code>: su «cédula de identidad» (nombre, scripts, dependencias). Se crea con:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npm init -y</code></pre>
+</div>
+<p>Genera un <code>package.json</code>. Ábrelo y déjalo así (añadimos <code>"type": "module"</code> y dos scripts):</p>
+<div class="code">
+  <div class="code-head"><span>package.json</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;name&quot;: &quot;bot-minimarket&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;type&quot;: &quot;module&quot;,
+  &quot;scripts&quot;: {
+    &quot;start&quot;: &quot;node consola.js&quot;,
+    &quot;test&quot;: &quot;node --test&quot;
+  }
+}</code></pre>
+</div>
+<p>El campo <code>"type": "module"</code> activa los <strong>ES Modules</strong>: la forma moderna de dividir el código en archivos. Cada archivo <strong>exporta</strong> lo que ofrece y otros lo <strong>importan</strong>:</p>
+<div class="code">
+  <div class="code-head"><span>util.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function formatearSoles(n) {
+  return &quot;S/ &quot; + n.toFixed(2);
+}</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>index.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { formatearSoles } from &quot;./util.js&quot;;
+
+console.log(formatearSoles(2.5));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>S/ 2.50</code></pre>
+</div>
+<p>Dos detalles que confunden a todos al empezar: en los imports de archivos propios <strong>debes escribir la extensión</strong> (<code>./util.js</code>) y la ruta empieza con <code>./</code>. Los módulos propios de Node se importan con el prefijo <code>node:</code> (por ejemplo <code>node:test</code>, <code>node:readline</code>).</p>
+<h2 id="objetos-y-arrays-la-forma-de-los-datos-d"><span class="n">5.</span>Objetos y arrays: la forma de los datos de un bot</h2>
+<p>Casi todo lo que maneja un bot son <strong>objetos</strong> (cosas con propiedades) en <strong>arrays</strong> (listas). El catálogo del minimarket es un array de objetos:</p>
+<div class="code">
+  <div class="code-head"><span>catalogo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export const catalogo = [
+  { id: 1, nombre: &quot;Gaseosa 500 ml&quot;, precio: 2.5, categoria: &quot;bebidas&quot; },
+  { id: 2, nombre: &quot;Pan francés&quot;, precio: 0.3, categoria: &quot;panadería&quot; },
+  { id: 3, nombre: &quot;Arroz 1 kg&quot;, precio: 4.8, categoria: &quot;abarrotes&quot; },
+  { id: 4, nombre: &quot;Agua 625 ml&quot;, precio: 1.5, categoria: &quot;bebidas&quot; },
+];</code></pre>
+</div>
+<p>Y un carrito es otro array: cada línea guarda el <code>id</code> del producto y la <code>cantidad</code>. Guardamos solo el <code>id</code>, no una copia del producto, para tener <strong>una sola fuente de verdad</strong> del precio.</p>
+<div class="code">
+  <div class="code-head"><span>JavaScript</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const carrito = [
+  { id: 1, cantidad: 2 },
+  { id: 2, cantidad: 10 },
+];</code></pre>
+</div>
+<p>Accedes a una propiedad con punto (<code>producto.precio</code>) y a un elemento por su posición (<code>catalogo[0]</code>). Para copiar o combinar usa el <strong>operador de propagación</strong>: <code>[...carrito, nuevaLinea]</code> crea un array nuevo sin tocar el original.</p>
+<h2 id="map-filter-find-y-reduce"><span class="n">6.</span>map, filter, find y reduce</h2>
+<p>Estas cuatro funciones de array reemplazan casi todos los <code>for</code>. Cada una recibe una <strong>función</strong> que se aplica a cada elemento.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Función</th>
+<th>Qué devuelve</th>
+<th>Ejemplo en el minimarket</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>map</code></td>
+<td>Un array nuevo, del mismo largo, con cada elemento transformado</td>
+<td>Lista de nombres</td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>Un array nuevo con los elementos que cumplen la condición</td>
+<td>Productos baratos</td>
+</tr>
+<tr>
+<td><code>find</code></td>
+<td>El <strong>primer</strong> elemento que cumple (o <code>undefined</code>)</td>
+<td>Buscar por <code>id</code></td>
+</tr>
+<tr>
+<td><code>reduce</code></td>
+<td><strong>Un solo valor</strong> acumulado</td>
+<td>Total del carrito</td>
+</tr>
+</tbody>
+</table></div>
+<p>Las usamos sobre el <code>catalogo</code> de arriba (con <code>const catalogo = [...]</code> en el mismo archivo):</p>
+<div class="code">
+  <div class="code-head"><span>a.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const nombres = catalogo.map((p) =&gt; p.nombre);
+console.log(nombres);
+
+console.log(catalogo.filter((p) =&gt; p.precio &lt; 2).map((p) =&gt; p.nombre));
+
+console.log(catalogo.find((p) =&gt; p.id === 3));
+console.log(catalogo.find((p) =&gt; p.id === 99));
+
+const total = carrito.reduce((suma, linea) =&gt; {
+  const p = catalogo.find((x) =&gt; x.id === linea.id);
+  return suma + p.precio * linea.cantidad;
+}, 0);
+console.log(total);
+console.log(&quot;S/ &quot; + total.toFixed(2));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[ &#x27;Gaseosa 500 ml&#x27;, &#x27;Pan francés&#x27;, &#x27;Arroz 1 kg&#x27;, &#x27;Agua 625 ml&#x27; ]
+[ &#x27;Pan francés&#x27;, &#x27;Agua 625 ml&#x27; ]
+{ id: 3, nombre: &#x27;Arroz 1 kg&#x27;, precio: 4.8, categoria: &#x27;abarrotes&#x27; }
+undefined
+8
+S/ 8.00</code></pre>
+</div>
+<p><code>reduce</code> es la que más cuesta. Piensa en una caja registradora: empieza en <code>0</code> (segundo argumento), por cada línea suma su importe y entrega el total al final. <code>suma</code> es lo acumulado hasta ahora y <code>linea</code> el elemento actual; lo que devuelves en cada vuelta pasa como <code>suma</code> a la siguiente.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Los decimales engañan</p>
+<p>En JavaScript <code>0.1 + 0.2</code> da <code>0.30000000000000004</code>. Para mostrar dinero usa <code>toFixed(2)</code>; para guardar un total, redondea con <code>Math.round(x * 100) / 100</code>. En proyectos más grandes se guardan los montos en <strong>céntimos</strong> (enteros): S/ 2.50 es <code>250</code>.</p></div>
+<h2 id="funciones-puras-y-funciones-con-efectos"><span class="n">7.</span>Funciones puras y funciones con efectos</h2>
+<p>Esta es la idea más importante de la lección, porque define cómo se organiza el bot completo.</p>
+<ul>
+<li>Una <strong>función pura</strong> devuelve siempre lo mismo para los mismos argumentos y <strong>no hace nada más</strong>: no imprime, no lee archivos, no llama a internet, no modifica nada de afuera.</li>
+<li>Una función con <strong>efectos</strong> hace algo en el mundo: imprime con <code>console.log</code>, guarda un dato, envía un mensaje.</li>
+</ul>
+<div class="code">
+  <div class="code-head"><span>JavaScript</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>// Pura: solo calcula
+function totalCarrito(catalogo, carrito) {
+  return carrito.reduce((suma, l) =&gt; {
+    const p = catalogo.find((x) =&gt; x.id === l.id);
+    return p ? suma + p.precio * l.cantidad : suma;
+  }, 0);
+}
+
+// Con efecto: imprime
+function mostrarTotal(total) {
+  console.log(&quot;Total: S/ &quot; + total.toFixed(2));
+}</code></pre>
+</div>
+<p>¿Por qué importa? Las funciones puras son <strong>fáciles de probar</strong> (les das un dato y miras el resultado) y fáciles de reutilizar. Tu bot tendrá un «cerebro» puro, que recibe el mensaje del cliente y devuelve la respuesta, y una «piel» con efectos, que lo conecta con la consola (lección 4) y luego con WhatsApp (lección 10). Si mezclas ambos, tendrás que enviar un WhatsApp real cada vez que quieras probar una regla.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Una regla práctica</p>
+<p>Escribe primero la función pura y llámala desde la que tiene efectos. Si te sorprendes escribiendo <code>console.log</code> o <code>fetch</code> dentro de una regla de negocio, sepáralos.</p></div>
+<h2 id="async-await-esperar-sin-bloquear"><span class="n">8.</span>async/await: esperar sin bloquear</h2>
+<p>Algunas operaciones tardan: llamar a una API, leer un archivo, esperar una respuesta de Meta. En JavaScript devuelven una <strong>promesa</strong> (un valor que llegará más tarde). <code>async/await</code> te permite escribirlas como si fueran código normal:</p>
+<div class="code">
+  <div class="code-head"><span>b.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const esperar = (ms) =&gt; new Promise((ok) =&gt; setTimeout(ok, ms));
+
+async function main() {
+  console.log(&quot;antes&quot;);
+  await esperar(500);
+  console.log(&quot;después de 0,5 s&quot;);
+}
+
+main();
+console.log(&quot;esto sale primero que &#x27;después&#x27;&quot;);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>antes
+esto sale primero que &#x27;después&#x27;
+después de 0,5 s</code></pre>
+</div>
+<p>Fíjate en el orden: <code>main()</code> empieza, llega al <code>await</code> y <strong>cede el control</strong>; mientras espera, el resto del programa sigue. Dos reglas:</p>
+<ol>
+<li><code>await</code> solo se puede usar dentro de una función marcada <code>async</code> (en un módulo, también al nivel superior del archivo).</li>
+<li>Una función <code>async</code> <strong>siempre devuelve una promesa</strong>. Para obtener su valor, tienes que hacer <code>await</code> a su llamada.</li>
+</ol>
+<p>Para manejar fallos, envuelve el <code>await</code> en <code>try/catch</code>:</p>
+<div class="code">
+  <div class="code-head"><span>JavaScript</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>try {
+  const respuesta = await fetch(&quot;https://ejemplo.invalid/api&quot;);
+  console.log(respuesta.status);
+} catch (error) {
+  console.log(&quot;No se pudo conectar:&quot;, error.message);
+}</code></pre>
+</div>
+<h2 id="json-el-idioma-de-las-apis"><span class="n">9.</span>JSON: el idioma de las APIs</h2>
+<p><strong>JSON</strong> es un texto con la misma forma que los objetos de JavaScript. Es el formato en que Meta te entrega cada mensaje. Dos funciones lo manejan:</p>
+<div class="code">
+  <div class="code-head"><span>JavaScript</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const texto = JSON.stringify({ cliente: &quot;51999000111&quot;, items: 2 });
+console.log(texto);
+console.log(JSON.parse(texto).items);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>{&quot;cliente&quot;:&quot;51999000111&quot;,&quot;items&quot;:2}
+2</code></pre>
+</div>
+<p><code>JSON.stringify</code> convierte un objeto en texto y <code>JSON.parse</code> hace lo contrario. Dos trampas: el JSON exige <strong>comillas dobles</strong> en las claves y los textos, y <code>JSON.parse</code> lanza un error si el texto no es JSON válido (por eso, con datos que vienen de afuera, siempre conviene <code>try/catch</code>).</p>
+<h2 id="fetch-llamar-a-una-api"><span class="n">10.</span>fetch: llamar a una API</h2>
+<p><code>fetch</code> hace una petición HTTP y viene incluido en Node. Con él enviarás los mensajes a WhatsApp en la <a href="../14-enviar-mensajes/">lección 14</a>. Aquí un ejemplo de lectura (usa una API pública de prueba):</p>
+<div class="code">
+  <div class="code-head"><span>c.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const r = await fetch(&quot;https://jsonplaceholder.typicode.com/todos/1&quot;);
+console.log(r.status);
+const dato = await r.json();
+console.log(dato.title);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>200
+delectus aut autem</code></pre>
+</div>
+<p>Y así se ve un <strong>envío</strong> (POST) con cuerpo JSON. Es solo un esqueleto para que reconozcas la forma; no lo ejecutes todavía:</p>
+<div class="code">
+  <div class="code-head"><span>JavaScript</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const r = await fetch(&quot;https://ejemplo.invalid/mensajes&quot;, {
+  method: &quot;POST&quot;,
+  headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
+  body: JSON.stringify({ texto: &quot;hola&quot; }),
+});</code></pre>
+</div>
+<p><code>await fetch(...)</code> devuelve la respuesta; <code>await r.json()</code> lee su cuerpo como objeto. Revisa siempre <code>r.ok</code> o <code>r.status</code> antes de fiarte del resultado.</p>
+<h2 id="variables-de-entorno-y-secretos"><span class="n">11.</span>Variables de entorno y secretos</h2>
+<p>El bot necesitará <strong>secretos</strong>: el token de WhatsApp, claves de otras APIs. Nunca se escriben dentro del código (si subes el código a GitHub, todo el mundo las ve). Se guardan en <strong>variables de entorno</strong> y se leen con <code>process.env</code>:</p>
+<div class="code">
+  <div class="code-head"><span>env.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>console.log(&quot;TOKEN:&quot;, process.env.TOKEN_DE_PRUEBA ?? &quot;(no definido)&quot;);</code></pre>
+</div>
+<p>Sin definir la variable:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>node env.js</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>TOKEN: (no definido)</code></pre>
+</div>
+<p>Para definirla sin tocar el código, crea un archivo <code>.env</code> en la carpeta del proyecto y pásalo a Node:</p>
+<div class="code">
+  <div class="code-head"><span>.env</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>TOKEN_DE_PRUEBA=abc123</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>node --env-file=.env env.js</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>TOKEN: abc123</code></pre>
+</div>
+<p>En la nube, donde publicarás el bot con Cloudflare, el equivalente local es un archivo llamado <code>.dev.vars</code> y los secretos reales se cargan desde el panel o la herramienta de despliegue (lección 11).</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Que el secreto no llegue a Git</p>
+<p>Crea un archivo <code>.gitignore</code> con las líneas <code>.env</code>, <code>.dev.vars</code> y <code>node_modules</code>. Así Git no los sube. Si alguna vez publicas un token por error, <strong>revócalo y genera uno nuevo</strong>: borrar el commit no basta.</p></div>
+<h2 id="pruebas-con-node-test"><span class="n">12.</span>Pruebas con node:test</h2>
+<p>Una <strong>prueba automática</strong> es una función que llama a tu código con datos conocidos y verifica el resultado. Node trae un ejecutor sin instalar nada. Crea <code>util.test.js</code> junto a <code>util.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>util.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import test from &quot;node:test&quot;;
+import assert from &quot;node:assert/strict&quot;;
+import { formatearSoles } from &quot;./util.js&quot;;
+
+test(&quot;formatea soles con dos decimales&quot;, () =&gt; {
+  assert.equal(formatearSoles(2.5), &quot;S/ 2.50&quot;);
+});
+
+test(&quot;este falla a propósito&quot;, () =&gt; {
+  assert.equal(formatearSoles(1), &quot;S/ 1&quot;);
+});</code></pre>
+</div>
+<p>Ejecuta todas las pruebas con <code>node --test</code> (o <code>npm test</code>). Con la prueba que falla a propósito:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>✔ formatea soles con dos decimales (1.2083ms)
+✖ este falla a propósito (0.9698ms)
+ℹ tests 2
+ℹ pass 1
+ℹ fail 1
+
+✖ failing tests:
+
+test at util.test.js:5:1
+✖ este falla a propósito (0.9698ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  &#x27;S/ 1.00&#x27; !== &#x27;S/ 1&#x27;</code></pre>
+</div>
+<p>Lee el mensaje: dice cuál esperabas y cuál recibió. Corrige el valor esperado a <code>"S/ 1.00"</code> y las dos pasan. Los tiempos y detalles de la salida varían; lo que importa es la marca ✔ o ✖. En el resto del curso cada regla del bot tendrá su prueba: son tu red de seguridad cuando cambies algo.</p>
+<h2 id="errores-frecuentes"><span class="n">13.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Olvidar <code>"type": "module"</code>.</strong> Sin él, Node no acepta <code>import</code>/<code>export</code> y muestra un error de sintaxis.</li>
+<li><strong>Importar sin extensión</strong> (<code>./util</code> en vez de <code>./util.js</code>) en ES Modules.</li>
+<li><strong>Usar <code>await</code> fuera de una función <code>async</code>.</strong> Marca la función con <code>async</code>.</li>
+<li><strong>Olvidar el <code>await</code>.</strong> Obtienes una promesa en vez del valor (<code>Promise { &lt;pending&gt; }</code>).</li>
+<li><strong>Modificar un array dentro de <code>map</code> o <code>filter</code>.</strong> Estas funciones no deben cambiar el original; devuelven uno nuevo.</li>
+<li><strong>Dejar el <code>0</code> fuera del <code>reduce</code>.</strong> Sin valor inicial, el primer elemento hace de acumulador y falla con arrays de objetos o vacíos.</li>
+<li><strong>Subir <code>.env</code> a GitHub.</strong> Añádelo al <code>.gitignore</code> antes del primer commit.</li>
+<li><strong>Comparar decimales con <code>===</code>.</strong> Redondea o trabaja en céntimos.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">14.</span>Apuntes para llevar</h2>
+<ul>
+<li>Node ejecuta JavaScript fuera del navegador; con <code>npm init</code> creas un proyecto y con <code>"type": "module"</code> usas <code>import</code>/<code>export</code>.</li>
+<li>El catálogo y el carrito son arrays de objetos; <code>map</code>, <code>filter</code>, <code>find</code> y <code>reduce</code> cubren casi todo lo que necesitas.</li>
+<li>Separa funciones <strong>puras</strong> (calculan) de funciones <strong>con efectos</strong> (imprimen, envían): el cerebro del bot será puro.</li>
+<li><code>async/await</code> espera operaciones lentas; <code>fetch</code> llama a APIs y <code>JSON.parse</code>/<code>stringify</code> convierten datos.</li>
+<li>Los secretos van en variables de entorno (<code>process.env</code>, <code>.env</code> o <code>.dev.vars</code>), nunca en el código ni en Git.</li>
+<li><code>node --test</code> ejecuta tus pruebas con <code>node:test</code>.</li>
+</ul>
+<h2 id="glosario"><span class="n">15.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node.js</td>
+<td>Programa que ejecuta JavaScript fuera del navegador.</td>
+</tr>
+<tr>
+<td>npm</td>
+<td>Administrador de paquetes y scripts que acompaña a Node.</td>
+</tr>
+<tr>
+<td><code>package.json</code></td>
+<td>Archivo con el nombre, los scripts y las dependencias del proyecto.</td>
+</tr>
+<tr>
+<td>ES Modules</td>
+<td>Sistema moderno de <code>import</code>/<code>export</code> para dividir el código en archivos.</td>
+</tr>
+<tr>
+<td>Función pura</td>
+<td>Función que devuelve siempre lo mismo para los mismos datos y no tiene efectos.</td>
+</tr>
+<tr>
+<td>Promesa</td>
+<td>Valor que llegará más tarde; <code>await</code> espera por él.</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>Formato de texto para intercambiar datos, con la forma de un objeto de JavaScript.</td>
+</tr>
+<tr>
+<td>Variable de entorno</td>
+<td>Valor de configuración fuera del código, leído con <code>process.env</code>.</td>
+</tr>
+<tr>
+<td><code>node:test</code></td>
+<td>Ejecutor de pruebas incluido en Node.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Qué hace <code>reduce</code> en <code>carrito.reduce((suma, l) =&gt; suma + l.cantidad, 0)</code>?</p><ul class="opts"><li><button type="button" class="opt">Devuelve un array nuevo con las cantidades</button></li><li><button type="button" class="opt">Devuelve el primer elemento del carrito</button></li><li><button type="button" class="opt" data-ok>Devuelve un solo valor acumulado, aquí la suma de las cantidades, empezando en 0</button></li><li><button type="button" class="opt">Elimina las líneas con cantidad cero</button></li></ul><p class="explain" hidden><code>reduce</code> convierte un array en un único valor acumulando paso a paso desde el valor inicial.</p></div>
+<div class="quiz-q"><p>¿Cuál es una función pura?</p><ul class="opts"><li><button type="button" class="opt">Una que imprime el total con <code>console.log</code></button></li><li><button type="button" class="opt">Una que guarda el pedido en un archivo</button></li><li><button type="button" class="opt" data-ok>Una que recibe el catálogo y el carrito y devuelve el total sin tocar nada de afuera</button></li><li><button type="button" class="opt">Una que consulta una API con <code>fetch</code></button></li></ul><p class="explain" hidden>Una función pura solo calcula; imprimir, guardar y consultar son efectos.</p></div>
+<div class="quiz-q"><p>¿Qué necesitas en <code>package.json</code> para usar <code>import</code> y <code>export</code> en tus archivos <code>.js</code>?</p><ul class="opts"><li><button type="button" class="opt"><code>"type": "commonjs"</code></button></li><li><button type="button" class="opt"><code>"main": "import"</code></button></li><li><button type="button" class="opt" data-ok><code>"type": "module"</code></button></li><li><button type="button" class="opt">Nada, siempre funciona</button></li></ul><p class="explain" hidden>La propiedad <code>"type": "module"</code> activa los ES Modules.</p></div>
+<div class="quiz-q"><p>¿Dónde debe guardarse el token de WhatsApp?</p><ul class="opts"><li><button type="button" class="opt">Escrito dentro del código, para no perderlo</button></li><li><button type="button" class="opt">En un comentario del repositorio público</button></li><li><button type="button" class="opt" data-ok>En una variable de entorno (por ejemplo en <code>.env</code>, que no se sube a Git)</button></li><li><button type="button" class="opt">En el título de la lección</button></li></ul><p class="explain" hidden>Los secretos no van en el código; se leen de variables de entorno y se excluyen de Git.</p></div>
+<div class="quiz-q"><p>¿Qué obtienes si llamas a una función <code>async</code> sin usar <code>await</code>?</p><ul class="opts"><li><button type="button" class="opt">El valor final directamente</button></li><li><button type="button" class="opt" data-ok>Una promesa pendiente en lugar del valor</button></li><li><button type="button" class="opt">Un error de sintaxis siempre</button></li><li><button type="button" class="opt">Un array vacío</button></li></ul><p class="explain" hidden>Las funciones <code>async</code> devuelven promesas; con <code>await</code> obtienes el valor resuelto.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-03">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../02-disenar-la-conversacion/"><small>← Anterior</small>Diseñar la conversación antes de programar</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 3 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%203:%20JavaScript%20y%20Node.js%20para%20bots&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

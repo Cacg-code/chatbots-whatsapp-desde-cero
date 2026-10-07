@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Tu primer bot en la consola · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Tu primer bot en la consola.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Tu primer bot en la consola · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Tu primer bot en la consola.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 4</a> › Ejercicio</div>
+        <h1>Ejercicio: Tu primer bot en la consola</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: básico</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Construir el bot de consola de <strong>tu propio negocio inventado</strong> y escribir su «cerebro»: una función <code>responder(texto)</code> que siga reglas dadas, sin leer ni imprimir nada.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real: montas el proyecto en tu computadora con el cerebro separado de la consola. La <strong>parte B</strong> es la función <code>responder(texto)</code> que se comprueba aquí. Las reglas son fijas para que la prueba sea la misma para todos, pero <strong>el texto de las respuestas es tuyo</strong>: usa el nombre, horario y dirección de tu negocio inventado (por ejemplo, una ferretería «El Tornillo Feliz» o una academia «Aula Norte»).</p>
+<p>Reglas que la función debe cumplir (se ignoran mayúsculas y tildes):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>El mensaje contiene</th>
+<th>La respuesta debe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hola</code>, <code>buenas</code></td>
+<td>empezar con la palabra «Hola»</td>
+</tr>
+<tr>
+<td><code>horario</code>, <code>hora</code>, <code>abren</code></td>
+<td>incluir al menos un número (una hora)</td>
+</tr>
+<tr>
+<td><code>direccion</code>, <code>donde</code>, <code>ubicacion</code></td>
+<td>incluir una dirección con número (por ejemplo «Av. Los Pinos 456»)</td>
+</tr>
+<tr>
+<td><code>ayuda</code></td>
+<td>mencionar <code>horario</code> y <code>direccion</code></td>
+</tr>
+<tr>
+<td>cualquier otra cosa, o texto vacío</td>
+<td>incluir «no entendí» (con o sin tilde)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Si el mensaje contiene <code>ayuda</code> y otra palabra de la tabla, gana <code>ayuda</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade una regla de «precios» y otra de «gracias» (responde «De nada»). Luego haz que <code>responder</code> reciba un segundo parámetro, un objeto <code>negocio</code> con <code>nombre</code>, <code>horario</code> y <code>direccion</code>, para poder usar el mismo cerebro con cualquier negocio.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Crea la carpeta <code>bot-mio</code> con <code>npm init -y</code>, <code>"type": "module"</code>, la carpeta <code>src/</code> y los archivos <code>src/cerebro.js</code> y <code>consola.js</code>. Ejecuta <code>node consola.js</code>.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Haz que <code>consola.js</code> lea líneas con <code>readline</code> y muestre <code>responder(linea)</code>. Cierra con la palabra <code>salir</code>.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Escribe <code>test/cerebro.test.js</code> con una prueba por regla y ejecuta <code>node --test</code> hasta ver todo en verde.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Pega en la caja de código <code>normalizar(texto)</code> y <code>responder(texto)</code> <strong>sin <code>export</code></strong> (la página no usa módulos), con las reglas de la tabla. Ante texto vacío, <code>null</code> o <code>undefined</code>, responde «No entendí».</span></label></li></ul>
+      <details><summary>💡 Pista 1: Normalizar primero</summary><p><code>String(texto ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim()</code> quita mayúsculas y tildes. Compara siempre contra el texto normalizado.</p></details>
+      <details><summary>💡 Pista 2: Orden de las reglas</summary><p>Evalúa las reglas en orden con <code>if (t.includes("hola") ...)</code>. Pon <code>ayuda</code> primero. Cuidado con palabras dentro de otras: <code>"hora"</code> está dentro de <code>"ahora"</code>.</p></details>
+      <details><summary>💡 Pista 3: Mensaje de ayuda</summary><p>La ayuda puede ser un texto fijo como <code>"Puedo darte el horario o la direccion."</code> Basta con que contenga ambas palabras.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`responder` existe y siempre devuelve un texto", "h": "Declara `function responder(texto)` y devuelve siempre un `string`.", "t": "return typeof responder==='function' && typeof responder('hola')==='string' && typeof responder('xyz')==='string'"}, {"d": "Saluda cuando le dicen hola o buenas, sin importar mayúsculas", "h": "Normaliza el texto y busca `hola` o `buenas`. La respuesta empieza con `Hola`.", "t": "return /^hola/i.test(responder('Hola')) && /^hola/i.test(responder('BUENAS tardes')) && /^hola/i.test(responder('  hola!  '))"}, {"d": "Responde el horario con al menos un número", "h": "Incluye una hora en la respuesta, por ejemplo `8:00`.", "t": "return /\\d/.test(responder('¿A qué hora abren?')) && /\\d/.test(responder('HORARIO'))"}, {"d": "Responde la dirección con un número de calle", "h": "Detecta `direccion`, `donde` o `ubicacion` (sin tilde) y devuelve una dirección con número.", "t": "var n=function(s){return s.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase()};var ok=function(x){return /\\d/.test(x) && n(x).indexOf('no entend')<0};return ok(responder('¿Dónde están?'))&&ok(responder('Dirección por favor'))&&ok(responder('ubicación'))"}, {"d": "La ayuda menciona horario y dirección", "h": "El texto de `ayuda` debe contener las palabras `horario` y `direccion` (o `dirección`).", "t": "var r=responder('ayuda').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();return r.indexOf('horario')>=0 && r.indexOf('direccion')>=0"}, {"d": "Dice «no entendí» ante algo desconocido", "h": "Al final de la función, devuelve un mensaje con `No entendí` para cualquier otro texto.", "t": "var n=function(s){return s.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase()};return n(responder('quiero una pizza')).indexOf('no entend')>=0 && n(responder('asdfgh')).indexOf('no entend')>=0"}, {"d": "Maneja texto vacío, `null` y `undefined` sin romperse", "h": "Usa `String(texto ?? \"\")` y trata el texto vacío como no entendido.", "t": "var n=function(s){return s.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase()};return n(responder('')).indexOf('no entend')>=0 && n(responder(null)).indexOf('no entend')>=0 && n(responder(undefined)).indexOf('no entend')>=0 && n(responder('   ')).indexOf('no entend')>=0"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>cerebro.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function normalizar(texto) {
+  return String(texto ?? &quot;&quot;)
+    .toLowerCase()
+    .normalize(&quot;NFD&quot;)
+    .replace(/[̀-ͯ]/g, &quot;&quot;)
+    .trim();
+}
+
+function responder(texto) {
+  const t = normalizar(texto);
+  if (t === &quot;&quot;) return &quot;No entendí. Escribe ayuda para ver las opciones.&quot;;
+  if (t.includes(&quot;ayuda&quot;)) return &quot;Puedo darte el horario o la direccion. Escribe una de las dos.&quot;;
+  if (t.includes(&quot;hola&quot;) || t.includes(&quot;buenas&quot;)) return &quot;Hola, bienvenido a Aula Norte. Escribe ayuda para ver las opciones.&quot;;
+  if (t.includes(&quot;horario&quot;) || t.includes(&quot;hora&quot;) || t.includes(&quot;abren&quot;)) return &quot;Atendemos de lunes a viernes de 8:00 a 20:00.&quot;;
+  if (t.includes(&quot;direccion&quot;) || t.includes(&quot;donde&quot;) || t.includes(&quot;ubicacion&quot;)) return &quot;Estamos en Av. Los Pinos 456 (ejemplo).&quot;;
+  return &quot;No entendí tu mensaje. Escribe ayuda para ver las opciones.&quot;;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 4</a>
+        <a class="next" href="../05-estado-de-la-conversacion/"><small>Siguiente →</small>El estado de la conversación</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 4 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Tu%20primer%20bot%20en%20la%20consola&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Practica con Telegram sin cuenta de Meta · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Practica con Telegram sin cuenta de Meta.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Practica con Telegram sin cuenta de Meta · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Practica con Telegram sin cuenta de Meta.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 27</a> › Ejercicio</div>
+        <h1>Ejercicio: Practica con Telegram sin cuenta de Meta</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Escribir las piezas centrales de un adaptador de Telegram: leer un <code>Update</code>, convertir una respuesta del motor en el cuerpo de <code>sendMessage</code> y proteger el webhook con el secreto.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real: creas tu bot de Telegram y lo ves responder. La <strong>parte B</strong> son cuatro funciones de JavaScript puro, sin <code>import</code> ni red, que se comprueban en esta página. Trabaja con los mismos formatos de la lección: la entrada del motor es <code>{tipo:'texto', texto}</code> o <code>{tipo:'interactivo', id}</code>, y las respuestas son <code>{tipo:'texto', texto}</code> o <code>{tipo:'botones', texto, botones:[{id, titulo}]}</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade <code>construirLista(chatId, respuesta)</code> que convierta una respuesta <code>lista</code> del motor (con <code>secciones</code> y <code>filas</code>) en un <code>inline_keyboard</code> con <strong>un botón por fila</strong> y el texto <code>titulo - descripcion</code>. Verifica con un <code>callback_data</code> de más de 64 bytes que tu función avisa del problema en lugar de enviarlo.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En Telegram abre <code>@BotFather</code>, envía <code>/newbot</code> y crea un bot de prueba para tu minimarket. Guarda el token en una variable de entorno (<code>TG_TOKEN</code>), <strong>nunca</strong> en un archivo del proyecto.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Copia <code>src/telegram.js</code> y <code>probar-telegram.mjs</code> de la lección, ejecuta <code>node probar-telegram.mjs</code> y comprueba que las 5 líneas de salida coinciden con las de la lección.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. (Opcional, con túnel o Worker publicado) registra el webhook con <code>setWebhook</code> y un <code>secret_token</code>, escribe <code>/start</code> a tu bot y verifica que aparece el menú de La Esquina. Si calla, revisa <code>getWebhookInfo</code>.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>secretoValido(esperado, cabecera)</code>: devuelve <code>true</code> solo si <code>cabecera</code> es un texto idéntico a <code>esperado</code>. Si <code>esperado</code> está vacío o <code>cabecera</code> no es texto, devuelve <code>false</code>.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>parsearUpdate(update)</code>: devuelve <code>{ chatId, entrada }</code> o <code>null</code>. Un <code>message</code> con <code>text</code> da <code>{tipo:'texto', texto}</code> (con <code>/start</code> convertido a <code>"hola"</code> y espacios sobrantes recortados); un <code>callback_query</code> con <code>data</code> da <code>{tipo:'interactivo', id}</code> y toma el <code>chatId</code> de <code>callback_query.message.chat.id</code>; cualquier otro <code>message</code> (por ejemplo una foto) da <code>{tipo:'no_soportado', subtipo:'otro'}</code>; si no hay <code>message</code> ni <code>callback_query</code> válidos, devuelve <code>null</code>.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>construirEnvio(chatId, respuesta)</code>: para <code>texto</code> devuelve <code>{ chat_id, text }</code>; para <code>botones</code> añade <code>reply_markup: { inline_keyboard: [[{text, callback_data}, ...]] }</code> (una sola fila, con <code>titulo</code> como <code>text</code> e <code>id</code> como <code>callback_data</code>). Recorta <code>text</code> a 4096 caracteres. Para otro tipo lanza un <code>Error</code>.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>esNuevo(vistos, updateId)</code>: <code>vistos</code> es un <code>Set</code>. Si <code>updateId</code> ya está, devuelve <code>false</code>; si no, lo agrega y devuelve <code>true</code>.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Comparar el secreto</summary><p>Antes de comparar revisa que <code>esperado</code> tenga contenido y que <code>typeof cabecera === "string"</code>. Después basta <code>esperado === cabecera</code> (en producción se usa comparación en tiempo constante, como en la lección).</p></details>
+      <details><summary>💡 Pista 2: Orden de las ramas en parsearUpdate</summary><p>Mira primero <code>update.callback_query</code> (con <code>typeof data === "string"</code> y <code>message.chat.id</code>), luego <code>update.message</code>. Dentro de <code>message</code>, si <code>typeof text === "string"</code> es texto; si no, no soportado. Usa <code>?.</code> para no romperte con objetos incompletos.</p></details>
+      <details><summary>💡 Pista 3: El teclado en línea</summary><p><code>botones.map((b) =&gt; ({ text: b.titulo, callback_data: b.id }))</code> da la fila; envuélvela en otro arreglo para formar <code>inline_keyboard</code>. Para recortar, <code>texto.slice(0, 4096)</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`secretoValido` acepta el secreto correcto y rechaza uno distinto, vacío o que no es texto", "h": "Devuelve `esperado === cabecera` cuando ambos son texto.", "t": "return secretoValido(\"abc_123\",\"abc_123\")===true && secretoValido(\"abc_123\",\"abc_124\")===false && secretoValido(\"\",\"\")===false && secretoValido(\"abc\",undefined)===false && secretoValido(\"123\",123)===false"}, {"d": "`parsearUpdate` convierte un mensaje de texto", "h": "Devuelve `{ chatId: message.chat.id, entrada: {tipo:\"texto\", texto} }` y recorta espacios.", "t": "var r=parsearUpdate({update_id:1,message:{chat:{id:5551001},text:\"  quiero 2 leches \"}});return r!==null && r.chatId===5551001 && r.entrada.tipo===\"texto\" && r.entrada.texto===\"quiero 2 leches\""}, {"d": "`parsearUpdate` traduce `/start` a `hola`", "h": "Si el texto es exactamente `/start` (o `/start@algo`), usa `\"hola\"`.", "t": "var r=parsearUpdate({update_id:1,message:{chat:{id:1},text:\"/start\"}});var q=parsearUpdate({update_id:2,message:{chat:{id:1},text:\"/start@la_esquina_bot\"}});return r.entrada.texto===\"hola\" && q.entrada.texto===\"hola\""}, {"d": "`parsearUpdate` convierte un toque de botón en entrada interactiva", "h": "El `chatId` sale de `callback_query.message.chat.id` y el `id` de `callback_query.data`.", "t": "var r=parsearUpdate({update_id:2,callback_query:{id:\"cq1\",data:\"menu_pedir\",message:{chat:{id:777}}}});return r.chatId===777 && r.entrada.tipo===\"interactivo\" && r.entrada.id===\"menu_pedir\""}, {"d": "`parsearUpdate` marca como no soportado lo que no es texto y descarta basura", "h": "Un `message` sin `text` da `no_soportado`; un objeto sin `message` ni `callback_query` da `null`.", "t": "var f=parsearUpdate({update_id:3,message:{chat:{id:9},photo:[{}]}});return f.entrada.tipo===\"no_soportado\" && parsearUpdate({update_id:4})===null && parsearUpdate(null)===null"}, {"d": "`construirEnvio` arma un mensaje de texto y recorta a 4096", "h": "Devuelve `{ chat_id, text }` sin `reply_markup`; usa `slice(0, 4096)`.", "t": "var a=construirEnvio(5,{tipo:\"texto\",texto:\"Hola\"});var b=construirEnvio(5,{tipo:\"texto\",texto:\"x\".repeat(5000)});return a.chat_id===5 && a.text===\"Hola\" && a.reply_markup===undefined && b.text.length===4096"}, {"d": "`construirEnvio` convierte botones en un teclado en línea de una fila", "h": "`inline_keyboard` es un arreglo de filas: `[[{text, callback_data}, ...]]`.", "t": "var r=construirEnvio(5,{tipo:\"botones\",texto:\"Que deseas?\",botones:[{id:\"menu_pedir\",titulo:\"Hacer pedido\"},{id:\"menu_horario\",titulo:\"Horario\"}]});var k=r.reply_markup.inline_keyboard;return k.length===1 && k[0].length===2 && k[0][0].text===\"Hacer pedido\" && k[0][0].callback_data===\"menu_pedir\" && k[0][1].callback_data===\"menu_horario\""}, {"d": "`construirEnvio` lanza un error con un tipo desconocido y `esNuevo` detecta repetidos", "h": "Haz `throw new Error(...)` en el caso final. Para `esNuevo`, usa `vistos.has` y `vistos.add`.", "t": "var fallo=false;try{construirEnvio(1,{tipo:\"video\"})}catch(e){fallo=true}var s=new Set();return fallo && esNuevo(s,10)===true && esNuevo(s,10)===false && esNuevo(s,11)===true"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function secretoValido(esperado, cabecera) {
+  if (!esperado || typeof cabecera !== &quot;string&quot;) return false;
+  return esperado === cabecera;
+}
+
+function parsearUpdate(update) {
+  if (!update) return null;
+  const cb = update.callback_query;
+  if (cb &amp;&amp; typeof cb.data === &quot;string&quot; &amp;&amp; cb.message?.chat?.id != null) {
+    return { chatId: cb.message.chat.id, entrada: { tipo: &quot;interactivo&quot;, id: cb.data } };
+  }
+  const msg = update.message;
+  if (!msg || msg.chat?.id == null) return null;
+  if (typeof msg.text === &quot;string&quot;) {
+    const t = msg.text.trim();
+    const texto = /^\/start(@\w+)?(\s|$)/.test(t) ? &quot;hola&quot; : t;
+    return { chatId: msg.chat.id, entrada: { tipo: &quot;texto&quot;, texto } };
+  }
+  return { chatId: msg.chat.id, entrada: { tipo: &quot;no_soportado&quot;, subtipo: &quot;otro&quot; } };
+}
+
+function construirEnvio(chatId, respuesta) {
+  const base = { chat_id: chatId, text: respuesta.texto === undefined ? &quot;&quot; : respuesta.texto.slice(0, 4096) };
+  if (respuesta.tipo === &quot;texto&quot;) return base;
+  if (respuesta.tipo === &quot;botones&quot;) {
+    base.reply_markup = {
+      inline_keyboard: [respuesta.botones.map((b) =&gt; ({ text: b.titulo, callback_data: b.id }))],
+    };
+    return base;
+  }
+  throw new Error(&quot;Tipo de respuesta desconocido: &quot; + respuesta.tipo);
+}
+
+function esNuevo(vistos, updateId) {
+  if (vistos.has(updateId)) return false;
+  vistos.add(updateId);
+  return true;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 27</a>
+        <a class="next" href="../28-otros-proveedores/"><small>Siguiente →</small>Otros proveedores y alternativas a la API directa</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 27 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Practica%20con%20Telegram%20sin%20cuenta%20de%20Meta&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

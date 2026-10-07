@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Plantillas de mensaje · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Plantillas de mensaje.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Plantillas de mensaje · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Plantillas de mensaje.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 17</a> › Ejercicio</div>
+        <h1>Ejercicio: Plantillas de mensaje</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Validar una plantilla antes de mandarla a revisión, construir el arreglo de variables a partir de un pedido y comprobar los límites de los botones de respuesta rápida, todo con funciones puras que se comprueban en el navegador.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> se hace con la documentación de Meta y tu cuenta de pruebas (sin enviar nada a clientes reales). La <strong>parte B</strong> son funciones de JavaScript puro. Los límites que usamos (cuerpo de 1024 caracteres, botón de 25, hasta 10 botones de respuesta rápida) vienen de la documentación; <strong>verifica</strong> que sigan vigentes cuando trabajes con una cuenta real.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Haz que <code>validarPlantilla</code> también avise cuando el cuerpo empieza o termina con una variable (Meta suele rechazar plantillas así: <strong>verifica</strong> la regla vigente en la documentación) y cuando hay más variables que ejemplos disponibles.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Abre en la documentación oficial de Meta la guía de plantillas y anota en <code>notas.md</code> las tres categorías y para qué sirve cada una.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Redacta en <code>notas.md</code> tres plantillas del minimarket (confirmación de pedido, pedido en camino, promoción de fin de semana). Para cada una indica la categoría que crees que le tocará y por qué.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Si tienes cuenta de pruebas de WhatsApp, crea una plantilla de utilidad en el panel de plantillas (o con la API) y observa su estado de revisión. No la envíes a nadie que no sea tu propio número de prueba.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>contarVariables(texto)</code>: devuelve cuántas variables posicionales distintas tiene el texto (<code>{{1}}</code>, <code>{{2}}</code>...). Si los números no son consecutivos desde 1 (por ejemplo <code>{{1}}</code> y <code>{{3}}</code>), lanza un <code>Error</code>. Una variable repetida cuenta una sola vez.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>nombreValido(nombre)</code>: <code>true</code> solo si tiene letras minúsculas sin tilde, números y guiones bajos, entre 1 y 512 caracteres.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>validarPlantilla(def)</code>: <code>def</code> es <code>{ nombre, cuerpo, botones: [textos] }</code>. Devuelve un arreglo de problemas (texto); vacío si todo está bien. Reglas: nombre válido, cuerpo de 1 a 1024 caracteres, variables consecutivas, hasta 10 botones y cada texto de botón de 1 a 25 caracteres.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>variablesDePedido(pedido)</code>: devuelve <code>[pedido.id, "S/ " + total con 2 decimales]</code>, que serán <code>{{1}}</code> y <code>{{2}}</code>.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Encontrar las variables</summary><p>Con <code>texto.match(...)</code> y una expresión regular global que busque dos llaves, dígitos y dos llaves obtienes todas las apariciones. Saca los números, quita repetidos con <code>new Set(...)</code>, ordénalos y comprueba que sean 1, 2, 3... sin saltos.</p></details>
+      <details><summary>💡 Pista 2: Nombre válido</summary><p>Una expresión regular con letras a-z minúsculas, dígitos y guion bajo (con <code>+</code>, entre <code>^</code> y <code>$</code>), más la comprobación del largo, resuelve todo. Las tildes y mayúsculas no pasan.</p></details>
+      <details><summary>💡 Pista 3: Formato de soles</summary><p><code>pedido.total.toFixed(2)</code> da dos decimales: <code>8.6</code> se vuelve <code>"8.60"</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`contarVariables` cuenta variables distintas", "h": "Extrae los números dentro de las llaves dobles y cuenta los distintos.", "t": "return contarVariables(\"Hola {{1}}, total {{2}}\")===2 && contarVariables(\"sin variables\")===0 && contarVariables(\"{{1}} y otra vez {{1}}\")===1"}, {"d": "`contarVariables` lanza error si faltan números", "h": "Con {{1}} y {{3}} falta la 2: lanza un Error.", "t": "try{contarVariables(\"{{1}} y {{3}}\");return false}catch(e){return e instanceof Error}"}, {"d": "`nombreValido` acepta minúsculas, números y guiones bajos", "h": "Expresión regular con a-z, 0-9 y guion bajo.", "t": "return nombreValido(\"recordatorio_pedido\")===true && nombreValido(\"promo_2\")===true"}, {"d": "`nombreValido` rechaza mayúsculas, espacios, tildes y vacío", "h": "Cualquier otro carácter lo invalida, y el nombre no puede estar vacío.", "t": "return nombreValido(\"Promo\")===false && nombreValido(\"mi plantilla\")===false && nombreValido(\"confirmación\")===false && nombreValido(\"\")===false && nombreValido(\"a\".repeat(513))===false"}, {"d": "`validarPlantilla` devuelve un arreglo vacío si todo está bien", "h": "Si no hay problemas, devuelve [] (no null ni false).", "t": "var r=validarPlantilla({nombre:\"recordatorio_pedido\",cuerpo:\"Tu pedido {{1}} suma {{2}}.\",botones:[\"Confirmar\",\"Cambiar pedido\"]});return Array.isArray(r) && r.length===0"}, {"d": "`validarPlantilla` detecta nombre inválido y cuerpo vacío", "h": "Agrega un texto al arreglo por cada regla incumplida.", "t": "var r=validarPlantilla({nombre:\"Mala Plantilla\",cuerpo:\"\",botones:[]});return r.length>=2"}, {"d": "`validarPlantilla` detecta botones largos, demasiados botones y variables salteadas", "h": "Botón de máximo 25 caracteres, máximo 10 botones, variables consecutivas.", "t": "var largo=validarPlantilla({nombre:\"a\",cuerpo:\"hola\",botones:[\"x\".repeat(26)]});var muchos=validarPlantilla({nombre:\"a\",cuerpo:\"hola\",botones:Array(11).fill(\"ok\")});var salto=validarPlantilla({nombre:\"a\",cuerpo:\"{{1}} {{3}}\",botones:[]});return largo.length===1 && muchos.length===1 && salto.length===1"}, {"d": "`variablesDePedido` devuelve id y total en soles", "h": "El segundo valor es \"S/ \" más total.toFixed(2).", "t": "var v=variablesDePedido({id:\"LE-1\",total:8.6});return v.length===2 && v[0]===\"LE-1\" && v[1]===\"S/ 8.60\""}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function contarVariables(texto) {
+  const hallados = texto.match(/\{\{(\d+)\}\}/g) ?? [];
+  const numeros = [...new Set(hallados.map((h) =&gt; Number(h.slice(2, -2))))].sort((a, b) =&gt; a - b);
+  numeros.forEach((n, i) =&gt; {
+    if (n !== i + 1) throw new Error(&quot;Las variables deben ser consecutivas desde {{1}}&quot;);
+  });
+  return numeros.length;
+}
+
+function nombreValido(nombre) {
+  return typeof nombre === &quot;string&quot; &amp;&amp; nombre.length &gt;= 1 &amp;&amp; nombre.length &lt;= 512 &amp;&amp; /^[a-z0-9_]+$/.test(nombre);
+}
+
+function validarPlantilla(def) {
+  const problemas = [];
+  if (!nombreValido(def.nombre)) problemas.push(&quot;Nombre inválido: solo minúsculas sin tilde, números y guion bajo&quot;);
+  if (!def.cuerpo || def.cuerpo.length &gt; 1024) problemas.push(&quot;El cuerpo debe tener entre 1 y 1024 caracteres&quot;);
+  try { contarVariables(def.cuerpo ?? &quot;&quot;); } catch (e) { problemas.push(e.message); }
+  const botones = def.botones ?? [];
+  if (botones.length &gt; 10) problemas.push(&quot;Máximo 10 botones&quot;);
+  for (const b of botones) {
+    if (!b || b.length &gt; 25) problemas.push(`Texto de botón de 1 a 25 caracteres: &quot;${b}&quot;`);
+  }
+  return problemas;
+}
+
+function variablesDePedido(pedido) {
+  return [pedido.id, &quot;S/ &quot; + pedido.total.toFixed(2)];
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 17</a>
+        <a class="next" href="../18-recordatorios-y-seguimiento/"><small>Siguiente →</small>Recordatorios y seguimiento automático</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 17 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Plantillas%20de%20mensaje&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

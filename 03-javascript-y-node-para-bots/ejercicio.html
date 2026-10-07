@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · JavaScript y Node.js para bots · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: JavaScript y Node.js para bots.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · JavaScript y Node.js para bots · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: JavaScript y Node.js para bots.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 3</a> › Ejercicio</div>
+        <h1>Ejercicio: JavaScript y Node.js para bots</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: básico</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Practicar con <code>map</code>, <code>filter</code>, <code>find</code> y <code>reduce</code> sobre el catálogo del minimarket y escribir las funciones de dinero y de carrito que el bot usará en todas las lecciones siguientes.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real en tu terminal: dejas Node funcionando con un proyecto y una prueba. La <strong>parte B</strong> son cuatro funciones puras que se comprueban en esta página. Un producto del catálogo tiene la forma <code>{ id, nombre, precio, categoria }</code> y una línea de carrito es <code>{ id, cantidad }</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Escribe <code>productosBaratos(catalogo, tope)</code> que devuelva los nombres de los productos con precio menor o igual al tope, ordenados del más barato al más caro (usa <code>filter</code>, <code>sort</code> y <code>map</code>; recuerda copiar el array antes de ordenar con <code>[...arr]</code>).</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Crea una carpeta <code>practica</code>, entra en ella y ejecuta <code>npm init -y</code>. Añade <code>"type": "module"</code> al <code>package.json</code> y comprueba con <code>node -v</code> que tienes Node 20 o superior.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Crea <code>util.js</code> con una función exportada y <code>util.test.js</code> con una prueba de <code>node:test</code>. Ejecuta <code>node --test</code>: debe salir en verde. Cambia el valor esperado a propósito y observa cómo se ve un fallo.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>formatearSoles(n)</code>: devuelve el monto con el prefijo <code>S/</code> y dos decimales, por ejemplo <code>formatearSoles(2.5)</code> da <code>"S/ 2.50"</code>.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>buscarProducto(catalogo, texto)</code>: devuelve el primer producto cuyo nombre contenga el texto, sin distinguir mayúsculas; si no hay ninguno, devuelve <code>null</code> (no <code>undefined</code>).</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>totalCarrito(catalogo, carrito)</code>: suma <code>precio * cantidad</code> de cada línea con <code>reduce</code>. Si una línea apunta a un id que no existe en el catálogo, se ignora. Redondea el total a 2 decimales.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>agruparPorCategoria(productos)</code>: devuelve un objeto donde cada clave es una categoría y su valor es el array de <strong>nombres</strong> de los productos de esa categoría, en el orden original.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Dos decimales</summary><p><code>n.toFixed(2)</code> devuelve un texto con dos decimales. Para el total, <code>Math.round(suma * 100) / 100</code> evita colas como <code>0.30000000000000004</code>.</p></details>
+      <details><summary>💡 Pista 2: Buscar sin distinguir mayúsculas</summary><p>Pasa ambos textos a minúsculas con <code>toLowerCase()</code> y usa <code>includes</code>. <code>find</code> devuelve <code>undefined</code> si no hay coincidencia: conviértelo con <code>?? null</code>.</p></details>
+      <details><summary>💡 Pista 3: reduce con valor inicial</summary><p><code>carrito.reduce((suma, linea) =&gt; { ... return suma + algo; }, 0)</code>. Dentro, busca el producto con <code>find</code>; si no existe, devuelve <code>suma</code> sin cambios.</p></details>
+      <details><summary>💡 Pista 4: Agrupar</summary><p>Empieza con <code>const grupos = {}</code>. Por cada producto: <code>if (!grupos[p.categoria]) grupos[p.categoria] = [];</code> y luego <code>grupos[p.categoria].push(p.nombre)</code>. También sirve <code>reduce</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`formatearSoles` pone el prefijo y dos decimales", "h": "Une el prefijo `S/ ` con `n.toFixed(2)`.", "t": "return typeof formatearSoles==='function' && formatearSoles(2.5)==='S/ 2.50' && formatearSoles(10)==='S/ 10.00' && formatearSoles(0)==='S/ 0.00'"}, {"d": "`formatearSoles` redondea a dos decimales", "h": "`toFixed(2)` redondea; no cortes el texto a mano.", "t": "return formatearSoles(3.456)==='S/ 3.46' && formatearSoles(0.3)==='S/ 0.30'"}, {"d": "`buscarProducto` encuentra por parte del nombre sin importar mayúsculas", "h": "Pasa a minúsculas ambos lados y usa `includes`.", "t": "var c=[{id:1,nombre:'Gaseosa 500 ml',precio:2.5,categoria:'bebidas'},{id:2,nombre:'Pan francés',precio:0.3,categoria:'panadería'}];var p=buscarProducto(c,'PAN');return p!==null && p.id===2 && buscarProducto(c,'gaseosa').id===1"}, {"d": "`buscarProducto` devuelve `null` si no existe", "h": "`find` devuelve `undefined`; usa `?? null`.", "t": "var c=[{id:1,nombre:'Arroz',precio:4,categoria:'abarrotes'}];return buscarProducto(c,'pizza')===null"}, {"d": "`totalCarrito` suma precio por cantidad", "h": "Usa `reduce` con valor inicial 0.", "t": "var c=[{id:1,nombre:'Gaseosa',precio:2.5,categoria:'bebidas'},{id:2,nombre:'Pan',precio:0.3,categoria:'panadería'}];return totalCarrito(c,[{id:1,cantidad:2},{id:2,cantidad:10}])===8"}, {"d": "`totalCarrito` evita errores de decimales y devuelve 0 con carrito vacío", "h": "Redondea con `Math.round(x * 100) / 100`.", "t": "var c=[{id:1,nombre:'A',precio:0.1,categoria:'x'},{id:2,nombre:'B',precio:0.2,categoria:'x'}];return totalCarrito(c,[{id:1,cantidad:1},{id:2,cantidad:1}])===0.3 && totalCarrito(c,[])===0"}, {"d": "`totalCarrito` ignora ids que no existen", "h": "Si `find` no halla el producto, no sumes nada.", "t": "var c=[{id:1,nombre:'A',precio:5,categoria:'x'}];return totalCarrito(c,[{id:1,cantidad:2},{id:99,cantidad:3}])===10"}, {"d": "`agruparPorCategoria` agrupa nombres por categoría en orden", "h": "Crea el array de la categoría la primera vez que la veas y haz `push` del nombre.", "t": "var ps=[{id:1,nombre:'Gaseosa',precio:2.5,categoria:'bebidas'},{id:2,nombre:'Pan',precio:0.3,categoria:'panadería'},{id:3,nombre:'Agua',precio:1.5,categoria:'bebidas'}];var g=agruparPorCategoria(ps);return JSON.stringify(g)===JSON.stringify({bebidas:['Gaseosa','Agua'],'panadería':['Pan']}) && JSON.stringify(agruparPorCategoria([]))==='{}'"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function formatearSoles(n) {
+  return &quot;S/ &quot; + n.toFixed(2);
+}
+
+function buscarProducto(catalogo, texto) {
+  const buscado = String(texto).toLowerCase();
+  return catalogo.find((p) =&gt; p.nombre.toLowerCase().includes(buscado)) ?? null;
+}
+
+function totalCarrito(catalogo, carrito) {
+  const suma = carrito.reduce((acc, linea) =&gt; {
+    const p = catalogo.find((x) =&gt; x.id === linea.id);
+    if (!p) return acc;
+    return acc + p.precio * linea.cantidad;
+  }, 0);
+  return Math.round(suma * 100) / 100;
+}
+
+function agruparPorCategoria(productos) {
+  const grupos = {};
+  for (const p of productos) {
+    if (!grupos[p.categoria]) grupos[p.categoria] = [];
+    grupos[p.categoria].push(p.nombre);
+  }
+  return grupos;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 3</a>
+        <a class="next" href="../04-primer-bot-en-consola/"><small>Siguiente →</small>Tu primer bot en la consola</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 3 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20JavaScript%20y%20Node.js%20para%20bots&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

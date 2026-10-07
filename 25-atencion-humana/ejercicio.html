@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Atención humana y traspaso · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Atención humana y traspaso.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Atención humana y traspaso · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Atención humana y traspaso.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 25</a> › Ejercicio</div>
+        <h1>Ejercicio: Atención humana y traspaso</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Construir las cuatro decisiones de un traspaso a una persona: saber si el negocio está abierto, avisar solo cuando corresponde, redactar el aviso al dueño y decidir cuándo el bot debe retomar la conversación.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real en tu terminal con el código de referencia. La <strong>parte B</strong> son funciones de JavaScript puro que se comprueban en esta página. Todas las horas son milisegundos (<code>Date.UTC(...)</code>) y Lima está en UTC-5 durante todo el año. Recuerda que en <code>Date.UTC</code> los meses empiezan en 0 (octubre es <code>9</code>) y que el domingo es el día <code>0</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Escribe <code>proximaApertura(ahora, horario, desfaseHoras = -5)</code>: devuelve un texto como <code>"hoy a las 8:00"</code> o <code>"mañana a las 9:00"</code> con la próxima hora de apertura. Es lo que haría falta para que el mensaje de fuera de horario diga cuándo te van a responder, en lugar de repetir toda la tabla.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En <code>codigo/</code> ejecuta <code>printf 'hola\n2 leches\nquiero hablar con una persona\nhola?\nmenu\n' | node consola.js</code> (en Windows usa Git Bash) y observa en qué momento el bot se calla y cuándo vuelve.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. En tu copia de <code>src/texto.js</code> agrega las palabras <code>reclamo</code>, <code>queja</code> y <code>devolucion</code> a la lista de la intención <code>humano</code>. Comprueba con <code>node -e</code> que <code>detectarIntencion("tengo un reclamo")</code> ahora devuelve <code>humano</code>, y corre <code>npm test</code> para confirmar que nada se rompió.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Crea una prueba con <code>node:test</code> que use <code>conversacion()</code> de <code>test/ayudas.js</code>: el cliente pide una persona, escribe tres mensajes más y verifica que el bot no responde nada (<code>c.respuestas.length === 0</code>) y que <code>c.sesion.carrito</code> conserva sus productos tras escribir <code>menu</code>.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>estaAbierto(ahora, horario, desfaseHoras = -5)</code>: <code>horario</code> es un objeto por día de la semana (0 domingo a 6 sábado) con <code>[horaApertura, horaCierre]</code>; un día ausente significa cerrado. Está abierto si la hora local es mayor o igual que la apertura y menor que el cierre (admite minutos: 8:30 es 8.5). Usa <code>new Date(ahora + desfaseHoras * 3600000)</code> y los métodos <code>getUTC...</code>.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>debeAvisar(antes, despues)</code>: recibe los estados de la sesión (textos) antes y después de procesar un mensaje. Devuelve <code>true</code> solo si <code>despues</code> es <code>"ESPERANDO_HUMANO"</code> y <code>antes</code> no lo era (incluye el caso en que <code>antes</code> sea <code>null</code> o <code>undefined</code>).</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>avisoDueno(sesion, nombre)</code>: devuelve <code>"Cliente pide atencion: &lt;quien&gt;. &lt;carrito&gt;"</code>. <code>quien</code> es <code>"&lt;nombre&gt; (&lt;telefono&gt;)"</code> o solo el teléfono si no hay nombre. <code>carrito</code> es <code>"Tiene N producto(s) en el carrito."</code> con N = suma de las cantidades de <code>sesion.carrito</code>, o <code>"No tiene nada en el carrito."</code> si N es 0.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>humanoVencido(desde, ahora, maxMs = 3 * 3600 * 1000)</code>: <code>true</code> si <code>desde</code> no es nulo y pasó <code>maxMs</code> o más; <code>false</code> en cualquier otro caso (incluye <code>desde</code> nulo).</span></label></li></ul>
+      <details><summary>💡 Pista 1: Hora local</summary><p><code>const local = new Date(ahora + desfaseHoras * 3600000);</code> te da una fecha «corrida». Con <code>local.getUTCDay()</code> obtienes el día (0 a 6) y con <code>local.getUTCHours() + local.getUTCMinutes() / 60</code> la hora decimal.</p></details>
+      <details><summary>💡 Pista 2: Franja ausente</summary><p><code>const franja = horario[local.getUTCDay()];</code> es <code>undefined</code> si ese día no está en la tabla. En ese caso devuelve <code>false</code> antes de comparar horas.</p></details>
+      <details><summary>💡 Pista 3: Sumar cantidades</summary><p><code>sesion.carrito.reduce((n, l) =&gt; n + l.cantidad, 0)</code> suma las cantidades de todas las líneas. Para el texto usa una plantilla: <code>`Tiene ${n} producto(s) en el carrito.`</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`estaAbierto` es `true` en horario de atención entre semana", "h": "Miércoles 15:00 UTC son las 10:00 en Lima; la franja es [8, 21].", "t": "var h={0:[9,14],1:[8,21],2:[8,21],3:[8,21],4:[8,21],5:[8,21],6:[8,21]};return estaAbierto(Date.UTC(2026,9,7,15,0),h)===true"}, {"d": "`estaAbierto` es `false` antes de abrir y después de cerrar", "h": "Compara con >= la apertura y con < el cierre. A las 21:00 en punto ya está cerrado.", "t": "var h={1:[8,21],2:[8,21],3:[8,21]};return estaAbierto(Date.UTC(2026,9,7,12,59),h)===false && estaAbierto(Date.UTC(2026,9,8,2,0),h)===false && estaAbierto(Date.UTC(2026,9,7,13,0),h)===true"}, {"d": "`estaAbierto` usa la franja del domingo", "h": "El 11 de octubre de 2026 es domingo (día 0): abre de 9 a 14 en Lima.", "t": "var h={0:[9,14],6:[8,21]};return estaAbierto(Date.UTC(2026,9,11,13,0),h)===false && estaAbierto(Date.UTC(2026,9,11,15,0),h)===true && estaAbierto(Date.UTC(2026,9,11,19,30),h)===false"}, {"d": "`estaAbierto` cierra los días ausentes y admite otro desfase con minutos", "h": "Si `horario[dia]` es undefined devuelve false; con desfaseHoras = 0 la hora local es la UTC y 8:30 se escribe 8.5.", "t": "var h={1:[8,21]};var g={3:[8.5,12]};return estaAbierto(Date.UTC(2026,9,7,15,0),h)===false && estaAbierto(Date.UTC(2026,9,7,8,29),g,0)===false && estaAbierto(Date.UTC(2026,9,7,8,30),g,0)===true"}, {"d": "`debeAvisar` es `true` solo en la transición a modo humano", "h": "Devuelve true si despues es ESPERANDO_HUMANO y antes era otra cosa (o no había sesión: null).", "t": "return debeAvisar(\"CARRITO\",\"ESPERANDO_HUMANO\")===true && debeAvisar(null,\"ESPERANDO_HUMANO\")===true && debeAvisar(undefined,\"ESPERANDO_HUMANO\")===true"}, {"d": "`debeAvisar` es `false` si ya estaba en modo humano o no pasó a él", "h": "Si antes ya era ESPERANDO_HUMANO, no avises de nuevo.", "t": "return debeAvisar(\"ESPERANDO_HUMANO\",\"ESPERANDO_HUMANO\")===false && debeAvisar(\"MENU\",\"CARRITO\")===false && debeAvisar(\"ESPERANDO_HUMANO\",\"MENU\")===false && debeAvisar(null,\"MENU\")===false"}, {"d": "`avisoDueno` redacta el aviso con y sin nombre, con y sin carrito", "h": "Con nombre: Rosa (51999000111). Sin nombre solo el teléfono. Con 0 productos: No tiene nada en el carrito.", "t": "var s={telefono:\"51999000111\",carrito:[{cantidad:2},{cantidad:1}]};var v={telefono:\"51999000111\",carrito:[]};return avisoDueno(s,\"Rosa\")===\"Cliente pide atencion: Rosa (51999000111). Tiene 3 producto(s) en el carrito.\" && avisoDueno(v,null)===\"Cliente pide atencion: 51999000111. No tiene nada en el carrito.\""}, {"d": "`humanoVencido` respeta el plazo y el valor nulo", "h": "Con 3 horas por defecto: a las 2 h no vence, a las 3 h sí; con desde nulo siempre false.", "t": "var H=3600000;return humanoVencido(0,2*H)===false && humanoVencido(0,3*H)===true && humanoVencido(null,99*H)===false && humanoVencido(0,H,H)===true"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>humano.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function estaAbierto(ahora, horario, desfaseHoras = -5) {
+  const local = new Date(ahora + desfaseHoras * 3600000);
+  const franja = horario[local.getUTCDay()];
+  if (!franja) return false;
+  const hora = local.getUTCHours() + local.getUTCMinutes() / 60;
+  return hora &gt;= franja[0] &amp;&amp; hora &lt; franja[1];
+}
+
+function debeAvisar(antes, despues) {
+  return despues === &quot;ESPERANDO_HUMANO&quot; &amp;&amp; antes !== &quot;ESPERANDO_HUMANO&quot;;
+}
+
+function avisoDueno(sesion, nombre) {
+  const n = sesion.carrito.reduce((suma, l) =&gt; suma + l.cantidad, 0);
+  const quien = nombre ? `${nombre} (${sesion.telefono})` : sesion.telefono;
+  const carrito = n &gt; 0 ? `Tiene ${n} producto(s) en el carrito.` : &quot;No tiene nada en el carrito.&quot;;
+  return `Cliente pide atencion: ${quien}. ${carrito}`;
+}
+
+function humanoVencido(desde, ahora, maxMs = 3 * 3600 * 1000) {
+  return desde != null &amp;&amp; ahora - desde &gt;= maxMs;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 25</a>
+        <a class="next" href="../26-vender-tu-bot/"><small>Siguiente →</small>Vender tu bot como servicio</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 25 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Atención%20humana%20y%20traspaso&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/25-atencion-humana/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seguridad y privacidad · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Protege secretos y tokens, verifica la firma de Meta, limita el abuso y trata los datos de tus clientes con mínimo necesario, retención y borrado a petición.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Seguridad y privacidad · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Protege secretos y tokens, verifica la firma de Meta, limita el abuso y trata los datos de tus clientes con mínimo necesario, retención y borrado a petición.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-un-bot-de-negocio-es-un-blanco">Por qué un bot de negocio es un blanco</a></li><li><a href="#secretos-y-tokens-nunca-en-el-repo-ni-en">Secretos y tokens: nunca en el repo ni en el chat</a></li><li><a href="#tokens-de-acceso-temporales-de-usuario-d">Tokens de acceso: temporales, de usuario del sistema y mínimo privilegio</a></li><li><a href="#verificar-la-firma-x-hub-signature-256">Verificar la firma: X-Hub-Signature-256</a></li><li><a href="#validar-entradas-y-limpiar-texto">Validar entradas y limpiar texto</a></li><li><a href="#limitar-el-abuso-tasa-e-idempotencia">Limitar el abuso: tasa e idempotencia</a></li><li><a href="#que-datos-guardar-y-por-cuanto-tiempo">Qué datos guardar y por cuánto tiempo</a></li><li><a href="#consentimiento-politica-de-privacidad-y-">Consentimiento, política de privacidad y borrado a petición</a></li><li><a href="#lista-de-seguridad-antes-de-entregar-el-">Lista de seguridad antes de entregar el bot</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 24</div>
+        <h1>Seguridad y privacidad</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: avanzado</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Guardar secretos y tokens fuera del repositorio y del chat, usando <code>.dev.vars</code> y secretos de Cloudflare.</li><li>Explicar cómo funciona la firma <code>X-Hub-Signature-256</code> (HMAC) y verificarla con código.</li><li>Aplicar mínimo privilegio, validación de entradas, limitación de tasa e idempotencia.</li><li>Decidir qué datos guardar, por cuánto tiempo y cómo borrarlos a petición del cliente.</li><li>Redactar una política de privacidad básica y revisar el bot con una lista de comprobación de seguridad.</li></ul>
+</div>
+
+<h2 id="por-que-un-bot-de-negocio-es-un-blanco"><span class="n">1.</span>Por qué un bot de negocio es un blanco</h2>
+<p>Tu bot es un servidor público en internet: cualquiera que conozca la URL del webhook puede enviarle peticiones. Además guarda <strong>teléfonos, direcciones y pedidos</strong> de personas reales, y tiene un <strong>token</strong> que permite enviar mensajes en nombre del negocio. Si algo sale mal, los daños son concretos: mensajes falsos enviados con tu número, datos filtrados, una factura de Meta inflada o una cuenta suspendida.</p>
+<p>La buena noticia es que la mayor parte de la seguridad de un bot pequeño se resume en unos pocos hábitos: <strong>no filtrar secretos, comprobar quién te escribe, no confiar en lo que llega, guardar poco y borrar a tiempo</strong>. Esta lección los recorre uno por uno.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Esto no es asesoría legal</p>
+<p>Hablamos de buenas prácticas técnicas y de principios de protección de datos. Las leyes cambian y dependen de cada país. Si vas a manejar datos de clientes de un negocio, consulta a un abogado local.</p></div>
+<h2 id="secretos-y-tokens-nunca-en-el-repo-ni-en"><span class="n">2.</span>Secretos y tokens: nunca en el repo ni en el chat</h2>
+<p>Un <strong>secreto</strong> es cualquier valor que da poder: el token de acceso de WhatsApp, el <strong>secreto de la app</strong> de Meta, el token de verificación del webhook, las claves de otros servicios. Reglas simples:</p>
+<ol>
+<li><strong>Nunca en el código.</strong> Ni «temporalmente», ni «solo para probar».</li>
+<li><strong>Nunca en el repositorio.</strong> Un secreto subido a GitHub debe considerarse <strong>comprometido</strong> aunque borres el commit, porque queda en el historial y existen bots que rastrean repositorios en busca de claves.</li>
+<li><strong>Nunca en un chat, correo o captura de pantalla</strong> (incluido pedirle ayuda a un compañero o a una IA con el token a la vista).</li>
+<li><strong>Rotación inmediata</strong> si se filtra: genera uno nuevo y revoca el anterior.</li>
+</ol>
+<h3>En local: <code>.dev.vars</code></h3>
+<p>Cloudflare lee los secretos de desarrollo desde un archivo <code>.dev.vars</code> junto a <code>wrangler.toml</code>. Ese archivo <strong>debe estar en <code>.gitignore</code></strong>:</p>
+<div class="code">
+  <div class="code-head"><span>.dev.vars</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>WHATSAPP_TOKEN=pon-aqui-tu-token
+APP_SECRET=pon-aqui-el-secreto-de-la-app
+VERIFY_TOKEN=una-frase-larga-que-inventes</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>.gitignore</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>node_modules/
+.dev.vars
+.env</code></pre>
+</div>
+<p>Comprueba que git lo ignora antes del primer commit:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>git check-ignore -v .dev.vars</code></pre>
+</div>
+<h3>En producción: secretos de Cloudflare</h3>
+<p>En el servidor desplegado se usan <strong>secretos de Worker</strong>, que se guardan cifrados y no aparecen en <code>wrangler.toml</code>:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npx wrangler secret put WHATSAPP_TOKEN
+npx wrangler secret put APP_SECRET</code></pre>
+</div>
+<p>Wrangler te pedirá el valor por la terminal (no queda en tu historial de comandos como argumento). En el código, el secreto llega en el objeto <code>env</code>: <code>env.WHATSAPP_TOKEN</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Un secreto por entorno</p>
+<p>Usa un token distinto para pruebas y para producción. Si se filtra el de pruebas, el negocio real no se toca.</p></div>
+<h2 id="tokens-de-acceso-temporales-de-usuario-d"><span class="n">3.</span>Tokens de acceso: temporales, de usuario del sistema y mínimo privilegio</h2>
+<p>En la <a href="../12-cuenta-y-app-de-meta/">lección 12</a> viste que Meta entrega un <strong>token temporal</strong> para practicar: caduca pronto y sirve solo para pruebas. Para producción se crea un <strong>usuario del sistema</strong> en la configuración del negocio y se le genera un token con los permisos justos. La documentación oficial de la plataforma describe estos pasos en la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/get-started">guía de inicio</a>.</p>
+<p>Aplica el <strong>principio de mínimo privilegio</strong>: da a cada pieza solo lo que necesita para su trabajo.</p>
+<ul>
+<li>Al usuario del sistema, solo la <strong>app</strong> y la <strong>cuenta de WhatsApp</strong> de ese cliente, no todo el portafolio.</li>
+<li>Al token, solo los permisos de mensajería y gestión de WhatsApp que usas.</li>
+<li>Al Worker, solo los secretos que realmente lee.</li>
+<li>A las personas, solo el rol que necesitan en el portafolio (nadie necesita ser administrador para ver estadísticas).</li>
+</ul>
+<p>Guarda la fecha de creación de cada token y revísalos cada cierto tiempo. Si trabajas para un cliente, la cuenta de Meta debe estar <strong>a nombre del cliente</strong>, y tú entras con un rol limitado (lección <a href="../26-vender-tu-bot/">26</a>).</p>
+<h3>Verificación en dos pasos en la cuenta de Meta</h3>
+<p>Activa la <strong>autenticación en dos pasos (2FA)</strong> en tu cuenta personal de Facebook y en el portafolio comercial. Quien controla esa cuenta controla el número, los clientes y la facturación. Meta puede <strong>exigirla</strong> para administrar el portafolio o para acceder a ciertas funciones.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Varios tutoriales dicen que la 2FA es obligatoria para acceder a la API, pero no pude confirmarlo en una página oficial de Meta. Los requisitos de seguridad del portafolio cambian: revisa lo que te pida tu cuenta en el <a href="https://www.facebook.com/business/help">Centro de ayuda para empresas de Meta</a> y la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/get-started">documentación oficial de WhatsApp</a>. Actívala aunque no te la pidan.</p></div>
+<h2 id="verificar-la-firma-x-hub-signature-256"><span class="n">4.</span>Verificar la firma: <code>X-Hub-Signature-256</code></h2>
+<p>Cualquiera puede enviar un POST a tu webhook diciendo «soy Meta». Para distinguir lo auténtico de lo falso, Meta <strong>firma</strong> cada notificación y pone la firma en el encabezado <code>X-Hub-Signature-256</code>, con la forma <code>sha256=&lt;hex&gt;</code>.</p>
+<p>La firma es un <strong>HMAC-SHA256</strong>: una huella calculada con el <strong>cuerpo exacto</strong> de la petición y el <strong>secreto de la app</strong>, que solo conocen Meta y tú. El proceso es:</p>
+<div class="flow"><div class="node"><strong>Meta</strong><span>firma el cuerpo con el secreto</span></div><div class="arrow">→<code>POST + cabecera de firma</code></div><div class="node"><strong>Tu webhook</strong><span>recalcula la firma</span></div><div class="arrow">→<code>¿coinciden?</code></div><div class="node"><strong>Procesar o rechazar</strong><span>200 / 401</span></div></div>
+<ol>
+<li>Recibes el cuerpo <strong>sin modificar</strong> (el texto crudo, antes de convertirlo a objeto).</li>
+<li>Calculas el HMAC-SHA256 de ese texto usando tu secreto de app.</li>
+<li>Lo comparas con lo que viene después de <code>sha256=</code>.</li>
+<li>Si coincide, el mensaje es auténtico y no fue alterado. Si no, respondes <code>401</code> y no haces nada más.</li>
+</ol>
+<p>La documentación de Meta lo describe en <a href="https://developers.facebook.com/docs/graph-api/webhooks/getting-started">Validating Payloads</a>: genera una firma SHA256 con el payload y el secreto de la app y compárala con la del encabezado.</p>
+<p>Ejemplo propio con el módulo <code>crypto</code> de Node (el código real del proyecto vive en <code>codigo/src/whatsapp.js</code>; aquí lo escribimos a mano para entender la idea). El secreto es de ejemplo:</p>
+<div class="code">
+  <div class="code-head"><span>firma.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const crypto = require(&quot;node:crypto&quot;);
+
+function firmar(cuerpo, secreto) {
+  return &quot;sha256=&quot; + crypto.createHmac(&quot;sha256&quot;, secreto).update(cuerpo).digest(&quot;hex&quot;);
+}
+
+function firmaValida(cuerpo, cabecera, secreto) {
+  if (!cabecera) return false;
+  const esperada = Buffer.from(firmar(cuerpo, secreto));
+  const recibida = Buffer.from(cabecera);
+  return esperada.length === recibida.length &amp;&amp; crypto.timingSafeEqual(esperada, recibida);
+}
+
+const secreto = &quot;secreto-de-ejemplo-no-real&quot;;
+const cuerpo = &#x27;{&quot;entry&quot;:[{&quot;id&quot;:&quot;1&quot;}]}&#x27;;
+const cab = firmar(cuerpo, secreto);
+console.log(cab);
+console.log(&quot;original:&quot;, firmaValida(cuerpo, cab, secreto));
+console.log(&quot;alterado:&quot;, firmaValida(&#x27;{&quot;entry&quot;:[{&quot;id&quot;:&quot;2&quot;}]}&#x27;, cab, secreto));
+console.log(&quot;sin cabecera:&quot;, firmaValida(cuerpo, null, secreto));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>sha256=35b1991096b0c6652e370ff67f1fb20c9595f6960f74ab42789869acca482b3c
+original: true
+alterado: false
+sin cabecera: false</code></pre>
+</div>
+<p>Detalles que importan:</p>
+<ul>
+<li><strong>Usa el cuerpo crudo.</strong> Si lo conviertes a objeto y lo vuelves a texto, el orden o los espacios pueden cambiar y la firma dejará de coincidir. Lee el cuerpo con <code>await request.text()</code> y recién después haz <code>JSON.parse</code>.</li>
+<li><strong>Comparación de tiempo constante</strong> (<code>timingSafeEqual</code>) en lugar de <code>===</code>, para que un atacante no deduzca la firma midiendo tiempos.</li>
+<li><strong>El secreto de la app no es el token de acceso.</strong> Son dos valores distintos; no los confundas.</li>
+<li>Cambia cualquier letra del cuerpo y la firma deja de coincidir: eso es lo que ves en el caso «alterado».</li>
+</ul>
+<h2 id="validar-entradas-y-limpiar-texto"><span class="n">5.</span>Validar entradas y limpiar texto</h2>
+<p>Aunque la firma sea válida, <strong>el texto del cliente es entrada no confiable</strong>: puede ser larguísimo, tener caracteres de control o intentar engañar a tu código. Reglas:</p>
+<ul>
+<li><strong>Limita la longitud</strong> (por ejemplo, 500 caracteres) antes de procesar.</li>
+<li><strong>Quita caracteres de control y de ancho cero</strong>, y normaliza espacios.</li>
+<li><strong>Nunca insertes el texto del cliente directamente</strong> en consultas, comandos o HTML sin escapar.</li>
+<li><strong>Comprueba la forma</strong> de lo que esperas: cantidades numéricas dentro de un rango, teléfonos con solo dígitos, etc.</li>
+<li><strong>Ignora lo que no esperas</strong> (tipos de mensaje que tu bot no maneja) en lugar de fallar.</li>
+</ul>
+<div class="code">
+  <div class="code-head"><span>seguridad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function limpiarEntrada(texto, max = 500) {
+  if (typeof texto !== &quot;string&quot;) return &quot;&quot;;
+  return texto
+    .replace(/[​-‍﻿]/g, &quot;&quot;)       // ancho cero
+    .replace(/[\u0000-\u001F\u007F]/g, &quot; &quot;)      // caracteres de control
+    .replace(/\s+/g, &quot; &quot;).trim().slice(0, max);
+}
+
+console.log(JSON.stringify(limpiarEntrada(&quot;  hola\n\n\tquiero\u0000   pan​  &quot;)));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>&quot;hola quiero pan&quot;</code></pre>
+</div>
+<p>Y para <strong>registros y paneles</strong>, enmascara el teléfono: en los logs casi nunca necesitas el número completo.</p>
+<div class="code">
+  <div class="code-head"><span>seguridad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function enmascararTelefono(tel) {
+  const d = String(tel ?? &quot;&quot;).replace(/\D/g, &quot;&quot;);
+  if (d.length &lt;= 5) return &quot;*&quot;.repeat(d.length);
+  return d.slice(0, 2) + &quot;*&quot;.repeat(d.length - 5) + d.slice(-3);
+}
+
+console.log(enmascararTelefono(&quot;51999000111&quot;));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>51******111</code></pre>
+</div>
+<h2 id="limitar-el-abuso-tasa-e-idempotencia"><span class="n">6.</span>Limitar el abuso: tasa e idempotencia</h2>
+<p>Dos problemas distintos con soluciones simples.</p>
+<h3>Limitar la tasa (rate limiting)</h3>
+<p>Un cliente (o un script) que te escribe 200 veces por minuto puede agotar tus límites gratuitos, generar costos y hundir la conversación. Una <strong>ventana deslizante</strong> guarda las horas de las últimas peticiones de cada cliente y rechaza cuando se supera el máximo:</p>
+<div class="code">
+  <div class="code-head"><span>seguridad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function limitarTasa(registro, clave, ahora, max, ventanaMs) {
+  const vivos = (registro[clave] ?? []).filter(t =&gt; ahora - t &lt; ventanaMs);
+  if (vivos.length &gt;= max) { registro[clave] = vivos; return false; }
+  vivos.push(ahora);
+  registro[clave] = vivos;
+  return true;
+}
+
+const reg = {};
+const r = [0, 1000, 2000, 3000, 61000].map(t =&gt; limitarTasa(reg, &quot;51999000111&quot;, t, 3, 60000));
+console.log(r);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>[ true, true, true, false, true ]</code></pre>
+</div>
+<p>Con un máximo de 3 mensajes por minuto, el cuarto (en el segundo 3) se rechaza; pasado el minuto, vuelve a funcionar. Para el cliente que excede el límite, lo más amable es <strong>ignorar en silencio</strong> o responder una sola vez («Estás escribiendo muy rápido, espera un momento»).</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Dónde guardar el contador</p>
+<p>En un Worker, cada petición puede ejecutarse en una instancia distinta, así que un <code>Map</code> en memoria no es fiable. Para un bot pequeño, guarda el contador en <a href="../15-memoria-con-kv/">KV</a> con caducidad corta, sabiendo que KV no es instantáneo entre regiones y que sus escrituras tienen cuota; es una defensa «suficiente», no perfecta. Para más rigor existen herramientas de Cloudflare diseñadas para esto.</p></div>
+<h3>Idempotencia</h3>
+<p>Meta puede <strong>reenviar</strong> una notificación si tu servidor tarda o falla: según la documentación, reintenta con frecuencia decreciente <strong>hasta 7 días</strong> y esos reintentos <strong>pueden producir notificaciones duplicadas</strong>. Si tu bot no se protege, un mismo mensaje «quiero 2 gaseosas» podría procesarse dos veces y crear un pedido doble.</p>
+<p>Una operación es <strong>idempotente</strong> si repetirla no cambia el resultado. La técnica: guarda el <strong>identificador del mensaje</strong> (<code>wamid...</code>) que viene en el JSON y descarta los ya vistos.</p>
+<div class="code">
+  <div class="code-head"><span>seguridad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const vistos = new Set();
+function procesarUnaVez(id, fn) {
+  if (vistos.has(id)) return &quot;duplicado ignorado&quot;;
+  vistos.add(id);
+  return fn();
+}
+console.log(procesarUnaVez(&quot;wamid.EJEMPLO1&quot;, () =&gt; &quot;procesado&quot;));
+console.log(procesarUnaVez(&quot;wamid.EJEMPLO1&quot;, () =&gt; &quot;procesado&quot;));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>procesado
+duplicado ignorado</code></pre>
+</div>
+<p>En producción, el <code>Set</code> se reemplaza por KV con una caducidad de uno o dos días. Responde siempre <code>200</code> rápido a Meta y procesa sin demorar, para evitar reintentos innecesarios.</p>
+<h2 id="que-datos-guardar-y-por-cuanto-tiempo"><span class="n">7.</span>Qué datos guardar y por cuánto tiempo</h2>
+<p>El principio rector es la <strong>minimización</strong>: guarda <strong>solo lo necesario</strong> para el propósito, y <strong>solo mientras haga falta</strong>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Dato</th>
+<th>¿Hace falta?</th>
+<th>Retención sugerida (decide con el negocio)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Teléfono</td>
+<td>Sí, es el identificador de la conversación</td>
+<td>Mientras el cliente esté activo</td>
+</tr>
+<tr>
+<td>Nombre</td>
+<td>Opcional, si lo da el cliente</td>
+<td>Igual que el teléfono</td>
+</tr>
+<tr>
+<td>Dirección de entrega</td>
+<td>Solo si hay delivery</td>
+<td>Hasta entregar; después, borrar o pedirla de nuevo</td>
+</tr>
+<tr>
+<td>Pedidos</td>
+<td>Sí (historial y reclamos)</td>
+<td>Según necesidad contable del negocio</td>
+</tr>
+<tr>
+<td>Texto de las conversaciones</td>
+<td>Solo el estado necesario para continuar</td>
+<td>Corto: horas o pocos días</td>
+</tr>
+<tr>
+<td>Registro de opt-in/baja</td>
+<td>Sí, como prueba del consentimiento</td>
+<td>Mientras dure la relación y el plazo legal aplicable</td>
+</tr>
+<tr>
+<td>Logs técnicos</td>
+<td>Para depurar</td>
+<td>Pocos días, con teléfonos enmascarados</td>
+</tr>
+</tbody>
+</table></div>
+<p>Lo que <strong>no</strong> debes guardar ni pedir por WhatsApp: números completos de tarjeta, claves, documentos de identidad, datos de salud. La política de Meta pide expresamente no compartir datos sensibles por el canal.</p>
+<p>Las cifras de retención de la tabla son <strong>sugerencias</strong>, no obligaciones legales: algunos datos (como comprobantes) pueden tener plazos de conservación por ley contable o tributaria. Cada negocio debe fijarlos con su asesor.</p>
+<p>Una función de retención es pura y fácil de probar: dice si un registro debe borrarse, ya sea por antigüedad o porque el cliente pidió el borrado:</p>
+<div class="code">
+  <div class="code-head"><span>seguridad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function debeBorrarse(registro, ahora, diasRetencion) {
+  if (registro.solicitudBorrado) return true;
+  return ahora - registro.creado &gt;= diasRetencion * 24 * 60 * 60 * 1000;
+}
+
+const DIA = 86400000;
+console.log(
+  debeBorrarse({ creado: 0 }, 91 * DIA, 90),
+  debeBorrarse({ creado: 0 }, 10 * DIA, 90),
+  debeBorrarse({ creado: 0, solicitudBorrado: true }, DIA, 90)
+);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>true false true</code></pre>
+</div>
+<p>Una tarea programada (la misma técnica de los <a href="../18-recordatorios-y-seguimiento/">recordatorios</a>) puede ejecutar la limpieza cada noche.</p>
+<h2 id="consentimiento-politica-de-privacidad-y-"><span class="n">8.</span>Consentimiento, política de privacidad y borrado a petición</h2>
+<p>Quien te da su teléfono y su dirección tiene <strong>derechos</strong> sobre esos datos. En Perú, por ejemplo, la <a href="https://www.congreso.gob.pe/Docs/DGP/DIDP/files/ley_29733.pdf">Ley 29733, Ley de Protección de Datos Personales</a> y su reglamento regulan el consentimiento, los derechos del titular (acceder, rectificar, cancelar y oponerse) y las obligaciones de quien trata datos; la autoridad es la Autoridad Nacional de Protección de Datos Personales. <strong>Cada país tiene su propia norma</strong> (por ejemplo, México, Colombia, Chile o Argentina tienen leyes distintas) y el reglamento peruano ha tenido modificaciones recientes, así que verifica la versión vigente.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>No des por hecho que una ley antigua sigue igual: busca la versión vigente en el portal oficial del Estado o consúltala con un abogado antes de redactar documentos legales para un cliente.</p></div>
+<p>Una <strong>política de privacidad</strong> para el bot del minimarket debe responder, en lenguaje claro:</p>
+<ol>
+<li><strong>Quién</strong> es el responsable (nombre y contacto del negocio).</li>
+<li><strong>Qué datos</strong> se recogen (teléfono, nombre, dirección, pedidos).</li>
+<li><strong>Para qué</strong> se usan (atender pedidos, avisos de entrega y, solo si aceptó, ofertas).</li>
+<li><strong>Con quién</strong> se comparten (Meta como proveedor del canal, el proveedor de alojamiento, repartidores si aplica).</li>
+<li><strong>Cuánto tiempo</strong> se conservan.</li>
+<li><strong>Cómo ejercer derechos</strong>: pedir copia, corregir, borrar o darse de baja, y a qué contacto.</li>
+<li><strong>Cómo se pide el consentimiento</strong> y cómo se retira.</li>
+</ol>
+<p>Publica la política en una página web (aunque sea una sola página) y enlázala en el cartel del QR y en el primer mensaje del bot.</p>
+<p>Mensaje de ejemplo para la primera interacción:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>Hola, soy el asistente de Minimarket La Esquina. Uso tu número para atender
+tu pedido. Más información en nuestra política de privacidad:
+https://ejemplo.com/privacidad. Para borrar tus datos, escribe BORRAR.</code></pre>
+</div>
+<h3>Borrar datos a petición</h3>
+<p>Si el cliente escribe <code>BORRAR</code> (o lo pide por otra vía), el bot debe:</p>
+<ol>
+<li><strong>Confirmar la identidad</strong>: el número que escribe es el titular de los datos.</li>
+<li><strong>Borrar o anonimizar</strong> pedidos no obligatorios de conservar, sesiones y registros.</li>
+<li><strong>Mantener lo que la ley obliga</strong> (por ejemplo, comprobantes) y explicarlo.</li>
+<li><strong>Confirmar</strong> con un mensaje breve y <strong>registrar</strong> que se atendió la solicitud, sin guardar de nuevo los datos que acabas de borrar.</li>
+</ol>
+<h2 id="lista-de-seguridad-antes-de-entregar-el-"><span class="n">9.</span>Lista de seguridad antes de entregar el bot</h2>
+<ul>
+<li>[ ] Ningún secreto en el repositorio; <code>.dev.vars</code> y <code>.env</code> en <code>.gitignore</code>.</li>
+<li>[ ] Secretos de producción cargados con <code>wrangler secret put</code>.</li>
+<li>[ ] Tokens con el mínimo de permisos; token de pruebas distinto del de producción.</li>
+<li>[ ] 2FA activa en la cuenta de Facebook y en el portafolio comercial.</li>
+<li>[ ] Firma <code>X-Hub-Signature-256</code> verificada sobre el cuerpo crudo; respuesta <code>401</code> si no coincide.</li>
+<li>[ ] Entradas limpiadas y con longitud máxima.</li>
+<li>[ ] Límite de mensajes por cliente.</li>
+<li>[ ] Idempotencia por identificador de mensaje.</li>
+<li>[ ] Teléfonos enmascarados en logs y paneles.</li>
+<li>[ ] Retención definida y tarea de limpieza.</li>
+<li>[ ] Política de privacidad publicada y comando para borrar datos.</li>
+<li>[ ] Opt-in y baja registrados (lección <a href="../20-marketing-responsable/">20</a>).</li>
+</ul>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Pegar el token en un chat o captura para pedir ayuda.</strong> Si pasó, rótalo ya.</li>
+<li><strong>Subir <code>.dev.vars</code> a GitHub «por una vez».</strong> Queda en el historial para siempre.</li>
+<li><strong>No verificar la firma</strong> porque «de todos modos nadie conoce mi URL». Las URLs se descubren.</li>
+<li><strong>Calcular la firma sobre el JSON ya parseado</strong> en vez del cuerpo crudo.</li>
+<li><strong>Guardar todo «por si acaso».</strong> Cada dato extra es un riesgo y una obligación.</li>
+<li><strong>Registrar teléfonos completos en logs públicos o compartidos.</strong></li>
+<li><strong>Ignorar los reintentos de Meta</strong> y crear pedidos duplicados.</li>
+<li><strong>Copiar una política de privacidad ajena</strong> sin adaptarla a lo que realmente hace tu bot.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>Los <strong>secretos</strong> no van en el código, el repo ni el chat: <code>.dev.vars</code> en local, <code>wrangler secret put</code> en producción.</li>
+<li>La <strong>firma <code>X-Hub-Signature-256</code></strong> es un HMAC-SHA256 del cuerpo crudo con el secreto de la app; compárala en tiempo constante.</li>
+<li><strong>Mínimo privilegio</strong> en tokens, cuentas y roles; activa la <strong>2FA</strong>.</li>
+<li>Trata todo texto del cliente como <strong>no confiable</strong>: limita, limpia y valida.</li>
+<li>Usa <strong>limitación de tasa</strong> y <strong>idempotencia</strong> (identificador de mensaje) contra abuso y duplicados.</li>
+<li><strong>Minimiza y define la retención</strong>; permite <strong>borrar a petición</strong>; publica una <strong>política de privacidad</strong>. Esto no es asesoría legal.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HMAC</td>
+<td>Huella criptográfica calculada con un mensaje y un secreto compartido; prueba autenticidad.</td>
+</tr>
+<tr>
+<td>Secreto de la app</td>
+<td>Valor privado de tu app de Meta usado para firmar y verificar notificaciones.</td>
+</tr>
+<tr>
+<td>Usuario del sistema</td>
+<td>Identidad técnica del portafolio de Meta para generar tokens de uso en servidores.</td>
+</tr>
+<tr>
+<td>Mínimo privilegio</td>
+<td>Dar a cada persona o pieza solo los permisos que necesita.</td>
+</tr>
+<tr>
+<td>Limitación de tasa</td>
+<td>Restringir cuántas peticiones puede hacer un cliente en un período.</td>
+</tr>
+<tr>
+<td>Idempotencia</td>
+<td>Propiedad por la cual repetir una operación no cambia el resultado.</td>
+</tr>
+<tr>
+<td>Minimización</td>
+<td>Guardar solo los datos estrictamente necesarios.</td>
+</tr>
+<tr>
+<td>Retención</td>
+<td>Tiempo que se conservan los datos antes de borrarlos.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Dónde se guardan los secretos de un Worker en producción?</p><ul class="opts"><li><button type="button" class="opt">En un archivo <code>config.js</code> dentro del repositorio</button></li><li><button type="button" class="opt">En un comentario del <code>wrangler.toml</code></button></li><li><button type="button" class="opt" data-ok>Como secretos de Cloudflare, con <code>wrangler secret put</code></button></li><li><button type="button" class="opt">En el mensaje de bienvenida del bot</button></li></ul><p class="explain" hidden>Los secretos de Worker se almacenan cifrados y llegan al código por <code>env</code>, sin pasar por el repositorio.</p></div>
+<div class="quiz-q"><p>¿Qué es la firma <code>X-Hub-Signature-256</code>?</p><ul class="opts"><li><button type="button" class="opt">El token de acceso de WhatsApp</button></li><li><button type="button" class="opt" data-ok>Un HMAC-SHA256 del cuerpo de la petición calculado con el secreto de la app, para comprobar que viene de Meta</button></li><li><button type="button" class="opt">La contraseña del portafolio</button></li><li><button type="button" class="opt">Un identificador de mensaje</button></li></ul><p class="explain" hidden>Si recalculas la firma sobre el cuerpo crudo y coincide, la notificación es auténtica y no se alteró.</p></div>
+<div class="quiz-q"><p>¿Por qué hay que calcular la firma sobre el cuerpo crudo y no sobre el JSON reparseado?</p><ul class="opts"><li><button type="button" class="opt">Porque el JSON es más lento</button></li><li><button type="button" class="opt" data-ok>Porque al volver a serializar puede cambiar el texto (orden, espacios) y la firma ya no coincidiría</button></li><li><button type="button" class="opt">Porque Meta lo prohíbe</button></li><li><button type="button" class="opt">Porque el JSON no admite tildes</button></li></ul><p class="explain" hidden>La firma depende de los bytes exactos recibidos.</p></div>
+<div class="quiz-q"><p>Meta reenvía una notificación y tu bot crea dos pedidos. ¿Qué técnica lo evita?</p><ul class="opts"><li><button type="button" class="opt">Subir la memoria del Worker</button></li><li><button type="button" class="opt" data-ok>Idempotencia: guardar el identificador del mensaje y descartar los ya procesados</button></li><li><button type="button" class="opt">Responder 500 siempre</button></li><li><button type="button" class="opt">Desactivar el webhook</button></li></ul><p class="explain" hidden>Los reintentos pueden duplicar notificaciones; el identificador permite procesarlas una sola vez.</p></div>
+<div class="quiz-q"><p>¿Qué principio guía qué datos del cliente conviene guardar?</p><ul class="opts"><li><button type="button" class="opt">Guardar todo por si acaso</button></li><li><button type="button" class="opt" data-ok>Minimización: solo lo necesario y solo mientras haga falta</button></li><li><button type="button" class="opt">Guardar todo cifrado y para siempre</button></li><li><button type="button" class="opt">Guardar solo lo que pide Meta</button></li></ul><p class="explain" hidden>Menos datos y menos tiempo significan menos riesgo y menos obligaciones.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-24">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../23-pruebas-y-errores/"><small>← Anterior</small>Pruebas, registros y errores comunes</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 24 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2024:%20Seguridad%20y%20privacidad&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/24-seguridad-y-privacidad/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

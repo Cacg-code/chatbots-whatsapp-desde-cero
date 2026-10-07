@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Recibir mensajes reales · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Recibir mensajes reales.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Recibir mensajes reales · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Recibir mensajes reales.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 13</a> › Ejercicio</div>
+        <h1>Ejercicio: Recibir mensajes reales</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Conectar tu webhook con Meta, ver llegar un mensaje real de tu celular y practicar la lógica del webhook con tres funciones de JavaScript puro: responder la verificación, resumir un evento y descartar duplicados.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real: túnel o despliegue, registro del webhook en Meta y una prueba desde tu celular. La <strong>parte B</strong> son tres funciones que se comprueban en esta página. Son versiones simplificadas de lo que ya hace <code>src/worker.js</code> y <code>src/whatsapp.js</code> (sin firma ni red), para que entiendas la lógica. <strong>No pegues tokens reales aquí ni en capturas.</strong></p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade a <code>resumirEvento</code> el nombre del contacto (<code>value.contacts[].profile.name</code>) cuando exista, con el formato <code>mensaje de Cliente Ejemplo (51999000111): ...</code>. Compara tu versión con <code>parsearMensaje</code> de <code>src/whatsapp.js</code>.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Arranca el Worker con <code>npx wrangler dev</code> (con tu <code>.dev.vars</code> de la lección 12) y prueba la verificación con <code>curl "http://localhost:8787/webhook?hub.mode=subscribe&amp;hub.verify_token=TU_VERIFY_TOKEN&amp;hub.challenge=12345"</code>. Debe devolver <code>12345</code>.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Abre un túnel con <code>cloudflared tunnel --url http://localhost:8787</code> (o usa tu Worker desplegado) y copia la URL HTTPS que te da.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. En el panel de Meta (<strong>WhatsApp &gt; Configuration</strong>) edita el webhook: pega la URL terminada en <code>/webhook</code>, tu <code>VERIFY_TOKEN</code> y pulsa <strong>Verify and save</strong>.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte A. Suscríbete al campo <code>messages</code> y escribe <code>hola</code> desde tu celular al número de prueba. Anota en <code>notas.md</code> qué viste en la terminal: ¿cuántos eventos llegaron y de qué tipo?</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>responderVerificacion(query, verifyToken)</code>: recibe un objeto con las claves <code>"hub.mode"</code>, <code>"hub.verify_token"</code> y <code>"hub.challenge"</code>. Devuelve <code>{ status: 200, body: &lt;el reto&gt; }</code> si el modo es <code>"subscribe"</code>, el token coincide, <code>verifyToken</code> no está vacío y hay reto; si no, <code>{ status: 403, body: "Prohibido" }</code>.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>resumirEvento(payload)</code>: recorre <code>payload.entry[].changes[].value</code>. Devuelve un arreglo de textos: <code>"mensaje de &lt;from&gt;: &lt;texto&gt;"</code> por cada mensaje de tipo <code>text</code>, <code>"estado &lt;status&gt; de &lt;id&gt;"</code> por cada estado y <code>"mensaje de &lt;from&gt;: no soportado (&lt;type&gt;)"</code> por cada mensaje de otro tipo. Si el payload es inválido o el objeto no es <code>"whatsapp_business_account"</code>, devuelve <code>[]</code>.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>esDuplicado(vistos, id)</code>: <code>vistos</code> es un <code>Set</code>. Si el id ya estaba, devuelve <code>true</code>; si no, lo agrega y devuelve <code>false</code>.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Verificación</summary><p>Compara con <code>===</code> los tres datos y exige que <code>verifyToken</code> sea un texto no vacío. Recuerda que el reto se devuelve <strong>tal cual</strong>, sin modificarlo.</p></details>
+      <details><summary>💡 Pista 2: Resumen del evento</summary><p>Usa <code>payload.entry ?? []</code>, luego <code>entrada.changes ?? []</code>, y para cada <code>value</code> recorre <code>value.messages ?? []</code> y <code>value.statuses ?? []</code>. Un arreglo vacío es un buen valor por defecto para todo lo que falte.</p></details>
+      <details><summary>💡 Pista 3: Duplicados</summary><p><code>Set</code> tiene <code>has</code> y <code>add</code>. Primero pregunta si existe; si no, agrégalo antes de devolver <code>false</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`responderVerificacion` devuelve el reto cuando todo coincide", "h": "Devuelve { status: 200, body: reto } si modo es subscribe y el token coincide.", "t": "var r=responderVerificacion({\"hub.mode\":\"subscribe\",\"hub.verify_token\":\"abc\",\"hub.challenge\":\"1158201444\"},\"abc\");return r.status===200 && r.body===\"1158201444\""}, {"d": "`responderVerificacion` rechaza token distinto o modo distinto", "h": "Si algo no coincide, devuelve 403 y el texto Prohibido.", "t": "var a=responderVerificacion({\"hub.mode\":\"subscribe\",\"hub.verify_token\":\"x\",\"hub.challenge\":\"1\"},\"abc\");var b=responderVerificacion({\"hub.mode\":\"unsubscribe\",\"hub.verify_token\":\"abc\",\"hub.challenge\":\"1\"},\"abc\");return a.status===403 && a.body===\"Prohibido\" && b.status===403"}, {"d": "`responderVerificacion` rechaza si no hay token configurado o falta el reto", "h": "Un verifyToken vacío o indefinido nunca debe verificar; tampoco una petición sin hub.challenge.", "t": "var a=responderVerificacion({\"hub.mode\":\"subscribe\",\"hub.verify_token\":\"\",\"hub.challenge\":\"1\"},\"\");var b=responderVerificacion({\"hub.mode\":\"subscribe\",\"hub.verify_token\":\"abc\"},\"abc\");return a.status===403 && b.status===403"}, {"d": "`resumirEvento` describe un mensaje de texto", "h": "Formato: mensaje de <from>: <texto>.", "t": "var p={object:\"whatsapp_business_account\",entry:[{changes:[{value:{messages:[{from:\"51999000111\",id:\"w1\",type:\"text\",text:{body:\"Quiero 2 leches\"}}]}}]}]};var r=resumirEvento(p);return r.length===1 && r[0]===\"mensaje de 51999000111: Quiero 2 leches\""}, {"d": "`resumirEvento` describe estados y tipos no soportados", "h": "Estados: estado <status> de <id>. Otros tipos: mensaje de <from>: no soportado (<type>).", "t": "var p={object:\"whatsapp_business_account\",entry:[{changes:[{value:{statuses:[{id:\"w9\",status:\"delivered\"}],messages:[{from:\"51999000111\",id:\"w2\",type:\"image\"}]}}]}]};var r=resumirEvento(p);return r.length===2 && r.includes(\"estado delivered de w9\") && r.includes(\"mensaje de 51999000111: no soportado (image)\")"}, {"d": "`resumirEvento` devuelve [] ante payloads inválidos", "h": "Revisa que payload exista y que object sea whatsapp_business_account; usa ?? [] para lo que falte.", "t": "return resumirEvento(null).length===0 && resumirEvento({}).length===0 && resumirEvento({object:\"page\",entry:[]}).length===0 && resumirEvento({object:\"whatsapp_business_account\"}).length===0"}, {"d": "`resumirEvento` recorre varias entradas y cambios", "h": "Necesitas dos bucles anidados: entry y changes.", "t": "var v=function(t){return {value:{messages:[{from:\"1\",id:t,type:\"text\",text:{body:t}}]}}};var p={object:\"whatsapp_business_account\",entry:[{changes:[v(\"a\"),v(\"b\")]},{changes:[v(\"c\")]}]};return resumirEvento(p).length===3"}, {"d": "`esDuplicado` detecta ids repetidos", "h": "Primera vez: agrega y devuelve false. Segunda vez: devuelve true.", "t": "var s=new Set();return esDuplicado(s,\"w1\")===false && esDuplicado(s,\"w1\")===true && esDuplicado(s,\"w2\")===false && s.size===2"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function responderVerificacion(query, verifyToken) {
+  const modo = query[&quot;hub.mode&quot;];
+  const token = query[&quot;hub.verify_token&quot;];
+  const reto = query[&quot;hub.challenge&quot;];
+  if (modo === &quot;subscribe&quot; &amp;&amp; verifyToken &amp;&amp; token === verifyToken &amp;&amp; reto) {
+    return { status: 200, body: reto };
+  }
+  return { status: 403, body: &quot;Prohibido&quot; };
+}
+
+function resumirEvento(payload) {
+  const lineas = [];
+  if (!payload || payload.object !== &quot;whatsapp_business_account&quot; || !Array.isArray(payload.entry)) return lineas;
+  for (const entrada of payload.entry) {
+    for (const cambio of entrada?.changes ?? []) {
+      const valor = cambio?.value ?? {};
+      for (const msg of valor.messages ?? []) {
+        if (msg.type === &quot;text&quot;) lineas.push(`mensaje de ${msg.from}: ${msg.text?.body ?? &quot;&quot;}`);
+        else lineas.push(`mensaje de ${msg.from}: no soportado (${msg.type})`);
+      }
+      for (const st of valor.statuses ?? []) {
+        lineas.push(`estado ${st.status} de ${st.id}`);
+      }
+    }
+  }
+  return lineas;
+}
+
+function esDuplicado(vistos, id) {
+  if (vistos.has(id)) return true;
+  vistos.add(id);
+  return false;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 13</a>
+        <a class="next" href="../14-enviar-mensajes/"><small>Siguiente →</small>Enviar mensajes</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 13 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Recibir%20mensajes%20reales&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/13-recibir-mensajes-reales/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

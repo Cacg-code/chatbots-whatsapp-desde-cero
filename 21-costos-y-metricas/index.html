@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Costos y métricas de tu bot · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cómo cobra Meta cada mensaje, cuánto cuesta realmente un bot pequeño con su infraestructura y qué métricas registrar para saber si el bot le sirve al negocio.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Costos y métricas de tu bot · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cómo cobra Meta cada mensaje, cuánto cuesta realmente un bot pequeño con su infraestructura y qué métricas registrar para saber si el bot le sirve al negocio.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#antes-de-empezar-los-numeros-que-veras-s">Antes de empezar: los números que verás son de ejemplo</a></li><li><a href="#el-modelo-de-cobro-por-mensaje">El modelo de cobro por mensaje</a></li><li><a href="#que-es-gratis-y-que-no">Qué es gratis y qué no</a></li><li><a href="#calcular-el-costo-mensual-de-un-bot-pequ">Calcular el costo mensual de un bot pequeño</a></li><li><a href="#costos-de-infraestructura">Costos de infraestructura</a></li><li><a href="#el-costo-total-para-el-cliente">El costo total para el cliente</a></li><li><a href="#metricas-que-si-sirven">Métricas que sí sirven</a></li><li><a href="#leer-los-numeros-y-decidir">Leer los números y decidir</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 21</div>
+        <h1>Costos y métricas de tu bot</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar el modelo de cobro por mensaje de plantilla y distinguir las categorías marketing, utilidad, autenticación y servicio.</li><li>Identificar qué mensajes son gratis y cómo influyen la ventana de 24 horas y la de punto de entrada de anuncios.</li><li>Calcular el costo mensual de un bot pequeño con una función y tarifas parametrizables.</li><li>Estimar el costo de infraestructura en Cloudflare Workers y KV y el costo total para el cliente.</li><li>Definir y registrar métricas útiles: resolución sin humano, pedidos por conversación, tiempos, lectura de plantillas y bajas.</li></ul>
+</div>
+
+<h2 id="antes-de-empezar-los-numeros-que-veras-s"><span class="n">1.</span>Antes de empezar: los números que verás son de ejemplo</h2>
+<p>En esta lección hay mucho dinero, y el dinero cambia. Meta no cobra lo mismo en todos los países, actualiza tarifas por trimestre y publica los precios en tablas descargables por moneda. Por eso:</p>
+<ul>
+<li>Los <strong>mecanismos</strong> (qué se cobra y cuándo) están contrastados con la documentación oficial a la fecha de esta lección (7 de octubre de 2026).</li>
+<li>Las <strong>tarifas</strong> que uses en los ejemplos están rotuladas <strong>«de ejemplo»</strong>: sirven para practicar la fórmula, no para cotizar. Para cotizar, descarga la tarifa de tu país desde la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página oficial de precios</a>.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Varios blogs de proveedores afirman que desde el <strong>1 de octubre de 2026</strong> los mensajes libres dentro de la ventana de 24 horas y las plantillas de utilidad enviadas dentro de ella <strong>dejan de ser gratuitos</strong>. Al redactar esta lección, la página oficial de Meta que pude consultar seguía describiendo ambos como gratuitos y solo anunciaba, para esa fecha, ajustes de tarifas en algunos países. No pude confirmar el cambio en una fuente de Meta. Antes de cotizar, revisa la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página de precios</a> y la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/updates-to-pricing">sección de actualizaciones de precios</a>, y compara con una factura real o con WhatsApp Manager. Por eso la calculadora de esta lección permite cobrar o no cobrar ese caso con una sola opción.</p></div>
+<h2 id="el-modelo-de-cobro-por-mensaje"><span class="n">2.</span>El modelo de cobro por mensaje</h2>
+<p>Desde el <strong>1 de julio de 2025</strong>, Meta cobra <strong>por mensaje de plantilla entregado</strong>, no por «conversaciones» de 24 horas como antes. La tarifa depende de dos cosas:</p>
+<ol>
+<li><strong>La categoría de la plantilla</strong>: marketing, utilidad o autenticación.</li>
+<li><strong>El país del destinatario</strong>, según el código de país de su número (no el tuyo).</li>
+</ol>
+<p>Cuando aprobaste una plantilla en una categoría, aceptaste pagar esa categoría. Meta puede reclasificar una plantilla si su contenido corresponde a otra, así que revisa la categoría que queda aprobada.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Categoría</th>
+<th>Para qué</th>
+<th>Ejemplo en La Esquina</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Marketing</strong></td>
+<td>Promociones, ofertas, reactivación, cualquier cosa que busque venta</td>
+<td>«Esta semana: leche a S/ 4.50»</td>
+</tr>
+<tr>
+<td><strong>Utilidad</strong></td>
+<td>Mensajes sobre una acción o pedido que el cliente ya realizó</td>
+<td>«Tu pedido #123 está en camino»</td>
+</tr>
+<tr>
+<td><strong>Autenticación</strong></td>
+<td>Códigos de un solo uso para verificar identidad</td>
+<td>«Tu código es 481516»</td>
+</tr>
+<tr>
+<td><strong>Servicio</strong></td>
+<td>Respuestas libres dentro de la ventana de atención (no es una plantilla)</td>
+<td>«Sí, tenemos pan. ¿Cuántos quieres?»</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="que-es-gratis-y-que-no"><span class="n">3.</span>Qué es gratis y qué no</h2>
+<p>Según la documentación oficial de precios, vigente al preparar esta lección:</p>
+<ul>
+<li><strong>Los mensajes que el cliente te envía no se cobran.</strong></li>
+<li><strong>Los mensajes que no son plantilla</strong> (texto libre, botones, listas) son gratis, pero <strong>solo se pueden enviar dentro de la ventana de atención al cliente de 24 horas</strong>.</li>
+<li><strong>Las plantillas de utilidad enviadas dentro de una ventana abierta</strong> también son gratuitas.</li>
+<li><strong>Las plantillas de marketing y autenticación se cobran siempre</strong>, dentro o fuera de la ventana.</li>
+<li><strong>Las plantillas de utilidad fuera de la ventana se cobran.</strong></li>
+</ul>
+<div class="flow"><div class="node"><strong>Cliente te escribe</strong><span>se abre la ventana</span></div><div class="arrow">→<code>24 horas</code></div><div class="node"><strong>Texto libre</strong><span>gratis (hoy)</span></div><div class="arrow">→<code>misma ventana</code></div><div class="node"><strong>Utilidad</strong><span>gratis (hoy)</span></div><div class="arrow">→<code>ventana cerrada</code></div><div class="node"><strong>Cualquier plantilla</strong><span>se cobra</span></div></div>
+<p>Esto tiene una consecuencia de diseño que ya conoces: <strong>un bot barato resuelve todo mientras la ventana está abierta</strong> y deja las plantillas de pago para cuando no hay alternativa (un recordatorio al día siguiente, una promoción).</p>
+<h3>Ventana de punto de entrada de anuncios</h3>
+<p>Si el cliente te escribe desde un <strong>anuncio de «Click to WhatsApp»</strong> (o un botón de llamada a la acción de una página de Facebook) usando la app móvil, y tú respondes dentro de las primeras 24 horas, se abre una <strong>ventana de 72 horas</strong> en la que <strong>todos los mensajes, incluidas las plantillas, son gratuitos</strong>. Es independiente de la ventana de 24 horas: si esta se cierra, solo puedes enviar plantillas. Para un negocio que paga anuncios, es un incentivo para responder rápido (el bot ayuda).</p>
+<h3>Descuentos por volumen</h3>
+<p>Hay descuentos por volumen, pero con matices importantes:</p>
+<ul>
+<li>Solo para plantillas de <strong>utilidad y autenticación</strong>, no marketing.</li>
+<li>Se calculan por <strong>portafolio comercial</strong>, sumando todas sus cuentas, por mercado y categoría.</li>
+<li>Los mensajes gratuitos no cuentan para los niveles.</li>
+<li>Los niveles se reinician cada mes y los define Meta.</li>
+</ul>
+<p>Un minimarket de barrio <strong>nunca llegará</strong> a esos niveles. Lo mencionamos para que entiendas la factura, no para que cuentes con ellos.</p>
+<h3>Cambios por fecha</h3>
+<p>Meta puede cambiar tarifas solo el <strong>primer día de un trimestre</strong> y avisa con anticipación (un mes para tarifas, tres para niveles de volumen y seis para cambios del modelo). La página oficial indicaba, por ejemplo, actualizaciones de tarifas para algunos países el 1 de octubre de 2026. Mira la cabecera de la página de precios cada trimestre y guarda en tu hoja de costos <strong>la fecha de la tarifa que usaste</strong>.</p>
+<h2 id="calcular-el-costo-mensual-de-un-bot-pequ"><span class="n">4.</span>Calcular el costo mensual de un bot pequeño</h2>
+<p>La parte de Meta de la factura es, en esencia, una suma: para cada categoría, <strong>cantidad de mensajes por tarifa</strong>. Lo único delicado es qué no se cobra. Escribamos una función <code>costoMensual</code> que acepte las tarifas como <strong>parámetro</strong>, de modo que cuando Meta cambie algo no cambies el código, solo los datos:</p>
+<div class="code">
+  <div class="code-head"><span>costos.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function costoMensual(mensajes, tarifas) {
+  let total = 0;
+  for (const m of mensajes) {
+    let precio = tarifas[m.categoria] ?? 0;
+    // Utilidad dentro de la ventana: gratis salvo que se indique lo contrario
+    if (m.categoria === &quot;utilidad&quot; &amp;&amp; m.enVentana &amp;&amp; !tarifas.cobrarUtilidadEnVentana) precio = 0;
+    total += precio * m.cantidad;
+  }
+  return Math.round(total * 100) / 100;
+}</code></pre>
+</div>
+<p>Probémosla con un mes <strong>de ejemplo</strong>: tarifas inventadas en dólares (<strong>no son las de Meta</strong>) y un minimarket con 80 plantillas de marketing, 120 de utilidad fuera de la ventana, 300 de utilidad dentro de ella y 900 mensajes libres:</p>
+<div class="code">
+  <div class="code-head"><span>costos.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>// Tarifas DE EJEMPLO en dólares (no son las de Meta)
+const tarifasEjemplo = { marketing: 0.06, utilidad: 0.02, autenticacion: 0.02, servicio: 0 };
+const mes = [
+  { categoria: &quot;marketing&quot;, cantidad: 80 },
+  { categoria: &quot;utilidad&quot;, cantidad: 120, enVentana: false },
+  { categoria: &quot;utilidad&quot;, cantidad: 300, enVentana: true },
+  { categoria: &quot;servicio&quot;, cantidad: 900 },
+];
+console.log(&quot;Hoy (utilidad en ventana gratis):&quot;, costoMensual(mes, tarifasEjemplo));
+console.log(&quot;Si se cobrara en ventana:&quot;, costoMensual(mes, { ...tarifasEjemplo, cobrarUtilidadEnVentana: true }));</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Hoy (utilidad en ventana gratis): 7.2
+Si se cobrara en ventana: 13.2</code></pre>
+</div>
+<p>Revisa las cuentas a mano: 80 × 0,06 = 4,80 y 120 × 0,02 = 2,40, suman 7,20. Si los 300 de utilidad en ventana también se cobraran, se añaden 6,00. Para un negocio chico, <strong>la diferencia son unos pocos dólares al mes</strong>. Aun así, mostrarle al cliente ambos escenarios te protege de sorpresas y demuestra que sabes lo que haces.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Servicio con tarifa</p>
+<p>Si Meta confirmara que los mensajes de servicio dejan de ser gratis, solo cambias <code>servicio: 0</code> por la tarifa real en el objeto de tarifas. Ese es el beneficio de parametrizar.</p></div>
+<h2 id="costos-de-infraestructura"><span class="n">5.</span>Costos de infraestructura</h2>
+<p>El bot corre en <strong>Cloudflare Workers</strong> y guarda datos en <strong>Workers KV</strong> (lecciones <a href="../11-despliegue-en-cloudflare/">11</a> y <a href="../15-memoria-con-kv/">15</a>). Según la documentación de Cloudflare al preparar la lección, el <strong>plan gratuito</strong> incluye:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Recurso</th>
+<th>Plan Free</th>
+<th>Plan de pago (Workers Paid)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Peticiones de Workers</td>
+<td>100.000 por día</td>
+<td>10 millones al mes incluidos; luego 0,30 USD por millón</td>
+</tr>
+<tr>
+<td>CPU por invocación</td>
+<td>10 ms</td>
+<td>Hasta 30 s por defecto (máx. 5 min)</td>
+</tr>
+<tr>
+<td>KV: lecturas</td>
+<td>100.000 por día</td>
+<td>10 millones al mes; luego 0,50 USD por millón</td>
+</tr>
+<tr>
+<td>KV: escrituras</td>
+<td>1.000 por día</td>
+<td>1 millón al mes; luego 5 USD por millón</td>
+</tr>
+<tr>
+<td>KV: almacenamiento</td>
+<td>1 GB</td>
+<td>1 GB incluido; luego 0,50 USD por GB-mes</td>
+</tr>
+<tr>
+<td>Precio base</td>
+<td>0</td>
+<td>5 USD al mes por cuenta</td>
+</tr>
+</tbody>
+</table></div>
+<p>Los límites del plan gratuito se reinician a las 00:00 UTC y, si los superas, las operaciones fallan hasta el reinicio. Para el dimensionamiento:</p>
+<ul>
+<li><strong>Un mensaje entrante</strong> equivale a una petición al Worker (más las que hagas a otros servicios).</li>
+<li><strong>Cada cambio de estado de una conversación</strong> puede ser una escritura en KV. Con <strong>1.000 escrituras al día</strong>, y un bot que escribe unas 3 veces por conversación, el plan gratuito alcanza para unas <strong>300 conversaciones al día</strong>. Un minimarket de barrio suele estar muy por debajo.</li>
+<li>Si el cliente crece, pasar al plan de pago cuesta 5 USD al mes por la cuenta, no por cliente.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los límites y precios de Cloudflare cambian. Confirma en <a href="https://developers.cloudflare.com/workers/platform/pricing/">Precios de Workers</a> (incluye la tabla de KV) antes de prometer «costo cero». Mantén también la cuenta de Cloudflare a nombre del cliente o en un acuerdo claro (lección <a href="../26-vender-tu-bot/">26</a>).</p></div>
+<p>Otros costos que se olvidan: el <strong>dominio</strong> propio si lo hay (anual), el <strong>número de teléfono</strong> (el chip, o un número virtual) y, si el negocio usa Google Sheets como panel, <strong>nada</strong> (es gratis para uso normal).</p>
+<h2 id="el-costo-total-para-el-cliente"><span class="n">6.</span>El costo total para el cliente</h2>
+<p>Hay cuatro bolsillos distintos y conviene separarlos en la propuesta:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Quién lo paga</th>
+<th>Frecuencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mensajes de plantilla a Meta</td>
+<td>El negocio (facturado por Meta a su cuenta)</td>
+<td>Variable, mensual</td>
+</tr>
+<tr>
+<td>Infraestructura (Cloudflare, dominio)</td>
+<td>El negocio (o incluido en tu mensualidad, si lo acuerdan)</td>
+<td>Mensual/anual</td>
+</tr>
+<tr>
+<td>Desarrollo e implementación</td>
+<td>El negocio, a ti</td>
+<td>Pago único</td>
+</tr>
+<tr>
+<td>Mantenimiento y soporte</td>
+<td>El negocio, a ti</td>
+<td>Mensual</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ejemplo <strong>ilustrativo</strong> de un mes: 7,20 USD a Meta (con las tarifas de ejemplo), 0 USD de Cloudflare en plan gratuito y 36 USD de mantenimiento a ti. El costo de Meta no es el protagonista: <strong>lo que más pesa es tu tiempo</strong>. En la lección <a href="../26-vender-tu-bot/">26</a> verás cómo cotizarlo.</p>
+<h2 id="metricas-que-si-sirven"><span class="n">7.</span>Métricas que sí sirven</h2>
+<p>Un bot no se evalúa por «cuántos mensajes manda», sino por si <strong>ayuda al negocio</strong>. Con cinco métricas simples puedes saberlo:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Pregunta que responde</th>
+<th>Cómo se calcula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tasa de resolución sin humano</strong></td>
+<td>¿El bot soluciona sin ayuda de una persona?</td>
+<td>conversaciones resueltas ÷ conversaciones iniciadas</td>
+</tr>
+<tr>
+<td><strong>Pedidos por conversación</strong></td>
+<td>¿Las conversaciones se convierten en ventas?</td>
+<td>pedidos ÷ conversaciones</td>
+</tr>
+<tr>
+<td><strong>Tiempo de respuesta</strong></td>
+<td>¿Es rápido?</td>
+<td>promedio de milisegundos entre mensaje y respuesta</td>
+</tr>
+<tr>
+<td><strong>Tasa de lectura de plantillas</strong></td>
+<td>¿Los mensajes llegan y se leen?</td>
+<td>plantillas leídas ÷ enviadas (Meta informa estados por webhook)</td>
+</tr>
+<tr>
+<td><strong>Bajas</strong></td>
+<td>¿Se está molestando a alguien?</td>
+<td>número de BAJA/STOP por campaña</td>
+</tr>
+</tbody>
+</table></div>
+<p>Una advertencia: <strong>«resuelta» debe significar algo concreto</strong>. En el minimarket puede ser «el cliente confirmó pedido» o «obtuvo la respuesta y no pidió humano». Si una conversación que termina en «hablar con una persona» cuenta como resuelta, la métrica miente.</p>
+<h3>Cómo registrarlas</h3>
+<p>La forma más simple es un <strong>registro de eventos</strong>: cada cosa relevante añade una línea con un <code>tipo</code> y, si aplica, un dato. Luego, una función suma. Funciona igual en KV, en una hoja de cálculo o en un archivo de texto:</p>
+<div class="code">
+  <div class="code-head"><span>metricas.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function tasaDeResolucion(conversaciones) {
+  if (conversaciones.length === 0) return 0;
+  const resueltas = conversaciones.filter(c =&gt; c.estado === &quot;resuelta&quot;).length;
+  return Math.round((resueltas / conversaciones.length) * 1000) / 1000;
+}
+
+function resumenMetricas(eventos) {
+  const n = tipo =&gt; eventos.filter(e =&gt; e.tipo === tipo).length;
+  const resp = eventos.filter(e =&gt; e.tipo === &quot;respuesta&quot;);
+  const conversaciones = n(&quot;conversacion_iniciada&quot;);
+  const enviadas = n(&quot;plantilla_enviada&quot;);
+  const redondear = (x, d) =&gt; Math.round(x * 10 ** d) / 10 ** d;
+  return {
+    conversaciones,
+    tasaResolucion: conversaciones ? redondear(n(&quot;conversacion_resuelta&quot;) / conversaciones, 3) : 0,
+    pedidosPorConversacion: conversaciones ? redondear(n(&quot;pedido&quot;) / conversaciones, 3) : 0,
+    tiempoRespuestaMedioMs: resp.length ? Math.round(resp.reduce((s, e) =&gt; s + e.ms, 0) / resp.length) : 0,
+    tasaLectura: enviadas ? redondear(n(&quot;plantilla_leida&quot;) / enviadas, 3) : 0,
+    bajas: n(&quot;baja&quot;),
+  };
+}</code></pre>
+</div>
+<p>Con un registro de ejemplo de 4 conversaciones, 2 pedidos, 2 respuestas medidas, 4 plantillas enviadas (3 leídas) y 1 baja:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>0.5
+{
+  conversaciones: 4,
+  tasaResolucion: 0.75,
+  pedidosPorConversacion: 0.5,
+  tiempoRespuestaMedioMs: 1000,
+  tasaLectura: 0.75,
+  bajas: 1
+}</code></pre>
+</div>
+<p>(La primera línea es <code>tasaDeResolucion</code> aplicada a 4 conversaciones: 2 resueltas, 1 derivada y 1 abandonada.) Dos reglas de oro: <strong>evita dividir por cero</strong> (si no hubo conversaciones, devuelve 0) y <strong>no guardes datos personales en el registro de eventos</strong> (un <code>tipo</code> y un número bastan; en la lección <a href="../24-seguridad-y-privacidad/">24</a> verás por qué).</p>
+<h2 id="leer-los-numeros-y-decidir"><span class="n">8.</span>Leer los números y decidir</h2>
+<p>Las métricas sirven para decisiones concretas:</p>
+<ul>
+<li><strong>Resolución baja (&lt; 50 %):</strong> revisa en el registro qué preguntas terminan en «no entendí» y mejora el <a href="../06-entender-texto-libre/">texto libre</a>.</li>
+<li><strong>Muchos pedidos abandonados a mitad:</strong> el flujo es largo; simplifícalo.</li>
+<li><strong>Lectura baja de plantillas:</strong> mal horario, mal texto o lista fría. Cuida la calidad (lección <a href="../20-marketing-responsable/">20</a>).</li>
+<li><strong>Bajas altas tras una campaña:</strong> menos frecuencia o mejor segmentación.</li>
+<li><strong>Tiempo de respuesta alto:</strong> revisa el Worker o servicios externos.</li>
+</ul>
+<p>Presenta al dueño un resumen mensual de media página con 3 números y una recomendación. Eso justifica tu mantenimiento mejor que cualquier explicación técnica.</p>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Usar cifras viejas de blogs o de memoria.</strong> Las tarifas dependen del país del destinatario y del trimestre; cotiza con la tarifa oficial vigente y anota la fecha.</li>
+<li><strong>Olvidar que marketing se cobra siempre.</strong> Un cliente que quiere «promociones masivas» necesita ver este costo desde la propuesta.</li>
+<li><strong>Disfrazar marketing como utilidad para pagar menos.</strong> Puede terminar en reclasificación o problemas de calidad.</li>
+<li><strong>Prometer «cero costo».</strong> Tienes una parte gratis (ventana, plan gratuito) y otra que no.</li>
+<li><strong>No separar quién paga qué.</strong> Si Meta le factura al cliente y tú te quedas con la infraestructura, que quede escrito.</li>
+<li><strong>Medir mensajes enviados en lugar de resultados.</strong> Más mensajes no es mejor; más pedidos con menos bajas, sí.</li>
+<li><strong>Dividir por cero en las métricas.</strong> Un mes sin conversaciones no debe romper el reporte.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>Meta cobra por <strong>mensaje de plantilla entregado</strong>, según <strong>categoría</strong> y <strong>país del destinatario</strong>; marketing, utilidad y autenticación son las categorías de plantilla.</li>
+<li>Texto libre dentro de la ventana de 24 h y las plantillas de utilidad dentro de ella eran gratis según la documentación consultada; <strong>verifica</strong> si cambió el 1-oct-2026.</li>
+<li>La ventana de punto de entrada de anuncios de 72 h hace gratuitos todos los mensajes si respondes dentro de las primeras 24 h.</li>
+<li>Las tarifas se <strong>parametrizan</strong>: el código no lleva precios fijos.</li>
+<li>Cloudflare tiene plan gratuito (100.000 peticiones/día; KV 1.000 escrituras/día) suficiente para un minimarket; el plan de pago parte de 5 USD/mes.</li>
+<li>Mide <strong>resolución, pedidos por conversación, tiempo de respuesta, lectura de plantillas y bajas</strong> con un registro de eventos simple.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plantilla de utilidad</td>
+<td>Plantilla sobre una acción o pedido ya iniciado por el cliente.</td>
+</tr>
+<tr>
+<td>Plantilla de autenticación</td>
+<td>Plantilla de códigos de un solo uso.</td>
+</tr>
+<tr>
+<td>Mensaje de servicio</td>
+<td>Mensaje libre (sin plantilla) dentro de la ventana de atención.</td>
+</tr>
+<tr>
+<td>Ventana de punto de entrada</td>
+<td>Ventana de 72 h gratuita tras un clic en un anuncio a WhatsApp respondido a tiempo.</td>
+</tr>
+<tr>
+<td>Descuento por volumen</td>
+<td>Rebaja por mensajes de utilidad y autenticación, calculada por portafolio y mes.</td>
+</tr>
+<tr>
+<td>Tasa de resolución</td>
+<td>Porcentaje de conversaciones resueltas sin intervención humana.</td>
+</tr>
+<tr>
+<td>Registro de eventos</td>
+<td>Lista de hechos del bot (tipo y dato) de la que se calculan métricas.</td>
+</tr>
+<tr>
+<td>Workers KV</td>
+<td>Almacén clave-valor de Cloudflare usado para guardar sesiones y pedidos.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Desde cuándo cobra Meta «por mensaje» de plantilla en lugar de por conversación?</p><ul class="opts"><li><button type="button" class="opt">Desde enero de 2024</button></li><li><button type="button" class="opt" data-ok>Desde el 1 de julio de 2025</button></li><li><button type="button" class="opt">Desde el 1 de octubre de 2026</button></li><li><button type="button" class="opt">Nunca cambió el modelo</button></li></ul><p class="explain" hidden>El cambio al cobro por mensaje de plantilla entregado entró en vigor el 1 de julio de 2025.</p></div>
+<div class="quiz-q"><p>¿De qué depende la tarifa de una plantilla?</p><ul class="opts"><li><button type="button" class="opt">Solo del largo del texto</button></li><li><button type="button" class="opt" data-ok>De su categoría y del país del número del destinatario</button></li><li><button type="button" class="opt">Del país del negocio únicamente</button></li><li><button type="button" class="opt">De la hora del envío</button></li></ul><p class="explain" hidden>La tarifa depende de la categoría (marketing, utilidad, autenticación) y del código de país del destinatario.</p></div>
+<div class="quiz-q"><p>Un cliente te escribió hace 2 horas. Le respondes con texto libre. Según la documentación oficial consultada, ¿se cobra?</p><ul class="opts"><li><button type="button" class="opt">Sí, siempre</button></li><li><button type="button" class="opt" data-ok>No, los mensajes no plantilla dentro de la ventana de 24 h eran gratuitos; verifica si esto cambió</button></li><li><button type="button" class="opt">Solo si el cliente es nuevo</button></li><li><button type="button" class="opt">Solo si incluye botones</button></li></ul><p class="explain" hidden>Los mensajes libres dentro de la ventana eran gratuitos; por eso hay que verificar la fuente oficial por si cambia.</p></div>
+<div class="quiz-q"><p>¿Por qué <code>costoMensual</code> recibe las tarifas como parámetro?</p><ul class="opts"><li><button type="button" class="opt">Para que sea más lenta</button></li><li><button type="button" class="opt" data-ok>Para actualizar precios sin cambiar el código cuando Meta modifique las tarifas</button></li><li><button type="button" class="opt">Porque JavaScript no permite constantes</button></li><li><button type="button" class="opt">Para evitar usar números</button></li></ul><p class="explain" hidden>Los precios son datos que cambian; el código no debe llevarlos escritos.</p></div>
+<div class="quiz-q"><p>¿Qué problema tiene contar como «resuelta» una conversación que termina con «quiero hablar con una persona»?</p><ul class="opts"><li><button type="button" class="opt">Ninguno</button></li><li><button type="button" class="opt" data-ok>Infla la tasa de resolución sin humano y oculta los fallos del bot</button></li><li><button type="button" class="opt">Hace que Meta cobre más</button></li><li><button type="button" class="opt">Borra el historial</button></li></ul><p class="explain" hidden>La métrica debe reflejar lo que el bot resolvió por sí mismo; si no, no sirve para decidir.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-21">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../20-marketing-responsable/"><small>← Anterior</small>Marketing responsable por WhatsApp</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 21 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2021:%20Costos%20y%20métricas%20de%20tu%20bot&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/21-costos-y-metricas/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

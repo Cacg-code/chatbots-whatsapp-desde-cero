@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Flujo de pedido · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Flujo de pedido.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Flujo de pedido · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Flujo de pedido.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 8</a> › Ejercicio</div>
+        <h1>Ejercicio: Flujo de pedido</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Escribir las cuatro reglas de negocio que cierran un pedido en el minimarket: cuánto falta para el delivery, si una dirección es aceptable, el total con delivery y el objeto del pedido que se guarda al confirmar. Son funciones puras, iguales en espíritu a las de <code>src/motor.js</code>.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> se hace en tu terminal con el simulador; la <strong>parte B</strong> son cuatro funciones de JavaScript puro que se comprueban en esta página. Reglas:</p>
+<ul>
+<li><code>faltaParaDelivery(subtotal)</code>: el mínimo de delivery es S/ 25. Devuelve cuántos soles faltan (0 si ya lo alcanzó), calculado en céntimos para no arrastrar decimales: con 21.3 da <code>3.7</code>.</li>
+<li><code>direccionValida(texto)</code>: es válida si, tras quitar espacios de los extremos, tiene 8 caracteres o más. Si no recibe un texto, es inválida.</li>
+<li><code>totalPedido(items, entrega)</code>: suma <code>precio * cantidad</code> de las líneas en céntimos y, si <code>entrega</code> es <code>"delivery"</code>, añade S/ 3. Devuelve soles. Con <code>"recojo"</code> no añade nada.</li>
+<li><code>crearPedido(sesion, ahora)</code>: devuelve <code>{ id, telefono, items, total, entrega, direccion, pago, estado, creadoEn }</code>. El <code>id</code> es <code>LE-</code> más <code>ahora.toString(36).toUpperCase().slice(-6)</code>; <code>items</code> es una <strong>copia</strong> de <code>sesion.carrito</code>; <code>total</code> sale de <code>totalPedido</code>; <code>estado</code> es <code>"recibido"</code>; <code>creadoEn</code> es <code>ahora</code>. <code>sesion</code> tiene <code>telefono</code>, <code>carrito</code>, <code>entrega</code>, <code>direccion</code> y <code>pago</code>.</li>
+</ul>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade <code>direccionValida</code> con una segunda regla: que la dirección contenga al menos un dígito (un número de calle o de casa). Piensa qué casos reales dejaría fuera («Frente al mercado») y por qué el bot de referencia prefiere una regla más simple y deja que el repartidor confirme por teléfono.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En <code>codigo/</code> ejecuta <code>printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js</code> (en PowerShell, escribe esas líneas a mano después de <code>node consola.js</code>). Anota en <code>notas.md</code> el id del pedido y el texto de despedida.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Repite pidiendo delivery con solo 1 arroz y observa el mensaje del mínimo. Luego agrega más productos, escribe una dirección de 4 letras y comprueba qué responde el bot.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>faltaParaDelivery(subtotal)</code> en céntimos.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>direccionValida(texto)</code>.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>totalPedido(items, entrega)</code> sumando en céntimos.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>crearPedido(sesion, ahora)</code> sin modificar la sesión recibida.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Soles con decimales</summary><p><code>25 - 21.3</code> da <code>3.6999999999999993</code>. Pasa ambos a céntimos con <code>Math.round(x * 100)</code>, resta, y divide entre 100 al final. Si el resultado es negativo, devuelve 0.</p></details>
+      <details><summary>💡 Pista 2: Direcciones</summary><p>Comprueba primero <code>typeof texto === "string"</code> y luego <code>texto.trim().length &gt;= 8</code>.</p></details>
+      <details><summary>💡 Pista 3: Id del pedido</summary><p><code>(1791385230000).toString(36)</code> convierte el número a base 36; <code>.toUpperCase().slice(-6)</code> deja las últimas seis letras o cifras en mayúscula. Antepón <code>LE-</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`faltaParaDelivery` devuelve lo que falta, sin errores de decimales", "h": "Resta en céntimos: Math.round(25*100) - Math.round(subtotal*100), y divide entre 100.", "t": "return faltaParaDelivery(21.3)===3.7 && faltaParaDelivery(10)===15 && faltaParaDelivery(0)===25"}, {"d": "`faltaParaDelivery` devuelve 0 si ya se alcanzó el mínimo", "h": "Si el resultado es 0 o negativo, devuelve 0.", "t": "return faltaParaDelivery(25)===0 && faltaParaDelivery(40.3)===0"}, {"d": "`direccionValida` exige al menos 8 caracteres útiles", "h": "Usa trim() antes de medir la longitud.", "t": "return direccionValida('Av. Los Pinos 456')===true && direccionValida('Av 1')===false && direccionValida('   Av 1    ')===false && direccionValida('12345678')===true"}, {"d": "`direccionValida` rechaza lo que no es texto", "h": "Comprueba typeof texto === 'string'.", "t": "return direccionValida(null)===false && direccionValida(undefined)===false && direccionValida(12345678)===false && direccionValida('')===false"}, {"d": "`totalPedido` suma en céntimos y no cobra delivery en recojo", "h": "Suma Math.round(precio*100)*cantidad y divide entre 100.", "t": "var it=[{id:'l',nombre:'L',precio:4.3,cantidad:3},{id:'a',nombre:'A',precio:4.2,cantidad:2}];return totalPedido(it,'recojo')===21.3 && totalPedido([],'recojo')===0"}, {"d": "`totalPedido` suma S/ 3 de delivery", "h": "Si entrega es 'delivery', añade 300 céntimos antes de dividir.", "t": "var it=[{id:'l',nombre:'L',precio:4.3,cantidad:3},{id:'a',nombre:'A',precio:4.2,cantidad:2}];return totalPedido(it,'delivery')===24.3 && totalPedido([{id:'x',nombre:'X',precio:0.1,cantidad:3}],'delivery')===3.3"}, {"d": "`crearPedido` arma el objeto con id, estado y fecha", "h": "El id es 'LE-' + ahora.toString(36).toUpperCase().slice(-6); el estado es 'recibido'.", "t": "var s={telefono:'51999000111',carrito:[{id:'leche',nombre:'Leche',precio:4.3,cantidad:2}],entrega:'recojo',direccion:null,pago:'efectivo'};var p=crearPedido(s,1791385230000);return p.id==='LE-'+(1791385230000).toString(36).toUpperCase().slice(-6) && /^LE-[0-9A-Z]{6}$/.test(p.id) && p.telefono==='51999000111' && p.total===8.6 && p.entrega==='recojo' && p.pago==='efectivo' && p.estado==='recibido' && p.creadoEn===1791385230000"}, {"d": "`crearPedido` incluye el delivery, copia los items y no modifica la sesión", "h": "Copia con `sesion.carrito.map(l => ({...l}))` y calcula el total con totalPedido.", "t": "var s={telefono:'51999000111',carrito:[{id:'a',nombre:'A',precio:20,cantidad:2}],entrega:'delivery',direccion:'Av. Los Pinos 456',pago:'yape'};var antes=JSON.stringify(s);var p=crearPedido(s,1000);p.items[0].cantidad=99;return p.total===43 && p.direccion==='Av. Los Pinos 456' && p.items!==s.carrito && s.carrito[0].cantidad===2 && JSON.stringify(s)!==antes===false"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>pedido.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>const MINIMO_DELIVERY = 25;
+const COSTO_DELIVERY = 3;
+const aCentimos = (soles) =&gt; Math.round(soles * 100);
+
+function faltaParaDelivery(subtotal) {
+  const falta = aCentimos(MINIMO_DELIVERY) - aCentimos(subtotal);
+  return falta &gt; 0 ? falta / 100 : 0;
+}
+
+function direccionValida(texto) {
+  return typeof texto === &quot;string&quot; &amp;&amp; texto.trim().length &gt;= 8;
+}
+
+function totalPedido(items, entrega) {
+  let centimos = items.reduce((suma, l) =&gt; suma + aCentimos(l.precio) * l.cantidad, 0);
+  if (entrega === &quot;delivery&quot;) centimos += aCentimos(COSTO_DELIVERY);
+  return centimos / 100;
+}
+
+function crearPedido(sesion, ahora) {
+  const items = sesion.carrito.map((l) =&gt; ({ ...l }));
+  return {
+    id: &quot;LE-&quot; + ahora.toString(36).toUpperCase().slice(-6),
+    telefono: sesion.telefono,
+    items,
+    total: totalPedido(items, sesion.entrega),
+    entrega: sesion.entrega,
+    direccion: sesion.direccion,
+    pago: sesion.pago,
+    estado: &quot;recibido&quot;,
+    creadoEn: ahora,
+  };
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 8</a>
+        <a class="next" href="../09-webhooks-y-json-de-whatsapp/"><small>Siguiente →</small>Webhooks y JSON de WhatsApp</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 8 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Flujo%20de%20pedido&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

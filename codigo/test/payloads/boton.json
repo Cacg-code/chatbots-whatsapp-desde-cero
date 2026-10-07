@@ -1,0 +1,18 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "102290129340398",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "51999000222", "phone_number_id": "106540352242922" },
+            "contacts": [{ "profile": { "name": "Cliente Ejemplo" }, "wa_id": "51999000111" }], "messages": [{ "context": { "from": "51999000222", "id": "wamid.ORIGEN001" }, "from": "51999000111", "id": "wamid.BOTON001", "timestamp": "1791360010", "type": "interactive", "interactive": { "type": "button_reply", "button_reply": { "id": "menu_pedir", "title": "Hacer pedido" } } }]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}

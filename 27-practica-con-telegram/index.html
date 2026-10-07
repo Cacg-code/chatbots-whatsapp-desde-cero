@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practica con Telegram sin cuenta de Meta · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Conecta el mismo motor de reglas a un bot de Telegram para practicar webhooks, botones y sesiones sin esperar aprobaciones de Meta ni gastar un sol.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Practica con Telegram sin cuenta de Meta · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Conecta el mismo motor de reglas a un bot de Telegram para practicar webhooks, botones y sesiones sin esperar aprobaciones de Meta ni gastar un sol.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-practicar-con-telegram">Por qué practicar con Telegram</a></li><li><a href="#crear-el-bot-con-botfather">Crear el bot con BotFather</a></li><li><a href="#como-habla-la-api-de-telegram">Cómo habla la API de Telegram</a></li><li><a href="#mapa-del-motor-a-telegram">Mapa: del motor a Telegram</a></li><li><a href="#el-adaptador-completo">El adaptador completo</a></li><li><a href="#probarlo-sin-red-un-fetch-falso">Probarlo sin red: un fetch falso</a></li><li><a href="#conectarlo-de-verdad">Conectarlo de verdad</a></li><li><a href="#que-si-y-que-no-se-traslada-a-whatsapp">Qué sí y qué no se traslada a WhatsApp</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 27</div>
+        <h1>Practica con Telegram sin cuenta de Meta</h1>
+        <ul class="meta"><li>⏱ 55 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar por qué Telegram sirve como campo de práctica del mismo motor de reglas que usarás en WhatsApp.</li><li>Crear un bot con BotFather y registrar un webhook con <code>setWebhook</code> y un secreto.</li><li>Traducir un <code>Update</code> de Telegram a la entrada del motor y las respuestas del motor a llamadas <code>sendMessage</code> con teclado en línea.</li><li>Probar el adaptador en local con un <code>fetch</code> falso, sin red ni credenciales.</li><li>Reconocer qué se parece y qué no entre Telegram y la Cloud API de WhatsApp.</li></ul>
+</div>
+
+<h2 id="por-que-practicar-con-telegram"><span class="n">1.</span>Por qué practicar con Telegram</h2>
+<p>Conectar un bot a WhatsApp exige una cuenta de Meta, un portafolio comercial, un número y, para cosas reales, aprobaciones y plantillas (lecciones <a href="../12-cuenta-y-app-de-meta/">12</a> a <a href="../14-enviar-mensajes/">14</a>). Es normal que esa parte te tome días. Mientras tanto no tienes forma de ver tu bot conversando con un teléfono de verdad.</p>
+<p><strong>Telegram</strong> es otra app de mensajería con una API de bots gratuita y mucho más simple de activar: hablas con un bot llamado BotFather, él te da un token y en minutos tu servidor recibe mensajes. Telegram <strong>no es WhatsApp</strong>, pero la forma del problema es la misma:</p>
+<div class="flow"><div class="node"><strong>Cliente</strong><span>Telegram</span></div><div class="arrow">→<code>mensaje</code></div><div class="node"><strong>Servidores de Telegram</strong><span>Bot API</span></div><div class="arrow">→<code>webhook (HTTPS)</code></div><div class="node"><strong>Tu servidor</strong><span>adaptador + motor</span></div><div class="arrow">→<code>sendMessage</code></div><div class="node"><strong>Cliente</strong><span>Telegram</span></div></div>
+<p>Recuerda la idea central del curso: el motor (<code>procesar(sesion, entrada)</code>) <strong>no sabe de ningún canal</strong>. Recibe una entrada simple y devuelve respuestas simples. Lo que cambia entre WhatsApp y Telegram es solo la «carcasa» que traduce formatos. Si el motor funciona con Telegram, funcionará igual con WhatsApp en cuanto tengas tu cuenta; el adaptador de WhatsApp (<code>whatsapp.js</code>) y el de Telegram son hermanos.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Qué es y qué no es esta práctica</p>
+<p>Telegram sirve para <strong>ensayar</strong> flujo, estados y botones. No reemplaza a WhatsApp: no tiene ventana de 24 horas, plantillas aprobadas ni opt-in de Meta, así que <strong>no practicas</strong> esas reglas aquí. Y los clientes reales del minimarket están en WhatsApp. Úsalo como laboratorio y como demo rápida para mostrar el flujo a un cliente.</p></div>
+<h2 id="crear-el-bot-con-botfather"><span class="n">2.</span>Crear el bot con BotFather</h2>
+<p><strong>BotFather</strong> es el bot oficial de Telegram para crear bots. Los pasos, según la <a href="https://core.telegram.org/bots/features">documentación de funciones para bots</a>:</p>
+<ol>
+<li>En Telegram busca <code>@BotFather</code> y ábrelo.</li>
+<li>Envía <code>/newbot</code>.</li>
+<li>Te pide un <strong>nombre</strong> (el que ven los clientes) y un <strong>usuario</strong>, que debe terminar en <code>bot</code> (por ejemplo <code>la_esquina_demo_bot</code>) y no se puede cambiar después.</li>
+<li>Te entrega un <strong>token</strong>, que parece <code>123456:ABC-DEF...</code>. Quien tenga ese token controla el bot.</li>
+</ol>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · El token es una contraseña</p>
+<p>Trátalo igual que el token de WhatsApp: se guarda como secreto (variable de entorno o <code>wrangler secret put</code>), nunca en el código ni en un repositorio. Si se filtra, BotFather permite generar uno nuevo. Lo repasarás en la <a href="../24-seguridad-y-privacidad/">lección 24</a>. En esta lección todos los tokens son falsos.</p></div>
+<p>No hace falta una cuenta empresarial ni un número extra: basta tu cuenta personal de Telegram.</p>
+<h2 id="como-habla-la-api-de-telegram"><span class="n">3.</span>Cómo habla la API de Telegram</h2>
+<p>Toda llamada es una petición HTTPS a:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>https://api.telegram.org/bot&lt;TOKEN&gt;/&lt;METODO&gt;</code></pre>
+</div>
+<p>Los parámetros pueden ir como JSON. Cada respuesta es un JSON con un campo <code>ok</code>: si es <code>true</code>, los datos van en <code>result</code>; si es <code>false</code>, viene un <code>description</code> y un <code>error_code</code>. Son cuatro piezas las que necesitas.</p>
+<p><strong>1. <code>setWebhook</code>.</strong> Le dices a Telegram a qué URL HTTPS entregar los mensajes. Parámetros que importan (verificados en la <a href="https://core.telegram.org/bots/api#setwebhook">referencia oficial</a>):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Para qué sirve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url</code></td>
+<td>La dirección HTTPS de tu servidor.</td>
+</tr>
+<tr>
+<td><code>secret_token</code></td>
+<td>Texto de 1 a 256 caracteres (solo <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code> y <code>-</code>). Telegram lo envía en la cabecera <code>X-Telegram-Bot-Api-Secret-Token</code> de cada petición.</td>
+</tr>
+<tr>
+<td><code>allowed_updates</code></td>
+<td>Qué tipos de evento quieres recibir.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Los puertos admitidos son 443, 80, 88 y 8443. Y mientras haya un webhook, <code>getUpdates</code> (el método de consulta periódica) no funciona.</p>
+<p><strong>2. El <code>Update</code>.</strong> Es el JSON que Telegram te entrega. Trae un <code>update_id</code> creciente y <strong>uno</strong> de varios campos opcionales; usarás dos: <code>message</code> (alguien escribió) y <code>callback_query</code> (alguien tocó un botón en línea).</p>
+<div class="code">
+  <div class="code-head"><span>JSON</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;update_id&quot;: 1,
+  &quot;message&quot;: {
+    &quot;message_id&quot;: 10,
+    &quot;date&quot;: 1790000000,
+    &quot;chat&quot;: { &quot;id&quot;: 5551001, &quot;type&quot;: &quot;private&quot; },
+    &quot;from&quot;: { &quot;id&quot;: 5551001, &quot;first_name&quot;: &quot;Cliente&quot; },
+    &quot;text&quot;: &quot;quiero 2 leches&quot;
+  }
+}</code></pre>
+</div>
+<p><strong>3. <code>sendMessage</code>.</strong> Envía texto a un <code>chat_id</code>. Acepta <code>text</code> (1 a 4096 caracteres) y un <code>reply_markup</code> opcional con un <strong>teclado en línea</strong>: <code>inline_keyboard</code>, un arreglo de filas, cada fila un arreglo de botones <code>{ text, callback_data }</code>. El <code>callback_data</code> mide de 1 a 64 bytes.</p>
+<p><strong>4. <code>answerCallbackQuery</code>.</strong> Cuando alguien toca un botón, llega un <code>callback_query</code> con un <code>id</code> y el <code>data</code> del botón. Telegram indica responder esos eventos con <code>answerCallbackQuery</code> (parámetro <code>callback_query_id</code>) para que el botón deje de mostrar el indicador de espera.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>La API de Telegram evoluciona con frecuencia (campos nuevos, cambios de límites). Antes de llevar esto a producción, contrasta con la <a href="https://core.telegram.org/bots/api">referencia oficial de la Bot API</a>. Los datos de esta lección se revisaron contra ella el 2026-10-07.</p></div>
+<h2 id="mapa-del-motor-a-telegram"><span class="n">4.</span>Mapa: del motor a Telegram</h2>
+<p>El motor tiene su propio lenguaje (lección <a href="../08-flujo-de-pedido/">8</a> y <code>API.md</code>). El adaptador solo traduce:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Motor</th>
+<th>WhatsApp (Cloud API)</th>
+<th>Telegram</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Entrada <code>{tipo:'texto'}</code></td>
+<td><code>messages[].text.body</code></td>
+<td><code>message.text</code></td>
+</tr>
+<tr>
+<td>Entrada <code>{tipo:'interactivo', id}</code></td>
+<td><code>interactive.button_reply.id</code> o <code>list_reply.id</code></td>
+<td><code>callback_query.data</code></td>
+</tr>
+<tr>
+<td>Respuesta <code>texto</code></td>
+<td><code>type: "text"</code></td>
+<td><code>sendMessage</code> con <code>text</code></td>
+</tr>
+<tr>
+<td>Respuesta <code>botones</code> (máx. 3)</td>
+<td><code>interactive</code> tipo <code>button</code></td>
+<td><code>inline_keyboard</code> con una fila</td>
+</tr>
+<tr>
+<td>Respuesta <code>lista</code></td>
+<td><code>interactive</code> tipo <code>list</code></td>
+<td><code>inline_keyboard</code> con un botón por fila</td>
+</tr>
+<tr>
+<td>Identificador del cliente</td>
+<td>número de teléfono</td>
+<td><code>chat.id</code></td>
+</tr>
+<tr>
+<td>Autenticación del webhook</td>
+<td>firma <code>X-Hub-Signature-256</code></td>
+<td>cabecera con tu <code>secret_token</code></td>
+</tr>
+<tr>
+<td>Orden y duplicados</td>
+<td><code>id</code> del mensaje (<code>wamid</code>)</td>
+<td><code>update_id</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Tres detalles de diseño:</p>
+<ul>
+<li><strong>El identificador de sesión.</strong> El motor guarda una sesión por «teléfono». En Telegram no hay teléfono: usaremos <code>tg:&lt;chat_id&gt;</code> como clave, que evita choques con números reales.</li>
+<li><strong>La lista.</strong> Telegram no tiene listas desplegables como WhatsApp; las convertimos en un teclado con un botón por fila (<code>título - descripción</code>). El motor no se entera.</li>
+<li><strong>El comando <code>/start</code>.</strong> Es lo primero que se envía al abrir un bot. Lo traducimos a <code>hola</code> para que el motor muestre su bienvenida.</li>
+</ul>
+<p>Como los <code>id</code> del motor (<code>menu_pedir</code>, <code>prod:leche</code>, <code>cant:2</code>...) caben de sobra en 64 bytes, viajan tal cual como <code>callback_data</code>.</p>
+<h2 id="el-adaptador-completo"><span class="n">5.</span>El adaptador completo</h2>
+<p>Crea <code>src/telegram.js</code> junto al resto de los módulos. Son unas 70 líneas y solo usa <code>fetch</code>, que ya existe en Node 22 y en los Workers:</p>
+<div class="code">
+  <div class="code-head"><span>src/telegram.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>// Adaptador entre Telegram y el motor de reglas.
+import { crearSesion, procesar } from &#x27;./motor.js&#x27;;
+
+const MAX_TEXTO = 4096; // límite de sendMessage
+
+// Compara el secreto en tiempo constante (evita filtrar información por tiempos).
+export function secretoValido(esperado, cabecera) {
+  if (!esperado || typeof cabecera !== &#x27;string&#x27;) return false;
+  if (cabecera.length !== esperado.length) return false;
+  let diff = 0;
+  for (let i = 0; i &lt; esperado.length; i++) diff |= esperado.charCodeAt(i) ^ cabecera.charCodeAt(i);
+  return diff === 0;
+}
+
+// Update de Telegram -&gt; { updateId, chatId, callbackId, entrada } (o null si no nos sirve)
+export function parsearUpdate(update) {
+  if (!update || typeof update.update_id !== &#x27;number&#x27;) return null;
+  const cb = update.callback_query;
+  if (cb &amp;&amp; typeof cb.data === &#x27;string&#x27; &amp;&amp; cb.message?.chat?.id != null) {
+    return { updateId: update.update_id, chatId: cb.message.chat.id, callbackId: cb.id,
+      entrada: { tipo: &#x27;interactivo&#x27;, id: cb.data } };
+  }
+  const msg = update.message;
+  if (!msg || msg.chat?.id == null) return null;
+  if (typeof msg.text === &#x27;string&#x27;) {
+    const t = msg.text.trim();
+    const texto = /^\/start(@\w+)?(\s|$)/.test(t) ? &#x27;hola&#x27; : t;
+    return { updateId: update.update_id, chatId: msg.chat.id, callbackId: null,
+      entrada: { tipo: &#x27;texto&#x27;, texto } };
+  }
+  return { updateId: update.update_id, chatId: msg.chat.id, callbackId: null,
+    entrada: { tipo: &#x27;no_soportado&#x27;, subtipo: &#x27;otro&#x27; } };
+}
+
+// Respuesta del motor -&gt; cuerpo de sendMessage
+export function construirEnvio(chatId, r) {
+  const base = { chat_id: chatId };
+  if (r.tipo === &#x27;texto&#x27;) return { ...base, text: r.texto.slice(0, MAX_TEXTO) };
+  if (r.tipo === &#x27;botones&#x27;) {
+    return { ...base, text: r.texto.slice(0, MAX_TEXTO),
+      reply_markup: { inline_keyboard: [r.botones.map((b) =&gt; ({ text: b.titulo, callback_data: b.id }))] } };
+  }
+  if (r.tipo === &#x27;lista&#x27;) {
+    const filas = r.secciones.flatMap((s) =&gt; s.filas.map((f) =&gt; [{
+      text: f.descripcion ? `${f.titulo} - ${f.descripcion}` : f.titulo, callback_data: f.id }]));
+    return { ...base, text: r.texto.slice(0, MAX_TEXTO), reply_markup: { inline_keyboard: filas } };
+  }
+  throw new Error(`Respuesta desconocida: ${r.tipo}`);
+}
+
+export async function llamarTelegram(token, metodo, cuerpo, llamar = fetch) {
+  const res = await llamar(`https://api.telegram.org/bot${token}/${metodo}`, {
+    method: &#x27;POST&#x27;, headers: { &#x27;content-type&#x27;: &#x27;application/json&#x27; }, body: JSON.stringify(cuerpo) });
+  const datos = await res.json();
+  if (!datos.ok) throw new Error(`Telegram ${metodo}: ${datos.error_code} ${datos.description}`);
+  return datos.result;
+}
+
+// Todo el recorrido de un webhook. `sesiones` y `vistos` son un Map y un Set en memoria
+// (para practicar); en producción serían KV, como en la lección 15.
+export async function manejarWebhook({ cuerpo, cabecera, env, sesiones, vistos, llamar = fetch, ahora = Date.now() }) {
+  if (!secretoValido(env.SECRETO, cabecera)) return { estado: 401 };
+  const ev = parsearUpdate(cuerpo);
+  if (!ev) return { estado: 200 };                      // algo que no usamos: 200 y seguimos
+  if (vistos.has(ev.updateId)) return { estado: 200 };  // Telegram reintenta: ignora repetidos
+  vistos.add(ev.updateId);
+  const clave = `tg:${ev.chatId}`;
+  const previa = sesiones.get(clave) ?? crearSesion(clave, ahora);
+  const { sesion, respuestas } = procesar(previa, ev.entrada, ahora);
+  sesiones.set(clave, sesion);
+  if (ev.callbackId) await llamarTelegram(env.TOKEN, &#x27;answerCallbackQuery&#x27;, { callback_query_id: ev.callbackId }, llamar);
+  for (const r of respuestas) await llamarTelegram(env.TOKEN, &#x27;sendMessage&#x27;, construirEnvio(ev.chatId, r), llamar);
+  return { estado: 200 };
+}</code></pre>
+</div>
+<p>Fíjate en las decisiones de seguridad, idénticas en espíritu a las de WhatsApp: se <strong>verifica quién llama</strong> antes de hacer nada (aquí con el secreto, allá con la firma HMAC), se <strong>ignoran duplicados</strong> (Telegram reintenta si tu servidor no responde con un código 2xx, y no conserva los eventos más de 24 horas) y se responde 200 incluso a eventos que no entiendes, para que no se queden reintentando.</p>
+<h2 id="probarlo-sin-red-un-fetch-falso"><span class="n">6.</span>Probarlo sin red: un <code>fetch</code> falso</h2>
+<p>El adaptador recibe <code>llamar</code> como parámetro, así que en las pruebas le pasas una función que <strong>registra</strong> lo que se enviaría en lugar de salir a internet. Crea <code>probar-telegram.mjs</code> en la carpeta del proyecto:</p>
+<div class="code">
+  <div class="code-head"><span>probar-telegram.mjs</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { manejarWebhook } from &#x27;./src/telegram.js&#x27;;
+
+const enviados = [];
+const fetchFalso = async (url, opciones) =&gt; {
+  enviados.push({ metodo: url.split(&#x27;/&#x27;).pop(), cuerpo: JSON.parse(opciones.body) });
+  return { json: async () =&gt; ({ ok: true, result: {} }) };
+};
+const env = { SECRETO: &#x27;secreto_de_prueba&#x27;, TOKEN: &#x27;111111:TOKEN_FALSO&#x27; };
+const sesiones = new Map();
+const vistos = new Set();
+const enviar = (cuerpo, cabecera = env.SECRETO) =&gt;
+  manejarWebhook({ cuerpo, cabecera, env, sesiones, vistos, llamar: fetchFalso });
+
+const chat = { id: 5551001, type: &#x27;private&#x27; };
+await enviar({ update_id: 1, message: { message_id: 1, date: 0, chat, text: &#x27;/start&#x27; } });
+console.log(&#x27;1. /start -&gt;&#x27;, enviados.map((e) =&gt; e.metodo).join(&#x27;, &#x27;));
+
+const boton = enviados[1].cuerpo.reply_markup.inline_keyboard[0][0];
+enviados.length = 0;
+await enviar({ update_id: 2, callback_query: { id: &#x27;cq1&#x27;, from: { id: 5551001 }, data: boton.callback_data, message: { message_id: 2, chat } } });
+console.log(&#x27;2. toque en &quot;&#x27; + boton.text + &#x27;&quot; -&gt;&#x27;, enviados.map((e) =&gt; e.metodo).join(&#x27;, &#x27;));
+
+enviados.length = 0;
+await enviar({ update_id: 3, message: { message_id: 3, date: 0, chat, text: &#x27;quiero 2 leches&#x27; } });
+console.log(&#x27;3. texto libre -&gt;&#x27;, enviados[0].cuerpo.text.split(&#x27;\n&#x27;)[0]);
+
+enviados.length = 0;
+const r = await enviar({ update_id: 3, message: { message_id: 3, date: 0, chat, text: &#x27;quiero 2 leches&#x27; } });
+console.log(&#x27;4. update repetido -&gt; estado&#x27;, r.estado, &#x27;envios&#x27;, enviados.length);
+
+const m = await enviar({ update_id: 4, message: { message_id: 4, date: 0, chat, text: &#x27;hola&#x27; } }, &#x27;otro&#x27;);
+console.log(&#x27;5. secreto incorrecto -&gt; estado&#x27;, m.estado, &#x27;envios&#x27;, enviados.length);</code></pre>
+</div>
+<p>Al ejecutarlo con <code>node probar-telegram.mjs</code> la salida real fue:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>1. /start -&gt; sendMessage, sendMessage
+2. toque en &quot;Hacer pedido&quot; -&gt; answerCallbackQuery, sendMessage
+3. texto libre -&gt; Agregué 2 x Leche entera 1 L.
+4. update repetido -&gt; estado 200 envios 0
+5. secreto incorrecto -&gt; estado 401 envios 0</code></pre>
+</div>
+<p>Cada línea prueba una promesa del adaptador: el <code>/start</code> produce bienvenida y menú; el toque de un botón se responde con <code>answerCallbackQuery</code> más la siguiente pantalla; un texto libre entra al motor; un <code>update_id</code> repetido no reenvía nada y un secreto incorrecto se rechaza con 401.</p>
+<h2 id="conectarlo-de-verdad"><span class="n">7.</span>Conectarlo de verdad</h2>
+<p>Para ver el bot en tu teléfono necesitas una URL pública HTTPS. Tienes dos caminos:</p>
+<ul>
+<li><strong>Publicar el Worker</strong> de la <a href="../11-despliegue-en-cloudflare/">lección 11</a> con una ruta <code>POST /telegram</code> que llame a <code>manejarWebhook</code> (con <code>env.TOKEN</code> y <code>env.SECRETO</code> como secretos y KV en lugar del <code>Map</code>).</li>
+<li><strong>Un túnel temporal</strong> hacia tu PC (por ejemplo Cloudflare Tunnel o ngrok) mientras desarrollas.</li>
+</ul>
+<p>Luego registras el webhook una sola vez desde la terminal (con tu token y tu URL reales; aquí van de ejemplo):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>curl -s &quot;https://api.telegram.org/bot&lt;TU_TOKEN&gt;/setWebhook&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#x27;{&quot;url&quot;:&quot;https://bot-minimarket.ejemplo.workers.dev/telegram&quot;,&quot;secret_token&quot;:&quot;un_secreto_largo_123&quot;,&quot;allowed_updates&quot;:[&quot;message&quot;,&quot;callback_query&quot;]}&#x27;</code></pre>
+</div>
+<p>Si todo va bien responde <code>{"ok":true,"result":true,...}</code>. Con <code>getWebhookInfo</code> puedes ver la URL registrada y el último error de entrega, que es lo primero que debes mirar si el bot calla.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Esto no se ejecutó contra la red</p>
+<p>El adaptador está probado con un <code>fetch</code> falso, no contra los servidores de Telegram: no hay token real en este curso. Es la misma política que seguimos con Meta. Cuando lo conectes, el primer mensaje real es tu prueba de integración.</p></div>
+<h2 id="que-si-y-que-no-se-traslada-a-whatsapp"><span class="n">8.</span>Qué sí y qué no se traslada a WhatsApp</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Se traslada tal cual</th>
+<th>Cambia o no existe en Telegram</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>El motor, los estados, el carrito y los textos</td>
+<td>Ventana de 24 horas y plantillas aprobadas</td>
+</tr>
+<tr>
+<td>La separación adaptador / motor</td>
+<td>Opt-in y calidad del número</td>
+</tr>
+<tr>
+<td>Verificar al remitente y evitar duplicados</td>
+<td>La firma HMAC (aquí es un secreto en cabecera)</td>
+</tr>
+<tr>
+<td>Botones y respuestas por id</td>
+<td>Los límites de WhatsApp (3 botones, listas nativas)</td>
+</tr>
+<tr>
+<td>Pruebas con <code>fetch</code> falso</td>
+<td>Costos por mensaje de plantilla</td>
+</tr>
+</tbody>
+</table></div>
+<p>Una buena rutina: desarrolla y demuestra el flujo en Telegram y, cuando el cliente acepte, cambia solo la carcasa. Si más adelante comparas proveedores de WhatsApp, la <a href="../28-otros-proveedores/">lección 28</a> te muestra qué cambia también allí.</p>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Dejar el token en el código o en un repositorio.</strong> Quien lo tenga controla el bot. Genera uno nuevo en BotFather si se filtra.</li>
+<li><strong>No poner <code>secret_token</code>.</strong> Cualquiera que conozca tu URL podría enviarle «mensajes» falsos a tu motor.</li>
+<li><strong>Intentar usar <code>getUpdates</code> con un webhook activo.</strong> No funciona mientras haya un webhook registrado.</li>
+<li><strong>Olvidar <code>answerCallbackQuery</code>.</strong> El botón queda con el indicador de espera y parece que el bot se colgó.</li>
+<li><strong>Usar una URL sin HTTPS.</strong> El webhook exige HTTPS en uno de los puertos admitidos (443, 80, 88 u 8443).</li>
+<li><strong>Creer que si funciona en Telegram ya cumple las reglas de WhatsApp.</strong> Telegram acepta mensajes que Meta rechazaría; verifica los límites de WhatsApp aparte.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>Telegram permite ensayar <strong>el mismo motor</strong> sin cuenta de Meta: solo cambia la carcasa que traduce formatos.</li>
+<li>BotFather crea el bot y entrega un <strong>token</strong> que se trata como contraseña.</li>
+<li><code>setWebhook</code> registra la URL; <code>secret_token</code> llega en la cabecera <code>X-Telegram-Bot-Api-Secret-Token</code> y debes verificarla.</li>
+<li>Un <code>Update</code> trae <code>message</code> (texto) o <code>callback_query</code> (botón); las respuestas salen por <code>sendMessage</code> con <code>inline_keyboard</code>.</li>
+<li>Responde 200 siempre que puedas y descarta los <code>update_id</code> repetidos.</li>
+<li>Con un <code>fetch</code> falso pruebas todo el flujo sin red ni credenciales.</li>
+<li>Telegram no practica ventana de 24 horas, plantillas ni opt-in.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BotFather</td>
+<td>Bot oficial de Telegram para crear bots y obtener su token.</td>
+</tr>
+<tr>
+<td>Bot API</td>
+<td>API HTTPS de Telegram para controlar bots.</td>
+</tr>
+<tr>
+<td><code>Update</code></td>
+<td>Evento que Telegram entrega a tu webhook (mensaje, botón, etc.).</td>
+</tr>
+<tr>
+<td><code>callback_query</code></td>
+<td>Evento que se genera al tocar un botón de teclado en línea.</td>
+</tr>
+<tr>
+<td><code>callback_data</code></td>
+<td>Texto de 1 a 64 bytes que lleva el botón y vuelve a tu bot al tocarlo.</td>
+</tr>
+<tr>
+<td>Teclado en línea</td>
+<td>Botones bajo un mensaje del bot (<code>inline_keyboard</code>).</td>
+</tr>
+<tr>
+<td><code>secret_token</code></td>
+<td>Secreto que defines en <code>setWebhook</code> y Telegram repite en cada petición.</td>
+</tr>
+<tr>
+<td>Adaptador</td>
+<td>Módulo que traduce entre el formato de un canal y el del motor.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Qué parte del proyecto cambia al pasar de Telegram a WhatsApp?</p><ul class="opts"><li><button type="button" class="opt">El motor de reglas completo</button></li><li><button type="button" class="opt">Los estados del carrito</button></li><li><button type="button" class="opt" data-ok>Solo el adaptador que traduce formatos de entrada y salida</button></li><li><button type="button" class="opt">La lógica de los precios</button></li></ul><p class="explain" hidden>El motor no conoce el canal; el adaptador es la única pieza que habla el idioma de cada plataforma.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve el <code>secret_token</code> de <code>setWebhook</code>?</p><ul class="opts"><li><button type="button" class="opt">Para cifrar los mensajes</button></li><li><button type="button" class="opt" data-ok>Para que tu servidor compruebe, en la cabecera <code>X-Telegram-Bot-Api-Secret-Token</code>, que la petición viene de Telegram</button></li><li><button type="button" class="opt">Para dar permiso a otros bots</button></li><li><button type="button" class="opt">Para cambiar el nombre del bot</button></li></ul><p class="explain" hidden>Telegram lo repite en cada petición; si no coincide, rechazas con 401.</p></div>
+<div class="quiz-q"><p>Un cliente toca un botón en línea. ¿Qué llega a tu webhook?</p><ul class="opts"><li><button type="button" class="opt">Un <code>message</code> con el texto del botón</button></li><li><button type="button" class="opt" data-ok>Un <code>callback_query</code> con un <code>id</code> y el <code>data</code> del botón</button></li><li><button type="button" class="opt">Nada, los botones no avisan al bot</button></li><li><button type="button" class="opt">Un archivo de imagen</button></li></ul><p class="explain" hidden>Los botones en línea generan <code>callback_query</code>; conviene responder con <code>answerCallbackQuery</code>.</p></div>
+<div class="quiz-q"><p>¿Qué regla de WhatsApp NO puedes practicar con Telegram?</p><ul class="opts"><li><button type="button" class="opt">Enviar botones</button></li><li><button type="button" class="opt" data-ok>La ventana de 24 horas y las plantillas aprobadas</button></li><li><button type="button" class="opt">Guardar sesiones por cliente</button></li><li><button type="button" class="opt">Verificar el origen del webhook</button></li></ul><p class="explain" hidden>Telegram no tiene ventana ni plantillas de Meta; esas reglas se practican solo con WhatsApp.</p></div>
+<div class="quiz-q"><p>¿Por qué el adaptador descarta los <code>update_id</code> ya vistos?</p><ul class="opts"><li><button type="button" class="opt">Porque ocupan mucha memoria</button></li><li><button type="button" class="opt" data-ok>Porque Telegram reintenta entregas y no quieres responder dos veces el mismo mensaje</button></li><li><button type="button" class="opt">Porque el <code>update_id</code> es secreto</button></li><li><button type="button" class="opt">Porque Telegram lo exige para el token</button></li></ul><p class="explain" hidden>Si tu servidor tarda o falla, Telegram reintenta; ignorar repetidos evita duplicar respuestas.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-27">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../14-enviar-mensajes/"><small>← Anterior</small>Enviar mensajes</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 27 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%2027:%20Practica%20con%20Telegram%20sin%20cuenta%20de%20Meta&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/27-practica-con-telegram/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

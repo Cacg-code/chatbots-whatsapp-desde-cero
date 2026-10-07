@@ -1,0 +1,17 @@
+{
+  "name": "bot-minimarket",
+  "version": "1.0.0",
+  "description": "Código de referencia del curso: chatbot de WhatsApp para Minimarket La Esquina (negocio ficticio)",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test",
+    "chat": "node consola.js",
+    "dev": "wrangler dev",
+    "desplegar": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

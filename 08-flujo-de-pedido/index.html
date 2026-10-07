@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flujo de pedido · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Cierra el pedido de punta a punta, con entrega o recojo, mínimo de delivery, dirección, pago y confirmación, y aprende a probar todo el recorrido.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Flujo de pedido · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Cierra el pedido de punta a punta, con entrega o recojo, mínimo de delivery, dirección, pago y confirmación, y aprende a probar todo el recorrido.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#de-carrito-a-pedido">De carrito a pedido</a></li><li><a href="#entrega-recojo-o-delivery">Entrega: recojo o delivery</a></li><li><a href="#la-direccion">La dirección</a></li><li><a href="#el-pago">El pago</a></li><li><a href="#confirmar">Confirmar</a></li><li><a href="#el-momento-del-pedido-pedidonuevo">El momento del pedido: pedidoNuevo</a></li><li><a href="#cuando-el-estado-cambia-el-significado">Cuando el estado cambia el significado</a></li><li><a href="#probar-el-flujo-completo">Probar el flujo completo</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 8</div>
+        <h1>Flujo de pedido</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: intermedio</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Recorrer los pasos de un pedido: entrega, dirección, pago y confirmación.</li><li>Aplicar reglas de negocio (mínimo de delivery, costo de envío, dirección válida) con mensajes claros.</li><li>Entender cuándo y cómo el motor produce el pedido final (<code>pedidoNuevo</code>) y qué pasa después.</li><li>Permitir al cliente modificar o cancelar sin perder su carrito.</li><li>Probar conversaciones completas con <code>conversacion()</code> y con el simulador <code>consola.js</code>.</li></ul>
+</div>
+
+<h2 id="de-carrito-a-pedido"><span class="n">1.</span>De carrito a pedido</h2>
+<p>Hasta la <a href="../07-catalogo-y-carrito/">lección 7</a> el cliente ya puede llenar su carrito. Falta lo que convierte una conversación en una venta: <strong>cómo recibirá el pedido, a dónde, cómo pagará y qué confirma finalmente</strong>. Cada una de esas preguntas es un estado de la máquina de la <a href="../05-estado-de-la-conversacion/">lección 5</a>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Estado</th>
+<th>Qué se le pregunta al cliente</th>
+<th>Botones o entrada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CARRITO</code></td>
+<td>¿Continuar con este carrito?</td>
+<td>Continuar, Seguir comprando, Vaciar carrito</td>
+</tr>
+<tr>
+<td><code>TIPO_ENTREGA</code></td>
+<td>¿Recojo o delivery?</td>
+<td>Recojo, Delivery, Agregar más</td>
+</tr>
+<tr>
+<td><code>DIRECCION</code></td>
+<td>¿A qué dirección lo llevamos?</td>
+<td>Texto libre (solo si eligió delivery)</td>
+</tr>
+<tr>
+<td><code>PAGO</code></td>
+<td>¿Cómo pagas?</td>
+<td>Efectivo, Yape, Transferencia</td>
+</tr>
+<tr>
+<td><code>CONFIRMAR</code></td>
+<td>Revisa y confirma</td>
+<td>Confirmar, Modificar pedido, Cancelar</td>
+</tr>
+<tr>
+<td><code>FIN</code></td>
+<td>Pedido recibido</td>
+<td>(el siguiente mensaje reinicia)</td>
+</tr>
+</tbody>
+</table></div>
+<p>El recorrido es lineal, pero el cliente puede salir de él en cualquier punto (cancelar, hablar con una persona, volver al menú). Esas salidas son las <strong>globales</strong> que viste en la lección 5.</p>
+<p>Antes de leer el código, probemos el camino feliz con el simulador. Si usas Bash, este guion le pasa los mensajes al bot desde la entrada estándar (en PowerShell, ejecuta <code>node consola.js</code> y escribe las líneas a mano):</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>printf &#x27;hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n&#x27; | node consola.js</code></pre>
+</div>
+<p>La última respuesta del bot, que depende del reloj real para el id, fue:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Pedido LE-YH59OL recibido. Total: S/ 8.60.
+Estará listo para recoger en unos 15 minutos.
+Pagas en efectivo al recibir tu pedido.
+Gracias por comprar en Minimarket La Esquina.</code></pre>
+</div>
+<p>Dos leches de S/ 4.30 son S/ 8.60: sin delivery, el total es el subtotal. Y el id <code>LE-YH59OL</code> cambiará cada vez que lo ejecutes, porque se deriva de la hora.</p>
+<h2 id="entrega-recojo-o-delivery"><span class="n">2.</span>Entrega: recojo o delivery</h2>
+<p>El paso <code>TIPO_ENTREGA</code> ofrece tres botones: <strong>Recojo</strong>, <strong>Delivery</strong> y <strong>Agregar más</strong>. Si el cliente elige recojo, se salta la dirección y va directo al pago. Si elige delivery, el bot aplica la primera regla de negocio: el <strong>mínimo de delivery</strong> (<code>NEGOCIO.minimoDelivery</code>, S/ 25). La razón es económica: llevar un pedido de S/ 6 cuesta más que lo que se gana.</p>
+<p>Con 3 leches y 2 arroces (S/ 21.30), el cliente toca Delivery:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Para delivery el pedido mínimo es S/ 25.00 y llevas S/ 21.30. Te faltan S/ 3.70 para completarlo, o puedes elegir recojo en tienda.</code></pre>
+</div>
+<p>El mensaje cumple tres cosas que conviene imitar siempre que el bot niegue algo:</p>
+<ol>
+<li><strong>Explica la regla</strong> (el mínimo) con los números concretos.</li>
+<li><strong>Dice cuánto falta</strong>, no solo «no alcanza».</li>
+<li><strong>Ofrece una salida</strong> (completar el pedido o elegir recojo) y repite los botones.</li>
+</ol>
+<p>La resta es la del ejercicio de esta lección: se hace en céntimos para que <code>25 - 21.3</code> dé <code>3.70</code> y no <code>3.6999999999999993</code>. Y el mínimo se compara con el <strong>subtotal de productos</strong>, sin contar los S/ 3 del envío: un pedido de exactamente S/ 25 pasa (hay una prueba para ese borde en <code>test/motor.test.js</code>).</p>
+<h2 id="la-direccion"><span class="n">3.</span>La dirección</h2>
+<p>Si el cliente cumple el mínimo y elige delivery, el estado pasa a <code>DIRECCION</code> y el bot pide la dirección. Aquí hay una peculiaridad que conviene entender: <strong>en este estado cualquier texto cuenta como dirección</strong>. Si el cliente escribe «hola», no se interpreta como saludo: se toma como intento de dirección (y se rechaza por corta). Solo las globales (cancelar, hablar con una persona, volver al menú) tienen prioridad.</p>
+<p>La validación es deliberadamente simple: la dirección debe tener al menos 8 caracteres. Con un cliente que ya añadió más productos hasta S/ 40.30:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Esa dirección parece muy corta. Escribe calle, número y alguna referencia, por ejemplo: Av. Los Pinos 456, casa verde.</code></pre>
+</div>
+<p>Tras recibir «Av. Los Pinos 456, casa verde», el bot guarda la dirección en la sesión y pasa al pago. No intenta verificar que la calle exista: eso no se puede saber sin un servicio de mapas, y es mejor que la persona que reparte confirme en caso de duda. Una regla simple y honesta vale más que una compleja que falla.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Reglas simples primero</p>
+<p>Podrías exigir que la dirección contenga un número o que pertenezca a una de las <code>zonas</code> de reparto. Antes de endurecer una regla, piensa en los clientes reales que dejarías fuera («Frente al mercado, puerta azul»). En un negocio pequeño suele convenir aceptar y confirmar por teléfono.</p></div>
+<h2 id="el-pago"><span class="n">4.</span>El pago</h2>
+<p>El paso <code>PAGO</code> ofrece tres botones: <strong>Efectivo</strong>, <strong>Yape</strong> y <strong>Transferencia</strong>. Lo elegido se guarda en <code>sesion.pago</code>, y las instrucciones se dan al <strong>final</strong>, en el mensaje de confirmación. Cada medio tiene su texto:</p>
+<ul>
+<li>Efectivo: «Pagas en efectivo al recibir tu pedido.»</li>
+<li>Yape: «Yape: envía S/ 43.30 al 51999000111 y avísanos por este chat.»</li>
+<li>Transferencia: «Transferencia: Cuenta de ejemplo 000-000000000-0-00 a nombre de La Esquina SAC. Avísanos por este chat al pagar.»</li>
+</ul>
+<p>Los datos (número de Yape, cuenta) salen de <code>NEGOCIO</code>, no del motor, así que cambiarlos no toca la lógica. Y son datos de ejemplo: 51999000111 es un número falso.</p>
+<p>Hay un detalle de robustez importante. ¿Qué pasa si el cliente toca un botón <strong>viejo</strong> de un mensaje anterior? WhatsApp conserva todos los mensajes y los botones siguen visibles. Si, por ejemplo, el cliente escribe un producto y luego toca <code>pago:yape</code> de un mensaje de hace una hora:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Esa opción ya no está disponible en este paso.</code></pre>
+</div>
+<p>Seguido de la pregunta del paso actual. Esto lo resuelve la tabla <code>SOLO_EN</code> de la lección 5: cada acción (entrega, pago, confirmarPedido) solo vale en su estado. Sin esa tabla, un botón antiguo podría saltarse pasos y confirmar un pedido incompleto.</p>
+<h2 id="confirmar"><span class="n">5.</span>Confirmar</h2>
+<p>En <code>CONFIRMAR</code> el bot muestra el pedido completo antes de comprometerse. Con el delivery de S/ 3 y el pago por Yape, la parte final del mensaje dice:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Delivery a: Av. Los Pinos 456, casa verde (S/ 3.00)
+Pago: yape
+Total a pagar: S/ 43.30</code></pre>
+</div>
+<p>Los S/ 43.30 son los S/ 40.30 de productos más S/ 3.00 de envío. Aquí aparece por primera vez el <strong>total del pedido</strong>, distinto del subtotal del carrito: <code>subtotal + costoDelivery</code>, siempre en céntimos. Es la misma cuenta que implementarás en <code>totalPedido</code>.</p>
+<p>El cliente tiene tres botones: <strong>Confirmar</strong>, <strong>Modificar pedido</strong> y <strong>Cancelar</strong>.</p>
+<ul>
+<li><strong>Modificar pedido</strong> lleva de vuelta a <code>CARRITO</code> <strong>conservando</strong> la entrega y el pago ya elegidos. El cliente edita sus productos (quita, agrega) y, al volver a confirmar, no tiene que repetir todo.</li>
+<li><strong>Cancelar</strong> vacía el carrito y vuelve al menú.</li>
+<li><strong>Confirmar</strong> crea el pedido.</li>
+</ul>
+<h2 id="el-momento-del-pedido-pedidonuevo"><span class="n">6.</span>El momento del pedido: <code>pedidoNuevo</code></h2>
+<p>Hasta aquí todo fue conversación. Al confirmar, el motor construye el pedido y lo deja en <code>sesion.pedidoNuevo</code>. Recuerda que el motor es puro: <strong>no guarda nada</strong>. Solo informa que hay un pedido nuevo, y quien lo llama (el servidor, la consola) decide qué hacer con él: guardarlo, avisar al dueño, mandarlo a una hoja de cálculo.</p>
+<p>Veámoslo con las ayudas de prueba <code>conversacion()</code> y <code>AHORA</code>, que fijan el reloj en 2026-10-07 15:00 UTC para que el id sea predecible:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import { conversacion } from &#x27;./test/ayudas.js&#x27;;
+
+const c = conversacion();
+c.decir(&#x27;hola&#x27;);
+c.decir(&#x27;3 leches y 2 arroces&#x27;);
+c.decir(&#x27;2 aceites&#x27;);
+c.tocar(&#x27;cerrar&#x27;);
+c.tocar(&#x27;entrega:delivery&#x27;);
+c.decir(&#x27;Av. Los Pinos 456, casa verde&#x27;);
+c.tocar(&#x27;pago:yape&#x27;);
+c.tocar(&#x27;pedido_confirmar&#x27;);
+console.log(c.sesion.estado, c.sesion.carrito.length);
+console.log(c.sesion.pedidoNuevo);
+console.log(c.texto);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>FIN 0
+{
+  id: &#x27;LE-Y8IPJ4&#x27;,
+  telefono: &#x27;51999000111&#x27;,
+  items: [
+    { id: &#x27;leche&#x27;, nombre: &#x27;Leche entera 1 L&#x27;, precio: 4.3, cantidad: 3 },
+    { id: &#x27;arroz&#x27;, nombre: &#x27;Arroz extra 1 kg&#x27;, precio: 4.2, cantidad: 2 },
+    { id: &#x27;aceite&#x27;, nombre: &#x27;Aceite vegetal 1 L&#x27;, precio: 9.5, cantidad: 2 }
+  ],
+  total: 43.3,
+  entrega: &#x27;delivery&#x27;,
+  direccion: &#x27;Av. Los Pinos 456, casa verde&#x27;,
+  pago: &#x27;yape&#x27;,
+  estado: &#x27;recibido&#x27;,
+  creadoEn: 1791385240000
+}
+Pedido LE-Y8IPJ4 recibido. Total: S/ 43.30.
+Lo llevaremos a tu dirección en unos 40 minutos.
+Yape: envía S/ 43.30 al 51999000111 y avísanos por este chat.
+Gracias por comprar en Minimarket La Esquina.</code></pre>
+</div>
+<p>(La salida se abrevió un poco: Node imprime cada línea de <code>items</code> en varias líneas. El id cambia con el reloj de prueba.)</p>
+<p>Hay varias cosas que mirar:</p>
+<ul>
+<li>El estado es <code>FIN</code> y el carrito de la sesión quedó <strong>vacío</strong>: el pedido ya no vive en la conversación sino en <code>pedidoNuevo</code>.</li>
+<li>El <strong>id</strong> es <code>LE-</code> más las últimas seis cifras de la hora en base 36 y mayúsculas: <code>ahora.toString(36).toUpperCase().slice(-6)</code>. No es único por diseño matemático, pero es corto para dictarlo por teléfono y distinto en la práctica. Un sistema real usaría un contador o un identificador de la base de datos.</li>
+<li>Los <strong>items se copian</strong> del carrito, con nombre y precio de ese momento, igual que la lección 7.</li>
+<li><code>estado: 'recibido'</code> es el primer estado del pedido; más adelante (lección 16) el dueño lo cambiará a «preparando», «entregado», etc.</li>
+</ul>
+<p><code>pedidoNuevo</code> es <strong>solo</strong> del turno de confirmación. Si el cliente escribe «hola» después, el motor reinicia la sesión y <code>sesion.pedidoNuevo</code> vuelve a ser <code>null</code>:</p>
+<div class="code">
+  <div class="code-head"><span>ejemplo.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>c.decir(&#x27;hola&#x27;);
+console.log(c.sesion.estado, c.sesion.pedidoNuevo);</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>MENU null</code></pre>
+</div>
+<p>Esto evita un error muy común y caro: <strong>guardar el mismo pedido dos veces</strong>. Quien llama al motor debe revisar <code>pedidoNuevo</code> en cada turno y guardarlo cuando no sea <code>null</code>; como solo aparece una vez, no hay riesgo de duplicados.</p>
+<h2 id="cuando-el-estado-cambia-el-significado"><span class="n">7.</span>Cuando el estado cambia el significado</h2>
+<p>Una última observación de diseño. En el estado <code>CARRITO</code>, si el cliente escribe «continuar» o «recojo», el bot no lo entiende (y responde «No te entendí bien», luego «Sigo sin entenderte»). Esas palabras son <strong>botones</strong> de otros pasos, y el entendimiento de texto está pensado para frases de compra, «sí», «cancelar», etc. En cambio, el botón <code>cerrar</code> y un «si» sí funcionan en <code>CARRITO</code>.</p>
+<p>Esto no es un fallo oculto: es un límite real del bot de reglas, y conviene conocerlo. Hay dos maneras de resolverlo: añadir esas frases como texto válido del paso (más reglas) o insistir en los botones (menos reglas, una experiencia más guiada). El contador <code>fallos</code> de la lección 5 se encarga de que, tras dos malentendidos seguidos, el bot repita el paso con sus botones en vez de seguir fallando.</p>
+<p>La moraleja es la que ya sabes: <strong>el mismo texto significa cosas distintas según el estado</strong>. «Si» en <code>CONFIRMAR</code> confirma el pedido; en <code>MENU</code> no significa nada.</p>
+<h2 id="probar-el-flujo-completo"><span class="n">8.</span>Probar el flujo completo</h2>
+<p>Con tantas reglas y estados, probar a mano cada vez no es viable. Las pruebas automáticas son lo que te permite cambiar un texto o una regla con tranquilidad. En <code>test/motor.test.js</code> hay una prueba por cada situación de esta lección: pedido completo con recojo, con delivery, el mínimo exacto de S/ 25, el pago por transferencia, «Modificar pedido», el reinicio tras <code>FIN</code> y la cancelación desde cada paso (un bucle sobre todos los estados). Se ejecutan con:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npm test</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>ℹ tests 112
+ℹ pass 112
+ℹ fail 0</code></pre>
+</div>
+<p>Todo en unos 0,4 segundos. El motor puro lo permite: no hay red, ni base de datos, ni WhatsApp de por medio. Cuando el bot esté desplegado (lecciones 10 y 11), estas mismas pruebas seguirán validando el cerebro, y solo necesitarás probar manualmente la conexión.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Un hábito útil</p>
+<p>Cada vez que un cliente real se queje de algo («me cobró de más», «se quedó trabado»), escribe primero una prueba que reproduzca el problema. Verás que falla, arreglas el motor y la prueba pasa. Así los errores no vuelven.</p></div>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Guardar el pedido antes de la confirmación.</strong> Hasta <code>confirmarPedido</code> el cliente puede cancelar o modificar; guarda solo cuando <code>pedidoNuevo</code> no sea <code>null</code>.</li>
+<li><strong>Guardar el mismo pedido dos veces.</strong> Revisa <code>pedidoNuevo</code> solo una vez por turno y no lo reutilices.</li>
+<li><strong>Comparar el mínimo de delivery con el total ya con envío.</strong> Se compara con el subtotal de productos.</li>
+<li><strong>Rechazar sin dar salida.</strong> Un «no alcanza el mínimo» sin decir cuánto falta ni ofrecer recojo deja al cliente varado.</li>
+<li><strong>Dejar que un botón viejo salte pasos.</strong> Valida cada acción contra el estado actual (<code>SOLO_EN</code>).</li>
+<li><strong>Validar demasiado la dirección.</strong> Reglas estrictas expulsan a clientes reales; mejor aceptar y confirmar.</li>
+<li><strong>Olvidar que tras <code>FIN</code> hay que reiniciar.</strong> Si no, el siguiente «hola» seguiría en un pedido cerrado.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>Cerrar un pedido es <strong>recorrer estados</strong>: entrega, dirección (solo delivery), pago y confirmación.</li>
+<li>Las reglas de negocio (mínimo S/ 25, envío S/ 3, dirección de 8 caracteres o más) viven en datos y funciones pequeñas, y se explican con números concretos.</li>
+<li>Un rechazo bueno <strong>explica, cuantifica y ofrece una salida</strong>.</li>
+<li>El total del pedido es <code>subtotal + envío</code>, calculado en céntimos.</li>
+<li>El motor no guarda: devuelve <code>pedidoNuevo</code> <strong>una sola vez</strong>, en el turno de confirmación, y quien lo llama decide qué hacer.</li>
+<li>«Modificar pedido» regresa al carrito sin perder entrega ni pago; tras <code>FIN</code>, el siguiente mensaje reinicia la sesión.</li>
+<li>Los límites del bot de reglas (como «continuar» escrito en <code>CARRITO</code>) se conocen y se documentan, no se ocultan.</li>
+<li>Las conversaciones completas se prueban con <code>conversacion()</code> y <code>npm test</code>.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mínimo de delivery</td>
+<td>Subtotal de productos desde el cual se acepta un envío a domicilio (S/ 25).</td>
+</tr>
+<tr>
+<td>Costo de delivery</td>
+<td>Cargo fijo del envío (S/ 3), que se suma al subtotal.</td>
+</tr>
+<tr>
+<td><code>pedidoNuevo</code></td>
+<td>Pedido creado por el motor, presente solo en el turno de confirmación.</td>
+</tr>
+<tr>
+<td>Estado <code>FIN</code></td>
+<td>La conversación terminó con un pedido confirmado; el siguiente mensaje reinicia.</td>
+</tr>
+<tr>
+<td>Id de pedido</td>
+<td>Código corto (<code>LE-</code> y seis caracteres) para identificar el pedido.</td>
+</tr>
+<tr>
+<td><code>conversacion()</code></td>
+<td>Ayuda de pruebas que simula un cliente con reloj fijo.</td>
+</tr>
+<tr>
+<td>Botón viejo</td>
+<td>Botón de un mensaje anterior, que el cliente toca fuera de su paso.</td>
+</tr>
+<tr>
+<td>Reinicio de sesión</td>
+<td>Volver a empezar la conversación con un carrito vacío.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Con qué se compara el mínimo de delivery?</p><ul class="opts"><li><button type="button" class="opt">Con el total ya incluido el envío</button></li><li><button type="button" class="opt" data-ok>Con el subtotal de los productos, sin contar el envío</button></li><li><button type="button" class="opt">Con la cantidad de productos</button></li><li><button type="button" class="opt">Con la distancia a la dirección</button></li></ul><p class="explain" hidden>Un pedido de exactamente S/ 25 en productos pasa; el envío se suma después.</p></div>
+<div class="quiz-q"><p>Un cliente pide delivery con S/ 21.30 en el carrito. ¿Qué respuesta es la mejor?</p><ul class="opts"><li><button type="button" class="opt">«No se puede.»</button></li><li><button type="button" class="opt" data-ok>Explicar el mínimo, decir que faltan S/ 3.70 y ofrecer completar el pedido o recoger en tienda</button></li><li><button type="button" class="opt">Aceptar el pedido igualmente</button></li><li><button type="button" class="opt">Cancelar la conversación</button></li></ul><p class="explain" hidden>Un buen rechazo explica la regla, cuantifica y ofrece una salida.</p></div>
+<div class="quiz-q"><p>¿Cuándo trae un valor <code>pedidoNuevo</code> la sesión devuelta por <code>procesar</code>?</p><ul class="opts"><li><button type="button" class="opt">En todos los turnos</button></li><li><button type="button" class="opt" data-ok>Solo en el turno en que el cliente confirma el pedido</button></li><li><button type="button" class="opt">Cuando el cliente llena el carrito</button></li><li><button type="button" class="opt">Cuando el cliente escribe «hola»</button></li></ul><p class="explain" hidden>Al ser de un solo turno, no hay riesgo de guardar el mismo pedido dos veces.</p></div>
+<div class="quiz-q"><p>¿Qué hace «Modificar pedido» en el paso de confirmación?</p><ul class="opts"><li><button type="button" class="opt">Borra el pedido</button></li><li><button type="button" class="opt" data-ok>Vuelve al carrito conservando la entrega y el pago elegidos</button></li><li><button type="button" class="opt">Reinicia la conversación</button></li><li><button type="button" class="opt">Confirma el pedido con cambios</button></li></ul><p class="explain" hidden>El cliente edita sus productos sin repetir todo el recorrido.</p></div>
+<div class="quiz-q"><p>El cliente toca un botón <code>pago:yape</code> de un mensaje antiguo mientras está eligiendo productos. ¿Qué ocurre?</p><ul class="opts"><li><button type="button" class="opt">Se confirma el pago</button></li><li><button type="button" class="opt" data-ok>El bot responde que esa opción ya no está disponible y repite la pregunta del paso actual</button></li><li><button type="button" class="opt">El bot se cae</button></li><li><button type="button" class="opt">Se reinicia la sesión</button></li></ul><p class="explain" hidden>La tabla <code>SOLO_EN</code> acepta cada acción solo en su estado.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-08">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../07-catalogo-y-carrito/"><small>← Anterior</small>Catálogo y carrito</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 8 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%208:%20Flujo%20de%20pedido&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

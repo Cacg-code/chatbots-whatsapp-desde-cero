@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tu primer bot en la consola · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Construye un bot funcional en la terminal con readline, separa el cerebro de la entrada y salida, y escribe su primera prueba automática.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Tu primer bot en la consola · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Construye un bot funcional en la terminal con readline, separa el cerebro de la entrada y salida, y escribe su primera prueba automática.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#por-que-empezar-por-la-consola">Por qué empezar por la consola</a></li><li><a href="#el-proyecto-estructura-de-carpetas">El proyecto: estructura de carpetas</a></li><li><a href="#primer-paso-un-eco-con-readline">Primer paso: un eco con readline</a></li><li><a href="#segundo-paso-separar-cerebro-y-consola">Segundo paso: separar cerebro y consola</a></li><li><a href="#tercer-paso-saludo-menu-y-palabras-clave">Tercer paso: saludo, menú y palabras clave</a></li><li><a href="#ejecutarlo">Ejecutarlo</a></li><li><a href="#cuarto-paso-la-primera-prueba-automatica">Cuarto paso: la primera prueba automática</a></li><li><a href="#una-trampa-palabras-dentro-de-otras">Una trampa: palabras dentro de otras</a></li><li><a href="#que-sigue">Qué sigue</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 4</div>
+        <h1>Tu primer bot en la consola</h1>
+        <ul class="meta"><li>⏱ 60 minutos</li><li>📶 Nivel: básico</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Crear un bot de consola que lee lo que escribes con <code>readline</code> y responde.</li><li>Separar el «cerebro» (una función pura <code>responder(texto)</code>) de la entrada y salida (la consola).</li><li>Implementar saludo, menú de tres opciones y respuestas por palabras clave, ignorando mayúsculas y tildes.</li><li>Organizar un proyecto con las carpetas <code>src/</code> y <code>test/</code> y el archivo <code>consola.js</code>.</li><li>Escribir y ejecutar la primera prueba con <code>node:test</code>.</li></ul>
+</div>
+
+<h2 id="por-que-empezar-por-la-consola"><span class="n">1.</span>Por qué empezar por la consola</h2>
+<p>Conectar un bot a WhatsApp exige cuentas, tokens y un servidor. Antes de eso conviene comprobar lo esencial: <strong>¿el bot entiende y responde bien?</strong> Eso se puede probar en tu terminal, sin internet, sin tarjetas y sin esperar aprobaciones.</p>
+<p>La consola va a ser tu «WhatsApp de laboratorio». Todo lo que construyas aquí (las reglas, el menú, más adelante el catálogo y el carrito) se conectará a WhatsApp después <strong>sin reescribirlo</strong>, porque la lógica quedará separada de la forma de entrada. Esa separación es la idea central de esta lección.</p>
+<p>Necesitas Node instalado y saber crear un proyecto; si no, repasa la <a href="../03-javascript-y-node-para-bots/">lección 3</a>. El diseño del menú viene de la <a href="../02-disenar-la-conversacion/">lección 2</a>.</p>
+<h2 id="el-proyecto-estructura-de-carpetas"><span class="n">2.</span>El proyecto: estructura de carpetas</h2>
+<p>Crea la carpeta del proyecto y su <code>package.json</code> como en la lección anterior:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>mkdir bot-minimarket
+cd bot-minimarket
+npm init -y</code></pre>
+</div>
+<p>Abre <code>package.json</code> y déjalo así:</p>
+<div class="code">
+  <div class="code-head"><span>package.json</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>{
+  &quot;name&quot;: &quot;bot-minimarket&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;type&quot;: &quot;module&quot;,
+  &quot;scripts&quot;: {
+    &quot;start&quot;: &quot;node consola.js&quot;,
+    &quot;test&quot;: &quot;node --test&quot;
+  }
+}</code></pre>
+</div>
+<p>La estructura que vamos a construir es esta:</p>
+<div class="code">
+  <div class="code-head"><span>Texto</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>bot-minimarket/
+├── package.json
+├── consola.js          entrada y salida: lee del teclado, imprime
+├── src/
+│   └── cerebro.js      el cerebro: responder(texto)
+└── test/
+    └── cerebro.test.js las pruebas</code></pre>
+</div>
+<p>Un archivo, una responsabilidad. <code>consola.js</code> sabe <strong>hablar con la terminal</strong>; <code>src/cerebro.js</code> sabe <strong>qué contestar</strong>. Ninguno se mete en el trabajo del otro.</p>
+<h2 id="primer-paso-un-eco-con-readline"><span class="n">3.</span>Primer paso: un eco con readline</h2>
+<p>Empecemos con lo mínimo: leer una línea y devolverla. Node incluye <code>readline</code>, que lee lo que escribe el usuario. Crea <code>eco.js</code> (es solo un experimento; luego lo descartas):</p>
+<div class="code">
+  <div class="code-head"><span>eco.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import readline from &quot;node:readline&quot;;
+
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+rl.question(&quot;Tú: &quot;, (texto) =&gt; {
+  console.log(&quot;Bot: dijiste &quot; + texto);
+  rl.close();
+});</code></pre>
+</div>
+<p>Ejecútalo con <code>node eco.js</code>. Escribes <code>hola bot</code> y pulsas Enter:</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Tú: hola bot
+Bot: dijiste hola bot</code></pre>
+</div>
+<p>Qué ocurre: <code>createInterface</code> conecta el teclado (<code>stdin</code>) y la pantalla (<code>stdout</code>). <code>rl.question</code> muestra una pregunta y, <strong>cuando el usuario pulsa Enter</strong>, llama a tu función con lo escrito. Es un <strong>callback</strong>: una función que se ejecuta cuando llega el dato. <code>rl.close()</code> termina la lectura.</p>
+<p>Ya tienes lo esencial de un bot: <strong>entra un texto, sale un texto</strong>. Ahora hay que hacerlo inteligente y, sobre todo, ordenado.</p>
+<h2 id="segundo-paso-separar-cerebro-y-consola"><span class="n">4.</span>Segundo paso: separar cerebro y consola</h2>
+<p>Imagina que escribes las reglas dentro de <code>consola.js</code>, mezcladas con <code>console.log</code> y <code>readline</code>. Cuando en la lección 10 quieras que el mismo bot responda por WhatsApp, tendrás que arrancarlo de nuevo. En cambio, si las reglas viven en una <strong>función pura</strong> (recibe texto, devuelve texto, no imprime nada), la consola y WhatsApp son solo dos formas distintas de llamarla:</p>
+<div class="flow"><div class="node"><strong>Consola</strong><span>o más adelante WhatsApp</span></div><div class="arrow">→<code>texto del cliente</code></div><div class="node"><strong>responder(texto)</strong><span>el cerebro (función pura)</span></div><div class="arrow">→<code>texto de respuesta</code></div><div class="node"><strong>Consola</strong><span>imprime la respuesta</span></div></div>
+<p>Escribe el cerebro más simple posible en <code>src/cerebro.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>src/cerebro.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function responder(texto) {
+  return &quot;Dijiste: &quot; + texto;
+}</code></pre>
+</div>
+<p>Y la consola, que ahora <strong>repite</strong> la pregunta después de cada respuesta para mantener la conversación. Crea <code>consola.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>consola.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import readline from &quot;node:readline&quot;;
+import { responder } from &quot;./src/cerebro.js&quot;;
+
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+console.log(&quot;Bot del Minimarket La Esquina. Escribe &#x27;salir&#x27; para terminar.\n&quot;);
+
+function preguntar() {
+  rl.question(&quot;Tú: &quot;, (linea) =&gt; {
+    if (linea.trim().toLowerCase() === &quot;salir&quot;) {
+      console.log(&quot;Bot: Hasta pronto.&quot;);
+      rl.close();
+      return;
+    }
+    console.log(&quot;Bot: &quot; + responder(linea) + &quot;\n&quot;);
+    preguntar();
+  });
+}
+
+preguntar();</code></pre>
+</div>
+<p>La función <code>preguntar</code> se llama a sí misma al terminar cada respuesta: eso crea el <strong>bucle de conversación</strong>. La única salida es escribir <code>salir</code>. Este <code>consola.js</code> no cambiará más en toda la lección: lo que mejore será el cerebro.</p>
+<h2 id="tercer-paso-saludo-menu-y-palabras-clave"><span class="n">5.</span>Tercer paso: saludo, menú y palabras clave</h2>
+<p>Ahora el cerebro de verdad. Tiene tres piezas.</p>
+<p><strong>1. Normalizar el texto.</strong> Los clientes escriben «HOLA», «Hola», «¿Dónde están?», «donde estan». Antes de comparar, convertimos todo a minúsculas y quitamos las tildes. <code>normalize("NFD")</code> separa cada letra de su tilde y la expresión regular elimina las tildes sueltas:</p>
+<div class="code">
+  <div class="code-head"><span>JavaScript</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>export function normalizar(texto) {
+  return String(texto ?? &quot;&quot;)
+    .toLowerCase()
+    .normalize(&quot;NFD&quot;)
+    .replace(/[̀-ͯ]/g, &quot;&quot;)
+    .trim();
+}</code></pre>
+</div>
+<p>El <code>String(texto ?? "")</code> hace que <code>null</code> o <code>undefined</code> no rompan la función.</p>
+<p><strong>2. Reglas por palabras clave.</strong> Una regla es un objeto con las palabras que la activan y una función que da la respuesta. Las guardamos en un array y recorremos hasta encontrar la primera que encaje. Así, <strong>añadir una regla es añadir un objeto</strong>, sin tocar la lógica.</p>
+<p><strong>3. Respuesta por defecto.</strong> Si ninguna regla encaja, el bot dice que no entendió y ofrece el menú (recuerda la lección 2: todo error termina en una opción).</p>
+<p>Este es el <code>src/cerebro.js</code> completo:</p>
+<div class="code">
+  <div class="code-head"><span>src/cerebro.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>// Cerebro del bot: recibe texto, devuelve texto. No imprime nada ni lee nada.
+
+export function normalizar(texto) {
+  return String(texto ?? &quot;&quot;)
+    .toLowerCase()
+    .normalize(&quot;NFD&quot;)
+    .replace(/[̀-ͯ]/g, &quot;&quot;)
+    .trim();
+}
+
+const MENU = [
+  &quot;Elige una opción escribiendo el número o la palabra:&quot;,
+  &quot;1. Horario&quot;,
+  &quot;2. Dirección&quot;,
+  &quot;3. Ayuda&quot;,
+].join(&quot;\n&quot;);
+
+const REGLAS = [
+  { palabras: [&quot;hola&quot;, &quot;buenas&quot;, &quot;buenos dias&quot;, &quot;buenas tardes&quot;], respuesta: () =&gt; &quot;Hola, bienvenido a Minimarket La Esquina.\n&quot; + MENU },
+  { palabras: [&quot;1&quot;, &quot;horario&quot;, &quot;hora&quot;, &quot;abren&quot;, &quot;cierran&quot;], respuesta: () =&gt; &quot;Atendemos de lunes a sábado de 8:00 a 21:00 y domingos de 9:00 a 14:00.&quot; },
+  { palabras: [&quot;2&quot;, &quot;direccion&quot;, &quot;donde&quot;, &quot;ubicacion&quot;], respuesta: () =&gt; &quot;Estamos en Av. Los Olivos 123 (ejemplo), frente al parque.&quot; },
+  { palabras: [&quot;3&quot;, &quot;ayuda&quot;, &quot;menu&quot;, &quot;opciones&quot;], respuesta: () =&gt; MENU },
+];
+
+export function responder(texto) {
+  const t = normalizar(texto);
+  if (t === &quot;&quot;) return &quot;Escríbeme algo y te ayudo. Con &#x27;ayuda&#x27; ves las opciones.&quot;;
+  for (const regla of REGLAS) {
+    if (regla.palabras.some((p) =&gt; t === p || t.includes(p) &amp;&amp; p.length &gt; 1)) {
+      return regla.respuesta();
+    }
+  }
+  return &quot;No entendí tu mensaje. Escribe &#x27;ayuda&#x27; para ver las opciones.&quot;;
+}</code></pre>
+</div>
+<p>Léelo con calma. La línea clave es <code>regla.palabras.some(...)</code>: la regla se activa si el texto es <strong>exactamente</strong> la palabra o <strong>contiene</strong> una palabra de más de un carácter. La condición <code>p.length &gt; 1</code> evita que el número <code>"1"</code> se active con cualquier mensaje que lo lleve (por ejemplo «quiero 10 panes»): los números solo valen si el cliente escribe <strong>solo</strong> el número.</p>
+<p>El horario y la dirección son datos de ejemplo del negocio ficticio. En un negocio real, vendrían de su configuración.</p>
+<h2 id="ejecutarlo"><span class="n">6.</span>Ejecutarlo</h2>
+<p>Con los dos archivos listos, arranca el bot con <code>npm start</code> (o <code>node consola.js</code>) y conversa:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npm start</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Bot del Minimarket La Esquina. Escribe &#x27;salir&#x27; para terminar.
+
+Tú: hola
+Bot: Hola, bienvenido a Minimarket La Esquina.
+Elige una opción escribiendo el número o la palabra:
+1. Horario
+2. Dirección
+3. Ayuda
+
+Tú: ¿a qué hora abren?
+Bot: Atendemos de lunes a sábado de 8:00 a 21:00 y domingos de 9:00 a 14:00.
+
+Tú: 2
+Bot: Estamos en Av. Los Olivos 123 (ejemplo), frente al parque.
+
+Tú: quiero pizza
+Bot: No entendí tu mensaje. Escribe &#x27;ayuda&#x27; para ver las opciones.
+
+Tú: salir
+Bot: Hasta pronto.</code></pre>
+</div>
+<p>Tienes un bot que saluda, ofrece un menú de tres opciones, entiende por palabras clave o por número y admite que no entendió. Es poco, pero es <strong>un bot de verdad</strong>: la misma estructura crecerá hasta manejar pedidos completos.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Escribir con tildes</p>
+<p>Si tu terminal muestra caracteres raros con las tildes en Windows, ejecuta antes <code>chcp 65001</code> en el Símbolo del sistema, o usa Windows Terminal, que suele funcionar sin ajustes.</p></div>
+<h2 id="cuarto-paso-la-primera-prueba-automatica"><span class="n">7.</span>Cuarto paso: la primera prueba automática</h2>
+<p>Cada vez que cambies una regla querrás saber que no rompiste otra. En vez de conversar con el bot a mano, escribes <strong>pruebas</strong>. Como <code>responder</code> es una función pura, probarla es trivial: le das un texto y miras la respuesta. Crea <code>test/cerebro.test.js</code>:</p>
+<div class="code">
+  <div class="code-head"><span>test/cerebro.test.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>import test from &quot;node:test&quot;;
+import assert from &quot;node:assert/strict&quot;;
+import { responder, normalizar } from &quot;../src/cerebro.js&quot;;
+
+test(&quot;normalizar quita tildes y mayúsculas&quot;, () =&gt; {
+  assert.equal(normalizar(&quot;  DIRECCIÓN &quot;), &quot;direccion&quot;);
+});
+
+test(&quot;saluda y muestra el menú&quot;, () =&gt; {
+  assert.match(responder(&quot;Hola&quot;), /bienvenido/);
+});
+
+test(&quot;responde el horario por palabra clave y por número&quot;, () =&gt; {
+  assert.match(responder(&quot;¿A qué hora abren?&quot;), /8:00/);
+  assert.match(responder(&quot;1&quot;), /8:00/);
+});
+
+test(&quot;si no entiende, lo dice&quot;, () =&gt; {
+  assert.match(responder(&quot;asdfgh&quot;), /No entendí/);
+});</code></pre>
+</div>
+<p><code>assert.equal</code> compara dos valores exactos; <code>assert.match</code> comprueba que un texto cumpla una expresión regular (útil cuando no quieres repetir el mensaje completo). Ejecuta:</p>
+<div class="code">
+  <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>npm test</code></pre>
+</div>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>✔ normalizar quita tildes y mayúsculas (0.9399ms)
+✔ saluda y muestra el menú (0.3564ms)
+✔ responde el horario por palabra clave y por número (0.155ms)
+✔ si no entiende, lo dice (0.1547ms)
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0</code></pre>
+</div>
+<p>Los milisegundos de tu pantalla serán otros; lo importante son los cuatro ✔. Desde ahora, cada vez que añadas una regla, añade su prueba. Es el hábito que separa un experimento de un producto.</p>
+<h2 id="una-trampa-palabras-dentro-de-otras"><span class="n">8.</span>Una trampa: palabras dentro de otras</h2>
+<p>Prueba esto en el bot: escribe <code>ahora</code>.</p>
+<div class="code">
+  <div class="code-head"><span>Salida esperada</span></div>
+<pre><code>Tú: ahora
+Bot: Atendemos de lunes a sábado de 8:00 a 21:00 y domingos de 9:00 a 14:00.</code></pre>
+</div>
+<p>El bot respondió el horario porque la palabra <code>hora</code> está <strong>dentro</strong> de «ahora». Es el error clásico del <code>includes</code>. Para un bot de reglas sencillo es un compromiso aceptable (los clientes suelen escribir mensajes cortos), pero en la <a href="../06-entender-texto-libre/">lección 6</a> aprenderás a separar el mensaje en palabras completas y a puntuar coincidencias para reducir esos falsos positivos. Por ahora, tenlo presente y coloca las palabras más específicas en las reglas más importantes.</p>
+<h2 id="que-sigue"><span class="n">9.</span>Qué sigue</h2>
+<p>Tu bot tiene una limitación grande: <strong>no recuerda nada</strong>. Si el cliente escribe «1» después de «quiero pedir», el bot no sabe en qué punto de la conversación estaba. Responder solo según el último mensaje funciona para preguntas sueltas, pero no para un pedido de varios pasos. La solución es el <strong>estado</strong>: guardar en qué punto va cada cliente, tal como lo dibujaste en el mapa de la lección 2. Eso es la <a href="../05-estado-de-la-conversacion/">lección 5</a>.</p>
+<h2 id="errores-frecuentes"><span class="n">10.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Escribir las reglas dentro de <code>consola.js</code>.</strong> Después no podrás reutilizarlas con WhatsApp ni probarlas con <code>node:test</code>. Mantén el cerebro en <code>src/</code>.</li>
+<li><strong>Imprimir dentro de <code>responder</code>.</strong> La función debe <strong>devolver</strong> texto; quien imprime es la consola.</li>
+<li><strong>Olvidar normalizar.</strong> Sin quitar mayúsculas y tildes, «Dirección» y «direccion» serán mensajes distintos.</li>
+<li><strong>Un <code>includes</code> con palabras demasiado cortas</strong> (<code>"1"</code>, <code>"a"</code>, <code>"si"</code>): se activan por casualidad dentro de otras palabras.</li>
+<li><strong>No cerrar <code>readline</code>.</strong> Sin <code>rl.close()</code> el programa nunca termina y queda esperando.</li>
+<li><strong>Poner el orden de las reglas sin pensar.</strong> Se usa la primera que encaja: las específicas deben ir antes que las generales.</li>
+<li><strong>Olvidar la respuesta por defecto.</strong> Un bot que se queda en silencio ante lo inesperado parece roto.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">11.</span>Apuntes para llevar</h2>
+<ul>
+<li>La consola es tu entorno de laboratorio: sin cuentas, sin costos y con resultados inmediatos.</li>
+<li><code>readline</code> lee líneas del teclado con <code>rl.question</code>; un bucle recursivo mantiene la conversación.</li>
+<li>Separa el <strong>cerebro</strong> (<code>responder(texto)</code>, pura) de la <strong>entrada y salida</strong> (<code>consola.js</code>): así el mismo cerebro servirá para WhatsApp.</li>
+<li>Normaliza el texto (minúsculas, sin tildes, sin espacios sobrantes) antes de compararlo.</li>
+<li>Las reglas como datos (un array de objetos) permiten crecer sin tocar la lógica.</li>
+<li>Cada regla nueva lleva su prueba con <code>node:test</code>; <code>npm test</code> las ejecuta todas.</li>
+</ul>
+<h2 id="glosario"><span class="n">12.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>readline</code></td>
+<td>Módulo de Node que lee líneas de texto desde el teclado.</td>
+</tr>
+<tr>
+<td><code>stdin</code> / <code>stdout</code></td>
+<td>Entrada y salida estándar: el teclado y la pantalla de la terminal.</td>
+</tr>
+<tr>
+<td>Callback</td>
+<td>Función que se ejecuta cuando llega un dato o termina una operación.</td>
+</tr>
+<tr>
+<td>Cerebro</td>
+<td>Función que decide qué responder; no imprime ni lee nada.</td>
+</tr>
+<tr>
+<td>Normalizar</td>
+<td>Dejar el texto en una forma uniforme (minúsculas, sin tildes) para compararlo.</td>
+</tr>
+<tr>
+<td>Palabra clave</td>
+<td>Palabra que, al aparecer en el mensaje, activa una regla.</td>
+</tr>
+<tr>
+<td>Falso positivo</td>
+<td>Regla que se activa cuando no debía (por ejemplo <code>hora</code> dentro de <code>ahora</code>).</td>
+</tr>
+<tr>
+<td>Prueba automática</td>
+<td>Código que verifica que otra función da el resultado esperado.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Por qué se separa <code>responder(texto)</code> del archivo <code>consola.js</code>?</p><ul class="opts"><li><button type="button" class="opt">Porque Node lo exige</button></li><li><button type="button" class="opt">Para que el programa corra más rápido</button></li><li><button type="button" class="opt" data-ok>Para poder reutilizar el mismo cerebro con WhatsApp y probarlo sin la consola</button></li><li><button type="button" class="opt">Porque <code>readline</code> no permite funciones</button></li></ul><p class="explain" hidden>Con el cerebro puro separado, solo cambia la forma de entrada y salida; las reglas no se reescriben.</p></div>
+<div class="quiz-q"><p>¿Qué hace <code>rl.question("Tú: ", callback)</code>?</p><ul class="opts"><li><button type="button" class="opt">Imprime el texto y termina el programa</button></li><li><button type="button" class="opt" data-ok>Muestra la pregunta y llama a la función cuando el usuario pulsa Enter</button></li><li><button type="button" class="opt">Lee el archivo <code>package.json</code></button></li><li><button type="button" class="opt">Envía el mensaje a WhatsApp</button></li></ul><p class="explain" hidden><code>rl.question</code> espera una línea y entrega lo escrito al callback.</p></div>
+<div class="quiz-q"><p>¿Para qué sirve normalizar el texto antes de comparar?</p><ul class="opts"><li><button type="button" class="opt">Para traducirlo al inglés</button></li><li><button type="button" class="opt">Para hacerlo más largo</button></li><li><button type="button" class="opt" data-ok>Para que «HOLA», «Hola» y «Dirección»/«direccion» se traten igual</button></li><li><button type="button" class="opt">Para ocultarlo al cliente</button></li></ul><p class="explain" hidden>Pasar a minúsculas y quitar tildes evita fallos por cómo escribe cada persona.</p></div>
+<div class="quiz-q"><p>El bot responde el horario cuando el cliente escribe «ahora». ¿Por qué?</p><ul class="opts"><li><button type="button" class="opt">Porque hay un error en <code>readline</code></button></li><li><button type="button" class="opt" data-ok>Porque <code>"hora"</code> está contenida dentro de «ahora» y <code>includes</code> solo busca el fragmento</button></li><li><button type="button" class="opt">Porque el bot adivina la intención</button></li><li><button type="button" class="opt">Porque la tilde falta</button></li></ul><p class="explain" hidden>Es un falso positivo típico de <code>includes</code>; la lección 6 enseña a reducirlos.</p></div>
+<div class="quiz-q"><p>¿Qué comando ejecuta todas las pruebas del proyecto?</p><ul class="opts"><li><button type="button" class="opt"><code>node readline</code></button></li><li><button type="button" class="opt"><code>npm init</code></button></li><li><button type="button" class="opt" data-ok><code>npm test</code> (o <code>node --test</code>)</button></li><li><button type="button" class="opt"><code>node cerebro.js</code></button></li></ul><p class="explain" hidden>Con <code>node:test</code>, <code>node --test</code> encuentra y ejecuta los archivos de prueba.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-04">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../03-javascript-y-node-para-bots/"><small>← Anterior</small>JavaScript y Node.js para bots</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 4 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%204:%20Tu%20primer%20bot%20en%20la%20consola&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/04-primer-bot-en-consola/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

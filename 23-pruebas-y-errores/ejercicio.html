@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Pruebas, registros y errores comunes · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Pruebas, registros y errores comunes.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Pruebas, registros y errores comunes · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Pruebas, registros y errores comunes.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 23</a> › Ejercicio</div>
+        <h1>Ejercicio: Pruebas, registros y errores comunes</h1>
+        <ul class="meta"><li>⏱ 45 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Escribir las cuatro piezas de fiabilidad que usa el bot en producción: decidir si un fallo se reintenta, calcular la espera entre intentos, interpretar un código de error de Meta y ocultar teléfonos en los logs.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real en tu terminal con el código de referencia. La <strong>parte B</strong> son cuatro funciones de JavaScript puro que se comprueban en esta página. No uses <code>import</code> ni <code>process</code>: solo funciones.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Escribe <code>reintentarConEsperas(estados)</code>: recibe una lista de estados HTTP simulados (por ejemplo <code>[500, 503, 200]</code>) y devuelve cuántos intentos hizo y cuánto esperó en total, aplicando <code>esReintentable</code> y <code>esperaReintento</code> con un máximo de 3 intentos.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. En la carpeta <code>codigo/</code> del curso ejecuta <code>npm test</code> y anota cuántas pruebas pasan. Luego abre <code>test/motor.test.js</code> y localiza la prueba de «hablar con una persona».</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Crea <code>test/mia.test.js</code> con <code>node:test</code> y escribe una prueba de conversación: pide <code>3 leches</code>, finaliza con <code>cerrar</code>, elige <code>entrega:recojo</code>, <code>pago:yape</code> y <code>pedido_confirmar</code>, y comprueba que <code>c.sesion.pedidoNuevo.total</code> es el valor esperado según <code>src/catalogo.js</code>.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Rompe la prueba a propósito (cambia el total esperado), ejecútala con <code>node --test test/mia.test.js</code> y lee el informe: ¿cuál es el valor recibido? Corrígela.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte A. Copia <code>test/payloads/estado-fallido.json</code> como <code>estado-fallido-2.json</code>, cambia el código de error a <code>131030</code> y escribe una prueba que lo lea con <code>parsearWebhook</code>.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>esReintentable(estadoHttp)</code>: <code>true</code> para <code>429</code> y para cualquier estado de 500 en adelante; <code>false</code> para el resto (por ejemplo 200, 400, 401, 404).</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>esperaReintento(intento, baseMs = 500, maxMs = 8000)</code>: la espera crece al doble en cada intento, empezando en <code>baseMs</code> para el intento 1 (500, 1000, 2000...) y nunca pasa de <code>maxMs</code>.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>accionParaError(codigo)</code>: devuelve <code>"plantilla"</code> para <code>131047</code>, <code>"corregir"</code> para <code>131030</code>, <code>190</code>, <code>131008</code> y <code>131009</code>, <code>"esperar"</code> para <code>131056</code> y <code>131048</code>, <code>"ignorar"</code> para <code>131026</code>, y <code>"revisar"</code> para cualquier otro código.</span></label></li><li><label><input type="checkbox" id="p8"><span>Parte B. Escribe <code>ocultarTelefono(tel)</code>: conserva los 3 primeros y los 3 últimos dígitos y pone <code>***</code> en medio (<code>"51999000111"</code> pasa a <code>"519***111"</code>). Si el número tiene 6 caracteres o menos, devuelve <code>"***"</code>. Acepta números o textos.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Potencias de dos</summary><p>El intento 1 espera <code>baseMs</code>, el 2 espera el doble, el 3 el cuádruple... Eso es <code>baseMs * 2 ** (intento - 1)</code>. Con <code>Math.min(valor, maxMs)</code> pones el tope.</p></details>
+      <details><summary>💡 Pista 2: Tabla de errores</summary><p>Un objeto como <code>{ 131047: "plantilla", 131030: "corregir", ... }</code> y <code>tabla[codigo] ?? "revisar"</code> resuelve el caso por defecto. Las claves numéricas de un objeto se convierten en texto, pero <code>tabla[131047]</code> funciona igual.</p></details>
+      <details><summary>💡 Pista 3: Teléfonos</summary><p>Convierte a texto con <code>String(tel)</code> y usa <code>slice(0, 3)</code> y <code>slice(-3)</code> para tomar el principio y el final.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`esReintentable` acepta 429 y los 5xx", "h": "Devuelve true si el estado es 429 o es mayor o igual que 500.", "t": "return esReintentable(429)===true && esReintentable(500)===true && esReintentable(503)===true"}, {"d": "`esReintentable` rechaza éxitos y errores 4xx", "h": "200, 400, 401, 403 y 404 no se reintentan.", "t": "return esReintentable(200)===false && esReintentable(400)===false && esReintentable(401)===false && esReintentable(404)===false"}, {"d": "`esperaReintento` duplica la espera en cada intento", "h": "Usa baseMs * 2 ** (intento - 1).", "t": "return esperaReintento(1)===500 && esperaReintento(2)===1000 && esperaReintento(3)===2000 && esperaReintento(4)===4000"}, {"d": "`esperaReintento` respeta el tope y los parámetros", "h": "Aplica Math.min con maxMs y usa los valores recibidos.", "t": "return esperaReintento(10)===8000 && esperaReintento(3, 100)===400 && esperaReintento(5, 1000, 5000)===5000"}, {"d": "`accionParaError` clasifica los códigos de la tabla", "h": "131047 plantilla; 131030, 190, 131008 y 131009 corregir; 131056 y 131048 esperar; 131026 ignorar.", "t": "return accionParaError(131047)===\"plantilla\" && accionParaError(131030)===\"corregir\" && accionParaError(190)===\"corregir\" && accionParaError(131008)===\"corregir\" && accionParaError(131009)===\"corregir\" && accionParaError(131056)===\"esperar\" && accionParaError(131048)===\"esperar\" && accionParaError(131026)===\"ignorar\""}, {"d": "`accionParaError` devuelve `revisar` si no conoce el código", "h": "Usa ?? \"revisar\" al final.", "t": "return accionParaError(999999)===\"revisar\" && accionParaError(undefined)===\"revisar\""}, {"d": "`ocultarTelefono` deja 3 dígitos al inicio y 3 al final", "h": "String(tel).slice(0,3) + \"***\" + String(tel).slice(-3).", "t": "return ocultarTelefono(\"51999000111\")===\"519***111\" && ocultarTelefono(51999000222)===\"519***222\""}, {"d": "`ocultarTelefono` oculta todo si el número es muy corto", "h": "Con 6 caracteres o menos devuelve solo ***.", "t": "return ocultarTelefono(\"12345\")===\"***\" && ocultarTelefono(\"123456\")===\"***\" && ocultarTelefono(\"1234567\")===\"123***567\""}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>fiabilidad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function esReintentable(estadoHttp) {
+  return estadoHttp === 429 || estadoHttp &gt;= 500;
+}
+
+function esperaReintento(intento, baseMs = 500, maxMs = 8000) {
+  return Math.min(baseMs * 2 ** (intento - 1), maxMs);
+}
+
+const ACCIONES = {
+  131047: &quot;plantilla&quot;,
+  131030: &quot;corregir&quot;,
+  190: &quot;corregir&quot;,
+  131008: &quot;corregir&quot;,
+  131009: &quot;corregir&quot;,
+  131056: &quot;esperar&quot;,
+  131048: &quot;esperar&quot;,
+  131026: &quot;ignorar&quot;,
+};
+
+function accionParaError(codigo) {
+  return ACCIONES[codigo] ?? &quot;revisar&quot;;
+}
+
+function ocultarTelefono(tel) {
+  const s = String(tel);
+  return s.length &lt;= 6 ? &quot;***&quot; : s.slice(0, 3) + &quot;***&quot; + s.slice(-3);
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 23</a>
+        <a class="next" href="../24-seguridad-y-privacidad/"><small>Siguiente →</small>Seguridad y privacidad</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 23 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Pruebas,%20registros%20y%20errores%20comunes&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · IA como complemento, no como cerebro · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: IA como complemento, no como cerebro.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/22-ia-como-complemento/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · IA como complemento, no como cerebro · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: IA como complemento, no como cerebro.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/22-ia-como-complemento/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 22</a> › Ejercicio</div>
+        <h1>Ejercicio: IA como complemento, no como cerebro</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: avanzado</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Construir la <strong>red de seguridad</strong> que rodea a una IA en el bot del minimarket: extraer su respuesta, validarla, no dejarla inventar productos ni precios, decidir cuándo usarla y estimar su costo. Todo sin llamar a ningún proveedor: las funciones trabajan con el <strong>texto que devolvería</strong> la IA, así que las pruebas son gratis y repetibles.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es una investigación y una práctica con el proveedor que prefieras (opcional: necesita cuenta y a veces tarjeta). La <strong>parte B</strong> son seis funciones de JavaScript puro que se comprueban en esta página. Imagina que la IA recibió el mensaje del cliente y se le pidió responder <strong>solo</strong> con un JSON como este: <code>{"intencion": "pedir_producto", "producto_id": "arroz", "confianza": 0.9}</code>.</p>
+<p>Las intenciones permitidas son <code>pedir_producto</code>, <code>consultar_horario</code>, <code>consultar_delivery</code> y <code>hablar_con_persona</code>. Cualquier otra cosa debe tratarse como <code>desconocida</code>.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Escribe <code>decidirCamino(intencionReglas, claseIA)</code>: si las reglas ya entendieron (<code>intencionReglas</code> distinta de <code>"desconocida"</code>) devuelve <code>"reglas"</code> sin consultar a la IA; si no, devuelve <code>"ia"</code> cuando la clasificación sea válida y <code>"humano"</code> cuando también la IA dé <code>"desconocida"</code>. Esa función es el corazón del diseño «reglas primero, IA de respaldo».</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Elige un proveedor de IA (el que prefieras) y localiza en su documentación la página de <strong>precios por tokens</strong> y la de <strong>salida estructurada / JSON</strong>. Anota en <code>notas.md</code> el precio por millón de tokens de entrada y de salida del modelo más barato, con la fecha de hoy (Verifica este dato: cambia con frecuencia).</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Escribe en <code>notas.md</code> tres mensajes de clientes que tu bot de reglas no entiende hoy (por ejemplo, «algo para el desayuno de mis hijos») y la intención que le asignarías a cada uno. Será tu mini conjunto de pruebas.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte B. Escribe <code>extraerJSON(texto)</code>: la IA a veces responde con texto alrededor o dentro de un bloque de código. Devuelve el <strong>primer objeto JSON</strong> que encuentres como objeto de JavaScript, o <code>null</code> si no hay ninguno válido.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>validarClasificacion(obj, permitidas, umbral)</code>: devuelve <code>obj.intencion</code> solo si es una de las <code>permitidas</code> y <code>obj.confianza</code> es un número mayor o igual que <code>umbral</code>. En cualquier otro caso devuelve <code>"desconocida"</code>.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>productoDelCatalogo(id, productos)</code>: devuelve el producto cuyo <code>id</code> coincide exactamente, o <code>null</code> si la IA inventó un id que no existe.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>textoPrecio(producto)</code>: arma la respuesta de precio <strong>usando solo el catálogo</strong>, con el formato <code>Arroz extra 1 kg cuesta S/ 4.20.</code> (dos decimales).</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>contienePrecio(texto)</code>: devuelve <code>true</code> si un texto escrito por la IA menciona un precio (por ejemplo <code>S/ 5</code>, <code>S/5.50</code> o <code>5 soles</code>). Se usará para <strong>rechazar</strong> cualquier texto libre de la IA que traiga cifras de dinero.</span></label></li><li><label><input type="checkbox" id="p8"><span>Parte B. Escribe <code>costoEstimado(llamadas, tokensEntrada, tokensSalida, precioEntradaPorMillon, precioSalidaPorMillon)</code>: devuelve el costo total (mismo tipo de moneda que los precios) de <code>llamadas</code> llamadas, cada una con esos tokens de entrada y salida.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Primer objeto JSON</summary><p>Busca la primera <code>{</code> y la última <code>}</code> con <code>indexOf</code> y <code>lastIndexOf</code>, corta ese fragmento y pásalo por <code>JSON.parse</code> dentro de un <code>try/catch</code>. Así funciona aunque haya texto o un bloque de código alrededor.</p></details>
+      <details><summary>💡 Pista 2: Detectar precios</summary><p>Una expresión regular como <code>/s\/\s*\d|\d+([.,]\d+)?\s*soles/i</code> cubre <code>S/ 5</code>, <code>S/5.50</code> y <code>5 soles</code>. Cuidado con el <code>\</code> de <code>S/</code> dentro de la expresión.</p></details>
+      <details><summary>💡 Pista 3: Costo por millón de tokens</summary><p>Si un precio es «por millón de tokens», el costo es <code>tokens / 1000000 * precio</code>. Suma entrada y salida, y multiplica por las llamadas.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`extraerJSON` lo rescata aunque venga con texto o bloque de código alrededor", "h": "Corta desde la primera `{` hasta la última `}` antes de hacer `JSON.parse`.", "t": "var t='Claro, aquí está:\\n```json\\n{\"intencion\":\"consultar_horario\",\"confianza\":0.8}\\n```\\nEspero que sirva.';var r=extraerJSON(t);return r!==null && r.intencion===\"consultar_horario\""}, {"d": "`extraerJSON` devuelve `null` si no hay JSON válido", "h": "Atrapa el error de `JSON.parse` y devuelve `null`; también si no hay llaves.", "t": "return extraerJSON(\"no puedo ayudarte con eso\")===null && extraerJSON('{intencion: roto')===null && extraerJSON(\"\")===null"}, {"d": "`validarClasificacion` acepta una intención permitida con buena confianza", "h": "Debe estar en `permitidas` y tener `confianza >= umbral`.", "t": "var p=[\"pedir_producto\",\"consultar_horario\"];return validarClasificacion({intencion:\"consultar_horario\",confianza:0.8},p,0.7)===\"consultar_horario\" && validarClasificacion({intencion:\"pedir_producto\",confianza:0.7},p,0.7)===\"pedir_producto\""}, {"d": "`validarClasificacion` devuelve `desconocida` si no es permitida, si la confianza es baja o si faltan datos", "h": "Revisa también que `confianza` sea un número y que `obj` no sea `null`.", "t": "var p=[\"pedir_producto\"];return validarClasificacion({intencion:\"borrar_base_de_datos\",confianza:0.99},p,0.7)===\"desconocida\" && validarClasificacion({intencion:\"pedir_producto\",confianza:0.4},p,0.7)===\"desconocida\" && validarClasificacion({intencion:\"pedir_producto\",confianza:\"alta\"},p,0.7)===\"desconocida\" && validarClasificacion(null,p,0.7)===\"desconocida\" && validarClasificacion({intencion:\"pedir_producto\"},p,0.7)===\"desconocida\""}, {"d": "`productoDelCatalogo` solo devuelve productos que existen", "h": "Usa `find` con igualdad estricta de `id` y devuelve `null` si no aparece.", "t": "var ps=[{id:\"arroz\",nombre:\"Arroz extra 1 kg\",precio:4.2},{id:\"leche\",nombre:\"Leche entera 1 L\",precio:4.3}];var a=productoDelCatalogo(\"arroz\",ps);return a!==null && a.nombre===\"Arroz extra 1 kg\" && productoDelCatalogo(\"caviar\",ps)===null && productoDelCatalogo(undefined,ps)===null"}, {"d": "`textoPrecio` usa el precio del catálogo con dos decimales", "h": "`precio.toFixed(2)` da el formato correcto: `S/ 4.20`.", "t": "return textoPrecio({id:\"arroz\",nombre:\"Arroz extra 1 kg\",precio:4.2})===\"Arroz extra 1 kg cuesta S/ 4.20.\" && textoPrecio({id:\"aceite\",nombre:\"Aceite vegetal 1 L\",precio:9.5})===\"Aceite vegetal 1 L cuesta S/ 9.50.\""}, {"d": "`contienePrecio` detecta precios y deja pasar textos sin cifras de dinero", "h": "Busca `S/` seguido de un número, o un número seguido de `soles`.", "t": "return contienePrecio(\"Cuesta S/ 5\")===true && contienePrecio(\"son S/5.50 por bolsa\")===true && contienePrecio(\"salen 5 soles\")===true && contienePrecio(\"Tenemos arroz y leche\")===false && contienePrecio(\"Atendemos hasta las 21 horas\")===false"}, {"d": "`costoEstimado` calcula el costo con precios por millón de tokens", "h": "(entrada/1e6*precioEntrada + salida/1e6*precioSalida) * llamadas.", "t": "var c=costoEstimado(1000,300,50,0.5,2);var esperado=1000*(300/1e6*0.5+50/1e6*2);return Math.abs(c-esperado)<1e-9 && costoEstimado(0,300,50,0.5,2)===0"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>ia-red-de-seguridad.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function extraerJSON(texto) {
+  const t = String(texto == null ? &quot;&quot; : texto);
+  const a = t.indexOf(&quot;{&quot;);
+  const b = t.lastIndexOf(&quot;}&quot;);
+  if (a === -1 || b &lt;= a) return null;
+  try {
+    const obj = JSON.parse(t.slice(a, b + 1));
+    return obj &amp;&amp; typeof obj === &quot;object&quot; ? obj : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function validarClasificacion(obj, permitidas, umbral) {
+  if (!obj || typeof obj !== &quot;object&quot;) return &quot;desconocida&quot;;
+  if (!permitidas.includes(obj.intencion)) return &quot;desconocida&quot;;
+  if (typeof obj.confianza !== &quot;number&quot; || obj.confianza &lt; umbral) return &quot;desconocida&quot;;
+  return obj.intencion;
+}
+
+function productoDelCatalogo(id, productos) {
+  if (typeof id !== &quot;string&quot;) return null;
+  return productos.find((p) =&gt; p.id === id) || null;
+}
+
+function textoPrecio(producto) {
+  return producto.nombre + &quot; cuesta S/ &quot; + producto.precio.toFixed(2) + &quot;.&quot;;
+}
+
+function contienePrecio(texto) {
+  return /s\/\s*\d|\d+([.,]\d+)?\s*soles/i.test(String(texto));
+}
+
+function costoEstimado(llamadas, tokensEntrada, tokensSalida, precioEntradaPorMillon, precioSalidaPorMillon) {
+  const porLlamada = (tokensEntrada / 1e6) * precioEntradaPorMillon + (tokensSalida / 1e6) * precioSalidaPorMillon;
+  return porLlamada * llamadas;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 22</a>
+        <a class="next" href="../23-pruebas-y-errores/"><small>Siguiente →</small>Pruebas, registros y errores comunes</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 22 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20IA%20como%20complemento,%20no%20como%20cerebro&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/22-ia-como-complemento/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

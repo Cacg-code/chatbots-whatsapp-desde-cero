@@ -1,0 +1,6 @@
+# Copia este archivo como .dev.vars (NO lo subas a git) y reemplaza los valores.
+# En producción se cargan con: npx wrangler secret put NOMBRE
+VERIFY_TOKEN=un-texto-largo-que-inventas-tu
+WA_TOKEN=token-de-acceso-de-la-api-de-whatsapp
+WA_PHONE_ID=id-del-numero-de-telefono-de-whatsapp
+APP_SECRET=secreto-de-la-app-de-meta

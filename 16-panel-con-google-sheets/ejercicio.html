@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicio · Panel del dueño con Google Sheets · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Ejercicio práctico de: Panel del dueño con Google Sheets.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/ejercicio.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Ejercicio · Panel del dueño con Google Sheets · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Ejercicio práctico de: Panel del dueño con Google Sheets.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/ejercicio.html">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido" style="max-width:820px;padding-top:2rem;padding-bottom:3rem">
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › <a href="./">Lección 16</a> › Ejercicio</div>
+        <h1>Ejercicio: Panel del dueño con Google Sheets</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: intermedio</li></ul>
+      </header>
+
+<h2>Objetivo</h2>
+<p>Convertir un pedido del bot en una fila de hoja de cálculo, proteger la entrada con un secreto compartido y calcular los números que el dueño quiere ver en su panel. Todo se comprueba con funciones puras.</p>
+<h3>Cómo se trabaja</h3>
+<p>La <strong>parte A</strong> es práctica real con tu cuenta de Google (usa una hoja de prueba, nunca la de un cliente real). La <strong>parte B</strong> son funciones de JavaScript puro que se comprueban en esta página. Un pedido tiene la forma <code>{ id, telefono, items: [{ nombre, cantidad, precio }], total, entrega, direccion, pago, estado, creadoEn }</code>, con <code>creadoEn</code> en milisegundos.</p>
+<div class="callout consejo">
+<p class="callout-title">💡 Reto extra</p>
+<p>Añade <code>topProductos(filas, n)</code> que lea la columna de productos (<code>"2 x Leche; 1 x Arroz"</code>), sume cantidades por producto entre todas las filas y devuelva los <code>n</code> más vendidos. Es el primer gráfico que le gustaría ver al dueño.</p></div>
+
+<div class="playground js" data-js>
+  <div class="pg-head"><span>▶ Prueba tu código aquí (opcional)</span><span class="pg-actions"><button type="button" data-run>Ejecutar</button><button type="button" data-reset>Restablecer</button></span></div>
+  <div class="pg-body">
+    <div><label>Código (edítalo y pulsa Ejecutar)</label><textarea class="pg-code" spellcheck="false" aria-label="Editor de JavaScript" style="height:300px">&lt;script&gt;
+// Escribe aquí tus funciones y pruébalas con console.log
+&lt;/script&gt;</textarea></div>
+    <div><label>Página (resultado)</label><div class="pg-frame"></div></div>
+  </div>
+  <div class="pg-console"><div class="pg-console-head"><span>Consola</span><button type="button" data-clear>Limpiar</button></div><div class="pg-log" role="log" aria-live="polite"></div></div>
+</div>
+
+      <h2>Pasos</h2>
+      <p>Marca cada paso a medida que lo completes. Tu avance se guarda en este navegador.</p>
+      <div class="progress" aria-hidden="true"><div></div></div>
+      <p id="progreso-texto" style="color:var(--muted);font-size:.9rem" aria-live="polite"></p>
+      <ul class="checklist"><li><label><input type="checkbox" id="p1"><span>Parte A. Crea una hoja de Google llamada <code>Minimarket La Esquina - Pedidos</code> con una pestaña <code>Pedidos</code> y estos encabezados en la fila 1: Fecha, Pedido, Telefono, Productos, Total, Entrega, Direccion, Pago, Estado.</span></label></li><li><label><input type="checkbox" id="p2"><span>Parte A. Abre <strong>Extensiones &gt; Apps Script</strong>, pega el <code>doPost</code> de la lección, guarda el secreto en <strong>Configuración del proyecto &gt; Propiedades del script</strong> y crea una implementación como <strong>Aplicación web</strong>. Copia la URL que termina en <code>/exec</code>.</span></label></li><li><label><input type="checkbox" id="p3"><span>Parte A. Desde tu terminal haz un <code>curl -L</code> con un pedido de prueba y comprueba que aparece una fila nueva. Repite con un secreto equivocado y anota qué respuesta recibes.</span></label></li><li><label><input type="checkbox" id="p4"><span>Parte B. Escribe <code>pedidoAFila(pedido)</code>: devuelve un arreglo de 9 valores en el orden de los encabezados. La fecha va en formato ISO (<code>new Date(ms).toISOString()</code>), los productos como <code>"2 x Leche entera 1 L; 1 x Arroz extra 1 kg"</code> y la dirección vacía (<code>""</code>) si es <code>null</code>.</span></label></li><li><label><input type="checkbox" id="p5"><span>Parte B. Escribe <code>autorizado(cuerpo, secreto)</code>: recibe el cuerpo crudo (texto JSON) y devuelve <code>true</code> solo si el JSON es válido, trae <code>secreto</code> y coincide exactamente. Si el JSON es inválido o el secreto esperado está vacío, devuelve <code>false</code> sin lanzar errores.</span></label></li><li><label><input type="checkbox" id="p6"><span>Parte B. Escribe <code>resumenDelDia(filas, dia)</code>: <code>filas</code> son los arreglos de <code>pedidoAFila</code>; <code>dia</code> es un texto <code>"2026-10-07"</code>. Devuelve <code>{ pedidos, total }</code> contando solo las filas cuya fecha empieza con ese día y que no estén <code>cancelado</code>. El total se redondea a 2 decimales.</span></label></li><li><label><input type="checkbox" id="p7"><span>Parte B. Escribe <code>porEstado(filas)</code>: devuelve un objeto con cuántos pedidos hay por estado, por ejemplo <code>{ recibido: 2, entregado: 1 }</code>.</span></label></li></ul>
+      <details><summary>💡 Pista 1: Orden de columnas</summary><p>Fecha, Pedido, Telefono, Productos, Total, Entrega, Direccion, Pago, Estado: la fila es un arreglo con esos nueve valores en ese orden. <code>items.map(...).join("; ")</code> arma la columna de productos.</p></details>
+      <details><summary>💡 Pista 2: Comparar el secreto sin romperse</summary><p>Envuelve <code>JSON.parse</code> en <code>try/catch</code>. Después comprueba <code>typeof datos.secreto === "string"</code> y compara con <code>===</code>. Recuerda devolver <code>false</code> si el secreto esperado es una cadena vacía.</p></details>
+      <details><summary>💡 Pista 3: Sumar sin errores de decimales</summary><p>Suma en céntimos: <code>Math.round(total * 100)</code> por fila, y divide entre 100 al final. Así <code>0.1 + 0.2</code> no te da <code>0.30000000000000004</code>.</p></details>
+
+      <section class="checker" id="comprobador" aria-labelledby="t-chk">
+        <h2 id="t-chk">🔎 Comprueba tu trabajo</h2>
+        <p>Pega tu código y pulsa <strong>Comprobar</strong>. La revisión ocurre en tu navegador; nada se envía a ningún sitio. Cada punto en rojo incluye una pista. Pega solo el JavaScript, <strong>sin</strong> las etiquetas <code>&lt;script&gt;</code>.</p>
+        <label for="chk-code">Tu código de JavaScript</label>
+        <textarea id="chk-code" rows="10" spellcheck="false" placeholder="Pega aquí tus funciones"></textarea>
+        <div class="chk-actions"><button class="btn" type="button" id="chk-run">Comprobar</button><button class="icon-btn" type="button" id="chk-clear">Limpiar</button></div>
+        <p class="chk-sum" id="chk-sum" aria-live="polite"></p>
+        <ul class="chk-list" id="chk-list"></ul>
+        <script type="application/json" id="checks">{"mode": "js", "scaffold": "", "width": 800, "checks": [{"d": "`pedidoAFila` devuelve 9 columnas en el orden correcto", "h": "Fecha ISO, id, teléfono, productos, total, entrega, dirección, pago, estado.", "t": "var p={id:\"LE-1\",telefono:\"51999000111\",items:[{nombre:\"Leche entera 1 L\",cantidad:2,precio:4.3}],total:8.6,entrega:\"recojo\",direccion:null,pago:\"efectivo\",estado:\"recibido\",creadoEn:Date.UTC(2026,9,7,15,0,25)};var f=pedidoAFila(p);return f.length===9 && f[0]===\"2026-10-07T15:00:25.000Z\" && f[1]===\"LE-1\" && f[2]===\"51999000111\" && f[4]===8.6 && f[8]===\"recibido\""}, {"d": "`pedidoAFila` une los productos con punto y coma", "h": "Usa `${cantidad} x ${nombre}` y `join(\"; \")`.", "t": "var p={id:\"A\",telefono:\"1\",items:[{nombre:\"Leche\",cantidad:2},{nombre:\"Arroz\",cantidad:1}],total:1,entrega:\"recojo\",direccion:null,pago:\"yape\",estado:\"recibido\",creadoEn:0};return pedidoAFila(p)[3]===\"2 x Leche; 1 x Arroz\""}, {"d": "`pedidoAFila` deja la dirección vacía si es `null` y la copia si existe", "h": "Usa `pedido.direccion ?? \"\"`.", "t": "var b={id:\"A\",telefono:\"1\",items:[],total:0,entrega:\"delivery\",pago:\"yape\",estado:\"recibido\",creadoEn:0};return pedidoAFila(Object.assign({},b,{direccion:null}))[6]===\"\" && pedidoAFila(Object.assign({},b,{direccion:\"Jr. Los Pinos 123\"}))[6]===\"Jr. Los Pinos 123\""}, {"d": "`autorizado` acepta el secreto correcto", "h": "Parsea el JSON y compara `datos.secreto` con el esperado.", "t": "return autorizado(JSON.stringify({secreto:\"abc123\",accion:\"x\"}),\"abc123\")===true"}, {"d": "`autorizado` rechaza secreto equivocado, ausente o JSON inválido", "h": "Usa try/catch alrededor de JSON.parse y devuelve false.", "t": "return autorizado(JSON.stringify({secreto:\"mal\"}),\"abc123\")===false && autorizado(JSON.stringify({accion:\"x\"}),\"abc123\")===false && autorizado(\"esto no es json\",\"abc123\")===false"}, {"d": "`autorizado` rechaza si el secreto esperado está vacío", "h": "Un secreto vacío no protege nada: devuelve false aunque coincida.", "t": "return autorizado(JSON.stringify({secreto:\"\"}),\"\")===false && autorizado(\"{}\",\"\")===false"}, {"d": "`resumenDelDia` cuenta y suma solo ese día, sin cancelados", "h": "Filtra con `fila[0].startsWith(dia)` y `fila[8] !== \"cancelado\"`; el total es la columna 4.", "t": "var f=[[\"2026-10-07T10:00:00.000Z\",\"A\",\"1\",\"x\",0.1,\"recojo\",\"\",\"yape\",\"recibido\"],[\"2026-10-07T11:00:00.000Z\",\"B\",\"1\",\"x\",0.2,\"recojo\",\"\",\"yape\",\"entregado\"],[\"2026-10-07T12:00:00.000Z\",\"C\",\"1\",\"x\",50,\"recojo\",\"\",\"yape\",\"cancelado\"],[\"2026-10-06T12:00:00.000Z\",\"D\",\"1\",\"x\",9,\"recojo\",\"\",\"yape\",\"recibido\"]];var r=resumenDelDia(f,\"2026-10-07\");return r.pedidos===2 && r.total===0.3"}, {"d": "`porEstado` cuenta pedidos por estado", "h": "Recorre las filas y suma 1 en `conteo[fila[8]]`.", "t": "var f=[[0,0,0,0,0,0,0,0,\"recibido\"],[0,0,0,0,0,0,0,0,\"recibido\"],[0,0,0,0,0,0,0,0,\"entregado\"]];var r=porEstado(f);return r.recibido===2 && r.entregado===1 && Object.keys(porEstado([])).length===0"}]}</script>
+      </section>
+      <details>
+        <summary>✅ Ver una solución posible</summary>
+        <p>Intenta resolverlo antes de mirar. Tu versión puede ser distinta y también correcta.</p>
+        <div class="code">
+  <div class="code-head"><span>funciones.js</span><button class="copy" type="button">Copiar</button></div>
+<pre><code>function pedidoAFila(p) {
+  return [
+    new Date(p.creadoEn).toISOString(),
+    p.id,
+    p.telefono,
+    p.items.map((i) =&gt; `${i.cantidad} x ${i.nombre}`).join(&quot;; &quot;),
+    p.total,
+    p.entrega,
+    p.direccion ?? &quot;&quot;,
+    p.pago,
+    p.estado,
+  ];
+}
+
+function autorizado(cuerpo, secreto) {
+  if (!secreto) return false;
+  let datos;
+  try { datos = JSON.parse(cuerpo); } catch { return false; }
+  return typeof datos?.secreto === &quot;string&quot; &amp;&amp; datos.secreto === secreto;
+}
+
+function resumenDelDia(filas, dia) {
+  let pedidos = 0;
+  let centimos = 0;
+  for (const fila of filas) {
+    if (!String(fila[0]).startsWith(dia) || fila[8] === &quot;cancelado&quot;) continue;
+    pedidos++;
+    centimos += Math.round(fila[4] * 100);
+  }
+  return { pedidos, total: centimos / 100 };
+}
+
+function porEstado(filas) {
+  const conteo = {};
+  for (const fila of filas) conteo[fila[8]] = (conteo[fila[8]] ?? 0) + 1;
+  return conteo;
+}</code></pre>
+</div>
+      </details>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="./"><small>← Anterior</small>Volver a lección 16</a>
+        <a class="next" href="../17-plantillas/"><small>Siguiente →</small>Plantillas de mensaje</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Ejercicio de lección 16 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Ejercicio:%20Panel%20del%20dueño%20con%20Google%20Sheets&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/16-panel-con-google-sheets/ejercicio.html" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>
