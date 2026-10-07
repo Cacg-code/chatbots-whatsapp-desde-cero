@@ -9,6 +9,9 @@ objetivos:
 - Nombrar las piezas de la API oficial: cuenta de WhatsApp Business, número, app de Meta, token y webhook.
 - Aplicar la regla de la ventana de 24 horas para decidir qué mensajes puedes enviar.
 - Explicar por qué las librerías no oficiales son un riesgo para un negocio.
+fuentes:
+- Documentación de WhatsApp Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/
+- Política de WhatsApp Business | https://www.whatsapp.com/legal/business-policy
 ---
 ## Qué es (y qué no es) un bot de WhatsApp
 

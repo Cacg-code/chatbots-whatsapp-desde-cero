@@ -987,7 +987,7 @@
       });
       $('#pp-meta', panel).addEventListener('change', function (e) { store.set('meta', e.target.value); renderPanel(); checkLogros(); });
       var code = $('#pp-code', panel), snapshot = function () {
-        var o = {}; store.keys().forEach(function (k) { if (/^(leccion:|logro:|actividad|meta|logros|racha|tema|check:)/.test(k)) o[k] = store.get(k); });
+        var o = {}; store.keys().forEach(function (k) { if (/^(leccion:|logro:|actividad|meta|logros|racha|tema|check:|cuaderno:|repaso:)/.test(k)) o[k] = store.get(k); });
         return btoa(unescape(encodeURIComponent(JSON.stringify(o))));
       };
       code.value = snapshot();
@@ -997,7 +997,7 @@
         $('#pp-restore', panel).onclick = function () {
           try {
             var o = JSON.parse(decodeURIComponent(escape(atob(code.value.trim()))));
-            Object.keys(o).forEach(function (k) { if (/^(leccion:|logro:|actividad|meta|logros|racha|tema|check:)/.test(k)) store.set(k, o[k]); });
+            Object.keys(o).forEach(function (k) { if (/^(leccion:|logro:|actividad|meta|logros|racha|tema|check:|cuaderno:|repaso:)/.test(k)) store.set(k, o[k]); });
             say('✅ Progreso restaurado'); location.reload();
           } catch (e) { say('⚠ El código no es válido'); }
         };
@@ -1104,3 +1104,6 @@
     addEventListener('load', function () { navigator.serviceWorker.register(base + 'sw.js', { scope: base }).catch(function () {}); });
   } catch (err) { /* opcional */ }
 })();
+
+// Herramientas de estudio personal (cuaderno, repaso espaciado)
+(function () { var cs = document.currentScript; if (!cs || !cs.src) return; var s = document.createElement('script'); s.src = cs.src.replace(/curso\.js(\?.*)?$/, 'estudio.js'); s.defer = true; document.head.appendChild(s); })();

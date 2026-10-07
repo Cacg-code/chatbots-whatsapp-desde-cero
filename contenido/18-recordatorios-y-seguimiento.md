@@ -9,6 +9,9 @@ objetivos:
 - Leer y ejecutar `pedidosParaRecordar` y `carritosAbandonados`, y razonar sobre sus umbrales.
 - Configurar un cron trigger de Cloudflare y simular su ejecución con un almacenamiento falso.
 - Aplicar baja (opt-out), frecuencia máxima y horario razonable antes de enviar cualquier aviso.
+fuentes:
+- Cron Triggers de Workers | https://developers.cloudflare.com/workers/configuration/cron-triggers/
+- Plantillas de mensaje (Meta) | https://developers.facebook.com/docs/whatsapp/message-templates
 ---
 ## Por qué un bot necesita un reloj
 

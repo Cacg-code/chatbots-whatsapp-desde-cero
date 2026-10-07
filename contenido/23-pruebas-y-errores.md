@@ -9,6 +9,9 @@ objetivos:
 - Registrar eventos útiles en el log sin filtrar tokens ni teléfonos completos.
 - Reintentar un envío fallido con espera creciente, y saber cuándo no conviene reintentar.
 - Interpretar los errores 131xxx más comunes y decidir qué hacer con cada uno.
+fuentes:
+- Node.js: módulo de pruebas | https://nodejs.org/docs/latest-v22.x/api/test.html
+- Documentación de WhatsApp Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/
 ---
 ## Por qué probar un bot es distinto
 

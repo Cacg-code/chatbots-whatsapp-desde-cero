@@ -9,6 +9,9 @@ objetivos:
 - Traducir un `Update` de Telegram a la entrada del motor y las respuestas del motor a llamadas `sendMessage` con teclado en línea.
 - Probar el adaptador en local con un `fetch` falso, sin red ni credenciales.
 - Reconocer qué se parece y qué no entre Telegram y la Cloud API de WhatsApp.
+fuentes:
+- Telegram Bot API | https://core.telegram.org/bots/api
+- Tutorial de bots de Telegram | https://core.telegram.org/bots/tutorial
 ---
 ## Por qué practicar con Telegram
 

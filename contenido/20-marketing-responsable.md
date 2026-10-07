@@ -9,6 +9,9 @@ objetivos:
 - Implementar la baja inmediata (BAJA/STOP) y una regla de frecuencia máxima como funciones puras.
 - Distinguir una promoción útil de spam con ejemplos del minimarket.
 - Interpretar la calidad del número, los límites de envío y las métricas para medir la respuesta.
+fuentes:
+- Política de WhatsApp Business | https://www.whatsapp.com/legal/business-policy
+- Plantillas de mensaje (Meta) | https://developers.facebook.com/docs/whatsapp/message-templates
 ---
 ## Para qué sirve (y para qué no) el marketing por WhatsApp
 

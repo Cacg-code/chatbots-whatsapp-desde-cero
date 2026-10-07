@@ -9,6 +9,8 @@ objetivos:
 - Anotar el Phone Number ID, el ID de la cuenta y el App Secret sin exponerlos.
 - Distinguir un token temporal de un token permanente de usuario del sistema y saber cuándo usar cada uno.
 - Enviar el primer mensaje de prueba y abrir la ventana de 24 horas respondiendo desde tu celular.
+fuentes:
+- Primeros pasos con la Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/get-started
 ---
 ## Qué vas a configurar y por qué en este orden
 

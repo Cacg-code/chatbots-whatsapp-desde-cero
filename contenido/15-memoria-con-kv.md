@@ -9,6 +9,8 @@ objetivos:
 - Leer y guardar JSON en KV con `get` y `put` usando `expirationTtl`, y comprobar el vencimiento con un reloj controlado.
 - Reconocer las limitaciones de KV (consistencia eventual, sin atomicidad, un `list` de máximo 1000 claves, cuotas del plan gratuito).
 - Decidir cuándo conviene pasar a D1 o Durable Objects.
+fuentes:
+- Cloudflare KV | https://developers.cloudflare.com/kv/
 ---
 ## Por qué el Worker necesita memoria
 

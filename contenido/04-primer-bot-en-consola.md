@@ -9,6 +9,9 @@ objetivos:
 - Implementar saludo, menú de tres opciones y respuestas por palabras clave, ignorando mayúsculas y tildes.
 - Organizar un proyecto con las carpetas `src/` y `test/` y el archivo `consola.js`.
 - Escribir y ejecutar la primera prueba con `node:test`.
+fuentes:
+- JavaScript en MDN | https://developer.mozilla.org/es/docs/Web/JavaScript
+- Node.js: documentación | https://nodejs.org/docs/latest/api/
 ---
 ## Por qué empezar por la consola
 

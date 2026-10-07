@@ -9,6 +9,9 @@ objetivos:
 - Justificar la idempotencia con claves `visto:<wamid>` y el uso de `ctx.waitUntil` para responder 200 de inmediato.
 - Levantar el Worker en tu computadora con `wrangler dev` y probarlo con `curl` y una firma real.
 - Probar la lógica del servidor sin red usando un KV falso y un `fetch` falso.
+fuentes:
+- Firma HMAC con Web Crypto (MDN) | https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/sign
+- Workers: Request | https://developers.cloudflare.com/workers/runtime-apis/request/
 ---
 ## Una carcasa alrededor del motor
 

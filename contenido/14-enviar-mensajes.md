@@ -9,6 +9,9 @@ objetivos:
 - Enviar un mensaje con enviarMensaje sin filtrar el token en los errores.
 - Interpretar los códigos de error más comunes de la API y decidir qué hacer en cada caso.
 - Explicar por qué una respuesta 200 no garantiza que el cliente recibió el mensaje.
+fuentes:
+- Enviar mensajes (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages
+- Fetch API en MDN | https://developer.mozilla.org/es/docs/Web/API/Fetch_API
 ---
 ## La petición básica
 

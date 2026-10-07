@@ -9,6 +9,9 @@ objetivos:
 - Integrar la atención humana con horario, aviso al dueño y retorno automático al bot.
 - Desplegar el bot en Cloudflare y conectarlo a un número de prueba de WhatsApp con firma y secretos bien configurados.
 - Verificar tu trabajo con una lista de entrega y una rúbrica de evaluación.
+fuentes:
+- Documentación de WhatsApp Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/
+- Cloudflare Workers | https://developers.cloudflare.com/workers/
 ---
 ## Qué vas a construir
 

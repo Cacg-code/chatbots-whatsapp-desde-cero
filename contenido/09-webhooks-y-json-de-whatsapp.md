@@ -9,6 +9,9 @@ objetivos:
 - Explicar y probar el handshake de verificación (`hub.mode`, `hub.verify_token`, `hub.challenge`).
 - Calcular y comprobar la firma `X-Hub-Signature-256` con HMAC-SHA256 sobre el cuerpo crudo.
 - Justificar por qué un servidor de bot debe ignorar con elegancia todo lo que no entiende.
+fuentes:
+- Webhooks de la Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks
+- JSON en MDN | https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/JSON
 ---
 ## Del bot en consola al bot que escucha
 

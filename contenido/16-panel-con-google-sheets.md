@@ -9,6 +9,9 @@ objetivos:
 - Publicar el script como aplicación web y llamarlo desde el Worker con `fetch`, sin romper el bot si la hoja falla.
 - Convertir un pedido en una fila ordenada y proteger los datos personales de los clientes.
 - Armar una pestaña de panel con totales del día y pedidos por estado.
+fuentes:
+- Google Sheets API | https://developers.google.com/sheets/api
+- Google Apps Script | https://developers.google.com/apps-script
 ---
 ## Por qué una hoja de cálculo es un buen panel
 

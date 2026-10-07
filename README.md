@@ -25,6 +25,12 @@ Un WhatsApp de práctica que corre en tu navegador con el mismo motor del bot de
 - **Panel JSON** con lo que entra y sale del motor, y reloj simulado para probar la ventana de 24 h.
 - Es opcional: el curso también se sigue con la terminal (`consola.js`).
 
+## Acerca de este material
+
+Lo hace **un estudiante** con ayuda de inteligencia artificial, como aporte gratuito a la comunidad de desarrolladores. No es un curso oficial, no da títulos ni certificados y puede tener errores, sobre todo en datos que Meta cambia (precios, límites, menús). Contrástalo con la [documentación oficial de WhatsApp Business Platform](https://developers.facebook.com/docs/whatsapp/) y avísame de cualquier fallo en los [issues](https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new).
+
+📝 Lee también [lo que aprendí construyendo esto](https://cacg-code.github.io/chatbots-whatsapp-desde-cero/aprendizajes/): decisiones, errores reales y qué haría distinto.
+
 ## Qué vas a construir
 
 Un bot para un negocio ficticio, **Minimarket La Esquina**: muestra el catálogo, arma el carrito, toma el pedido (recojo o delivery, Yape o efectivo), guarda la sesión de cada cliente, avisa al dueño, envía recordatorios con plantillas y pasa a una persona cuando hace falta. La misma base sirve para citas, pedidos o preguntas frecuentes de cualquier negocio.

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lo que aprendí construyendo esto · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Decisiones, errores reales y qué haría distinto al construir este curso.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/aprendizajes/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#0b7a75">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Lo que aprendí construyendo esto · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Decisiones, errores reales y qué haría distinto al construir este curso.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/aprendizajes/">
+  <meta property="og:image" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/assets/compartir.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo"><img src="../assets/favicon.svg" alt="" width="34" height="34"></span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido">
+    <article style="max-width:760px;margin:0 auto">
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Aprendizajes</div>
+        <h1>Lo que aprendí construyendo esto</h1>
+      </header>
+<h2 id="que-es-esta-pagina"><span class="n">1.</span>Qué es esta página</h2>
+<p>Un curso se ve limpio cuando está terminado, pero el camino tuvo decisiones y tropiezos. Aquí quedan escritos, porque revisar los errores enseña más que mirar solo el resultado. El material lo hace <strong>un estudiante con ayuda de inteligencia artificial</strong>, así que esta página también sirve para saber dónde conviene desconfiar y verificar.</p>
+<h2 id="decisiones-que-tome"><span class="n">2.</span>Decisiones que tomé</h2>
+<ul>
+<li><strong>Reglas primero, IA después.</strong> El bot de referencia no usa IA: es un motor de reglas fácil de probar y de explicar. La IA entra como complemento (lección 22), nunca como cerebro.</li>
+<li><strong>Una función pura como centro.</strong> <code>procesar(sesion, entrada)</code> devuelve la nueva sesión y las respuestas, sin tocar nada fuera. Gracias a eso se puede probar en la consola, en el simulador y en el servidor con el mismo código.</li>
+<li><strong>Un negocio ficticio como hilo.</strong> Todo el curso usa «Minimarket La Esquina»: un solo ejemplo, repetido, se entiende mejor que muchos ejemplos distintos.</li>
+<li><strong>Un simulador en el navegador.</strong> Sin cuenta de Meta se puede practicar el 80 % del curso; la cuenta real solo hace falta para conectar.</li>
+</ul>
+<h2 id="errores-que-aparecieron-y-como-se-corrig"><span class="n">3.</span>Errores que aparecieron (y cómo se corrigieron)</h2>
+<ol>
+<li><strong>Mensajes perdidos por marcar «visto» demasiado pronto.</strong> El servidor guardaba <code>visto:&lt;id&gt;</code> antes de enviar la respuesta; si el envío fallaba, Meta reintentaba y el bot ignoraba el reintento por «ya visto». Se corrigió deshaciendo la marca si el envío falla, y se añadió una prueba que lo reproduce.</li>
+<li><strong>Una lección decía que la sesión vive en memoria.</strong> En un servidor sin estado eso se pierde en cada petición; lo correcto era guardarla en Cloudflare KV. Se corrigió el texto y el ejemplo.</li>
+<li><strong>Comandos que solo funcionaban en Bash.</strong> Algunos ejercicios usaban <code>printf … |</code>, que en PowerShell no existe. Se añadieron alternativas para Windows.</li>
+<li><strong>Enlaces rotos entre lecciones.</strong> Se automatizó la revisión de enlaces para que no vuelvan a pasar sin que nadie lo note.</li>
+<li><strong>Datos de Meta que cambian.</strong> Precios, límites y nombres de menús varían; por eso hay avisos «Verifica este dato» con enlace a la documentación oficial en lugar de cifras inventadas.</li>
+</ol>
+<h2 id="que-haria-distinto"><span class="n">4.</span>Qué haría distinto</h2>
+<ul>
+<li>Probar el flujo completo con una cuenta real de Meta <strong>antes</strong> de escribir las lecciones de conexión (12 a 14), no después.</li>
+<li>Escribir las pruebas automáticas desde la primera lección, no al final.</li>
+<li>Pedir a otra persona que haga el curso de cero y anote dónde se atasca.</li>
+</ul>
+<h2 id="que-me-llevo"><span class="n">5.</span>Qué me llevo</h2>
+<ul>
+<li>Que escribir una explicación obliga a entender: varias veces la lección salió mal hasta que el código la contradijo.</li>
+<li>Que una prueba automática vale más que «debería funcionar».</li>
+<li>Que decir con claridad qué está verificado y qué no genera más confianza que aparentar certeza.</li>
+</ul>
+<h2 id="como-ayudarme-a-mejorarlo"><span class="n">6.</span>Cómo ayudarme a mejorarlo</h2>
+<p>Si encuentras un error, un dato desactualizado o algo confuso, abre un <em>issue</em> en el repositorio. Cualquier corrección se agradece.</p>
+      <nav class="pager" aria-label="Navegación"><a href="../"><small>← Inicio</small>Temario del curso</a></nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Aprendizajes · Material de estudio gratuito, hecho por un estudiante con ayuda de inteligencia artificial como aporte a la comunidad. Contrástalo con la documentación oficial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Chatbots%20de%20WhatsApp%20desde%20cero&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/aprendizajes/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>

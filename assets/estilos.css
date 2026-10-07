@@ -870,3 +870,4 @@ html:root[data-skin="neon"][data-theme="dark"] { --accent: #f0abfc; --accent-sof
 .sim-steps li { margin: .25rem 0; }
 @media (max-width: 560px) { .lessons > li.mod-head { padding: .85rem; gap: .7rem; } .mod-n { width: 2.2rem; height: 2.2rem; } .mod-prog i { width: 60px; } }
 .lessons > li.mod-head[hidden] { display: none; }
+.aprend-link{margin:1.5rem 0 3rem;font-weight:600}

@@ -9,6 +9,9 @@ objetivos:
 - Redactar una plantilla con variables y botones respetando sus límites, y crearla desde el panel o con la API.
 - Enviar una plantilla con parámetros usando `construirPlantilla` y manejar el error de una plantilla inexistente.
 - Recibir la respuesta de un botón de respuesta rápida y diseñar los textos para que el bot los entienda.
+fuentes:
+- Plantillas de mensaje (Meta) | https://developers.facebook.com/docs/whatsapp/message-templates
+- Enviar plantillas (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-message-templates
 ---
 ## Por qué existen las plantillas
 

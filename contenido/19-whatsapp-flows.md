@@ -9,6 +9,8 @@ objetivos:
 - Construir el mensaje que abre un Flow y leer la respuesta (`nfm_reply`) que llega al webhook.
 - Distinguir un Flow sin endpoint de uno con endpoint y saber qué exige este último (cifrado, respuestas rápidas).
 - Decidir con criterio cuándo usar un Flow y cuándo basta con botones o texto.
+fuentes:
+- WhatsApp Flows (Meta) | https://developers.facebook.com/docs/whatsapp/flows
 ---
 ## El problema: pedir tres datos por chat es incómodo
 

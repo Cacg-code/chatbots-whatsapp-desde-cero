@@ -9,6 +9,8 @@ objetivos:
 - Cotizar con una plantilla de propuesta, hitos y modelo mensual o pago único, y calcular tu margen.
 - Aclarar quién paga a Meta y qué costos pasan al cliente.
 - Preparar una demo con el simulador sin tocar datos del cliente y un contrato mínimo con acuerdo de datos.
+fuentes:
+- Precios de WhatsApp Business Platform (Meta) | https://developers.facebook.com/docs/whatsapp/pricing
 ---
 ## Del aprendizaje al servicio
 

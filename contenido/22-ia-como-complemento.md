@@ -9,6 +9,8 @@ objetivos:
 - Pedir a una IA una respuesta estructurada y validarla con código antes de usarla.
 - Evitar alucinaciones comprobando todo contra el catálogo y rechazando precios inventados.
 - Estimar el costo por conversación y conocer las reglas de Meta sobre IA en WhatsApp.
+fuentes:
+- Documentación de WhatsApp Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/
 ---
 ## Qué puede hacer la IA por tu bot (y qué no)
 

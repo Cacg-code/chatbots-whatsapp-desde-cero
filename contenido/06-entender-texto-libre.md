@@ -9,6 +9,8 @@ objetivos:
 - Buscar productos por sinónimos, con plurales y errores de tipeo, y resolver ambigüedades.
 - Detectar la intención de un mensaje con frases clave, orden de prioridad y reglas para mensajes cortos.
 - Reconocer los límites de un bot de reglas y decidir qué hacer cuando no entiende.
+fuentes:
+- Expresiones regulares en MDN | https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 ---
 ## El problema: la gente no escribe como tú programas
 

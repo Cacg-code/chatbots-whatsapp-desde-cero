@@ -9,6 +9,8 @@ objetivos:
 - Entender cuándo y cómo el motor produce el pedido final (`pedidoNuevo`) y qué pasa después.
 - Permitir al cliente modificar o cancelar sin perder su carrito.
 - Probar conversaciones completas con `conversacion()` y con el simulador `consola.js`.
+fuentes:
+- Node.js: módulo de pruebas | https://nodejs.org/docs/latest-v22.x/api/test.html
 ---
 ## De carrito a pedido
 

@@ -9,6 +9,8 @@ objetivos:
 - Calcular el costo mensual de un bot pequeño con una función y tarifas parametrizables.
 - Estimar el costo de infraestructura en Cloudflare Workers y KV y el costo total para el cliente.
 - Definir y registrar métricas útiles: resolución sin humano, pedidos por conversación, tiempos, lectura de plantillas y bajas.
+fuentes:
+- Precios de WhatsApp Business Platform (Meta) | https://developers.facebook.com/docs/whatsapp/pricing
 ---
 ## Antes de empezar: los números que verás son de ejemplo
 

@@ -213,7 +213,7 @@ def cabecera(titulo, desc, ruta, prof, brand_href):
 
 def pie(texto, ruta, prof, titulo):
     t = esc(titulo).replace(" ", "%20")
-    return (f'  <footer class="site-footer">{esc(SITE)} · {texto} · Material elaborado con ayuda de inteligencia artificial.'
+    return (f'  <footer class="site-footer">{esc(SITE)} · {texto} · Material de estudio gratuito, hecho por un estudiante con ayuda de inteligencia artificial como aporte a la comunidad. Contrástalo con la documentación oficial.'
             f'<span class="foot-links"><a href="https://github.com/{REPO}/issues/new?title=%5BError%5D%20{t}&amp;pagina={BASE}{ruta}" target="_blank" rel="noopener">Reportar un error en esta página</a> · '
             f'<a href="https://github.com/{REPO}/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · '
             f'<a href="https://github.com/{REPO}/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>\n'
@@ -269,6 +269,11 @@ def construir_leccion(s):
     h = h.replace("@@ACCIONES@@", acc)
     toc = "".join(f'<li><a href="#{i}">{esc(t)}</a></li>' for i, t in secs)
     obj = "".join(f"<li>{inline(o)}</li>" for o in meta.get("objetivos", []))
+    fuentes = ""
+    if meta.get("fuentes"):
+        its = "".join(f'<li><a href="{esc(u.strip())}" target="_blank" rel="noopener">{esc(n.strip())}</a></li>' for n, u in (f.rsplit("|", 1) for f in meta["fuentes"]))
+        fuentes = ('<div class="callout nota">\n<p class="callout-title">📚 Para profundizar (fuentes oficiales)</p>\n'
+                   f'<ul>{its}</ul>\n<p>Este material lo hace un estudiante con ayuda de IA: ante cualquier duda, manda la documentación oficial.</p></div>\n')
     meta_li = f'<li>⏱ {meta["minutos"]} minutos</li><li>📶 Nivel: {esc(meta["nivel"])}</li>' + ("<li>🧩 Incluye ejercicio</li>" if tiene_ej else "")
     h += f'''
   <main class="wrap lesson-layout" id="contenido">
@@ -290,7 +295,7 @@ def construir_leccion(s):
 
 {cuerpo_h}
 
-<div class="complete"><button class="btn" type="button" data-complete="{clave(s)}">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+{fuentes}<div class="complete"><button class="btn" type="button" data-complete="{clave(s)}">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
 '''
     if tiene_ej:
         h += '''
@@ -501,6 +506,7 @@ def construir_portada():
     if CUR.get("proyecto") and CUR["proyecto"] in INFO:
         h += '      <li class="mod-head" data-mod="fin"><span class="mod-n">★</span><div class="mod-txt"><h3>Cierre del curso</h3><p>Junta todo y entrega un bot real.</p></div></li>\n' + tarjeta(CUR["proyecto"])
     h += "    </ul>\n"
+    h += '    <p class="aprend-link"><a href="aprendizajes/">📝 Lo que aprendí construyendo esto: decisiones y errores reales →</a></p>\n'
     h += "  </main>\n\n" + pie("Temario", "", "", SITE)
     (RAIZ / "index.html").write_text(h, encoding="utf8")
 
@@ -512,8 +518,30 @@ def tarjeta(s):
             f'        <p>{esc(m["resumen"])}</p><span class="tag open">Disponible</span></a></li>\n')
 
 
+def construir_aprendizajes():
+    cuerpo_h, secs = procesar((RAIZ / "contenido" / "aprendizajes.md").read_text(encoding="utf8"))
+    h = cabecera(f"Lo que aprendí construyendo esto · {SITE}", "Decisiones, errores reales y qué haría distinto al construir este curso.", "aprendizajes/", "../", "../")
+    h = h.replace("@@ACCIONES@@", '<a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>')
+    h += f'''
+  <main class="wrap" id="contenido">
+    <article style="max-width:760px;margin:0 auto">
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">{esc(SITE)}</a> › Aprendizajes</div>
+        <h1>Lo que aprendí construyendo esto</h1>
+      </header>
+{cuerpo_h}
+      <nav class="pager" aria-label="Navegación"><a href="../"><small>← Inicio</small>Temario del curso</a></nav>
+    </article>
+  </main>
+
+'''
+    h += pie("Aprendizajes", "aprendizajes/", "../", SITE)
+    (RAIZ / "aprendizajes").mkdir(exist_ok=True)
+    (RAIZ / "aprendizajes" / "index.html").write_text(h, encoding="utf8")
+
+
 def construir_extras():
-    urls = [BASE, f"{BASE}simulador/"] + [f"{BASE}{s}/" for s in ORDEN] + [f"{BASE}{s}/ejercicio.html" for s in ORDEN if (RAIZ / "contenido" / f"{s}.ej.md").exists()]
+    urls = [BASE, f"{BASE}simulador/", f"{BASE}aprendizajes/"] + [f"{BASE}{s}/" for s in ORDEN] + [f"{BASE}{s}/ejercicio.html" for s in ORDEN if (RAIZ / "contenido" / f"{s}.ej.md").exists()]
     sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"  <url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n"
     (RAIZ / "sitemap.xml").write_text(sm, encoding="utf8")
     (RAIZ / "manifest.webmanifest").write_text(json.dumps({
@@ -529,5 +557,6 @@ for s in ORDEN:
     if (RAIZ / "contenido" / f"{s}.ej.md").exists():
         construir_ejercicio(s)
 construir_portada()
+construir_aprendizajes()
 construir_extras()
 print(f"✓ {len(ORDEN)} lecciones generadas")

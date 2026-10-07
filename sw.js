@@ -1,10 +1,10 @@
 // Service worker: uso sin conexión. Sube VERSION cuando cambies el sitio.
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'chatbots-whatsapp-' + VERSION;
 const ROOT = new URL('./', self.location).href;
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll([ROOT, ROOT + 'assets/estilos.css', ROOT + 'assets/curso.js', ROOT + 'assets/indice.json', ROOT + 'assets/favicon.svg', ROOT + '404.html'])).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll([ROOT, ROOT + 'assets/estilos.css', ROOT + 'assets/curso.js', ROOT + 'assets/estudio.js', ROOT + 'assets/indice.json', ROOT + 'assets/favicon.svg', ROOT + '404.html'])).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k.startsWith('chatbots-whatsapp-') && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));

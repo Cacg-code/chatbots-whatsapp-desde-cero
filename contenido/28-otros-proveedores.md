@@ -9,6 +9,8 @@ objetivos:
 - Elegir entre API directa, proveedor o sandbox según el perfil del proyecto.
 - Justificar por qué Baileys y whatsapp-web.js no son una opción para un negocio.
 - Aislar las diferencias de cada proveedor en un adaptador para no reescribir el motor.
+fuentes:
+- Documentación de WhatsApp Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/
 ---
 ## El mapa de opciones
 

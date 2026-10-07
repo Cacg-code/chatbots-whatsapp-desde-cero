@@ -9,6 +9,9 @@ objetivos:
 - Aplicar mínimo privilegio, validación de entradas, limitación de tasa e idempotencia.
 - Decidir qué datos guardar, por cuánto tiempo y cómo borrarlos a petición del cliente.
 - Redactar una política de privacidad básica y revisar el bot con una lista de comprobación de seguridad.
+fuentes:
+- OWASP Top 10 | https://owasp.org/www-project-top-ten/
+- Secretos en Workers | https://developers.cloudflare.com/workers/configuration/secrets/
 ---
 ## Por qué un bot de negocio es un blanco
 

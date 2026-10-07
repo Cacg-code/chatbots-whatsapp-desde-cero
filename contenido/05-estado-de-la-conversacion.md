@@ -9,6 +9,9 @@ objetivos:
 - Describir la firma `procesar(sesion, entrada) -> { sesion, respuestas }` y por qué es una función pura.
 - Manejar eventos globales (cancelar, hablar con una persona) y botones viejos sin romper el flujo.
 - Escribir una mini máquina de estados que no muta la sesión recibida.
+fuentes:
+- Map en MDN | https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Map
+- JSON en MDN | https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/JSON
 ---
 ## Por qué un bot necesita memoria
 

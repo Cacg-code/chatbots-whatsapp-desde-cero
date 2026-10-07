@@ -9,6 +9,9 @@ objetivos:
 - Registrar la URL y el token de verificación en el panel de Meta y suscribirte al campo messages.
 - Leer en los registros un mensaje real y distinguirlo de un evento de estado.
 - Diagnosticar por qué un webhook no se verifica o no recibe mensajes.
+fuentes:
+- Webhooks de la Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks
+- Primeros pasos con la Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/get-started
 ---
 ## El objetivo: que Meta te hable a ti
 

@@ -9,6 +9,10 @@ objetivos:
 - Crear el namespace KV y cargar `VERIFY_TOKEN`, `WA_TOKEN` y `APP_SECRET` con `wrangler secret put`.
 - Comprobar el empaquetado con `wrangler deploy --dry-run` y describir qué hará el despliegue real.
 - Observar el bot en producción con `wrangler tail` y revertir con `wrangler rollback`.
+fuentes:
+- Cloudflare Workers | https://developers.cloudflare.com/workers/
+- Wrangler (CLI) | https://developers.cloudflare.com/workers/wrangler/
+- Secretos en Workers | https://developers.cloudflare.com/workers/configuration/secrets/
 ---
 ## Qué significa «desplegar»
 

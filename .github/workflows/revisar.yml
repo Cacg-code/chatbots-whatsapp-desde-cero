@@ -13,3 +13,15 @@ jobs:
           python-version: "3.12"
       - name: Enlaces, metadatos, sitemap e índice del buscador
         run: python scripts/revisar.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Pruebas del bot de referencia
+        working-directory: codigo
+        run: npm test
+      - name: Comprobaciones de los ejercicios (con su solución)
+        run: node scripts/probar-ejercicios.mjs
+      - name: El sitio está al día con el contenido
+        run: |
+          python scripts/construir.py
+          git diff --exit-code --stat -- . ':!assets/indice.json' ':!sitemap.xml' || (echo "Ejecuta python scripts/construir.py y sube los cambios" && exit 1)

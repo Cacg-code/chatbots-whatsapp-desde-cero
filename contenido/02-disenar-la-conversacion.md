@@ -9,6 +9,8 @@ objetivos:
 - Dibujar un flujo de conversación y convertirlo en un mapa de estados en tabla.
 - Respetar los límites de botones y listas de WhatsApp y decidir cuándo usar cada formato.
 - Diseñar el traspaso a una persona (handoff) y adaptar el diseño a otros negocios.
+fuentes:
+- Documentación de WhatsApp Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/
 ---
 ## Por qué se diseña antes de programar
 

@@ -9,6 +9,8 @@ objetivos:
 - Calcular si el negocio está abierto en la hora de Lima y adaptar el mensaje del traspaso.
 - Avisar al dueño respetando la ventana de 24 horas (texto libre o plantilla).
 - Evitar que un cliente quede esperando para siempre con un tiempo máximo de espera.
+fuentes:
+- Documentación de WhatsApp Cloud API (Meta) | https://developers.facebook.com/docs/whatsapp/cloud-api/
 ---
 ## Por qué todo bot necesita una salida a una persona
 

@@ -9,6 +9,9 @@ objetivos:
 - Distinguir una función pura de una función con efectos y explicar por qué un bot gana al separarlas.
 - Escribir código con `async/await`, leer y crear JSON y llamar a una API con `fetch`.
 - Guardar secretos en variables de entorno y escribir una prueba con `node:test`.
+fuentes:
+- JavaScript en MDN | https://developer.mozilla.org/es/docs/Web/JavaScript
+- Node.js: módulo de pruebas | https://nodejs.org/docs/latest-v22.x/api/test.html
 ---
 ## Qué necesitas saber (y qué no)
 

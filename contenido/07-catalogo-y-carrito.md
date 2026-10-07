@@ -9,6 +9,8 @@ objetivos:
 - Escribir un carrito con funciones puras e inmutables (agregar, quitar, cambiar cantidad).
 - Calcular totales en céntimos para evitar errores de decimales y formatear soles.
 - Conducir al cliente por el catálogo con listas, botones de cantidad y texto libre.
+fuentes:
+- JavaScript en MDN | https://developer.mozilla.org/es/docs/Web/JavaScript
 ---
 ## El catálogo es un dato, no código
 
