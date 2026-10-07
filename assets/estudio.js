@@ -69,6 +69,20 @@
       });
     });
 
+
+    // Fuentes oficiales (lista opcional en fuentes.json, junto a este script)
+    if (!/Para profundizar/.test(document.body.textContent)) {
+      var base = (document.currentScript && document.currentScript.src) || ($$('script[src*="estudio.js"]')[0] || {}).src;
+      if (base && window.fetch) {
+        fetch(base.replace(/estudio\.js.*$/, 'fuentes.json')).then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) {
+          var l = d[id]; if (!l || !l.length) return;
+          var box = document.createElement('div'); box.className = 'callout nota';
+          box.innerHTML = '<p class="callout-title">📚 Para profundizar (fuentes oficiales)</p><ul>' + l.map(function (f) { return '<li><a href="' + esc(f[1]) + '" target="_blank" rel="noopener">' + esc(f[0]) + '</a></li>'; }).join('') + '</ul><p>Este material lo hace un estudiante con ayuda de IA: ante cualquier duda, manda la documentación oficial.</p>';
+          sec.parentNode.insertBefore(box, sec);
+        }).catch(function () {});
+      }
+    }
+
     // Quiz: guardar las preguntas falladas para repasarlas más adelante
     $$('.quiz-q').forEach(function (q, qi) {
       var opts = $$('.opt', q), key = 'repaso:' + id + ':' + qi;
