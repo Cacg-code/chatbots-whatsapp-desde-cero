@@ -42,6 +42,10 @@ Cliente (WhatsApp) -> webhook -> motor de reglas -> respuesta -> Cliente
 | Producción y negocio | 23 Pruebas y errores · 24 Seguridad · 25 Atención humana · 26 Vender tu bot |
 | Proyecto final | El bot completo del minimarket |
 
+## Antes de empezar
+
+Necesitas lo básico de JavaScript. Si vienes de cero, haz primero [Desarrollo web desde cero](https://cacg-code.github.io/web-desde-cero/) (JavaScript y Node.js). Más trabajos del autor en el [portafolio Carlo · Dev](https://cacg-code.github.io/).
+
 ## Código de referencia
 
 La carpeta [`codigo/`](codigo/) contiene el bot terminado, con 112 pruebas (`npm test`) y una consola para conversar con él (`node consola.js`). Las lecciones se escriben contra ese código real.
