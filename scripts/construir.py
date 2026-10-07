@@ -477,6 +477,13 @@ def construir_portada():
       <section><h2 class="section-title" style="margin-top:0">Lo que construirás</h2><ul class="checks-list">{haras}</ul></section>
     </div>
 
+    <section class="sim-promo" aria-labelledby="sim-t">
+      <div><h2 id="sim-t">🧪 ¿Qué es el simulador?</h2>
+      <p>Es un WhatsApp de práctica que corre en tu navegador con el <strong>mismo motor</strong> del bot del curso. No necesita cuenta de Meta, ni internet, ni dinero: escribes, tocas botones y ves el JSON que viajaría por la API.</p>
+      <ol class="sim-steps"><li><b>Es opcional</b>: el curso se puede seguir con la terminal (<code>consola.js</code>), pero el simulador es más visual para las lecciones 5 a 8 y el proyecto.</li><li><b>Pruébalo</b> con los guiones guiados: hacer un pedido, cerrar la ventana de 24 h, escribir algo que no entiende.</li><li><b>Mira el JSON</b> para entender qué envía y recibe tu webhook.</li></ol>
+      <a class="btn" href="simulador/" style="text-decoration:none">Abrir el simulador con guía →</a></div>
+    </section>
+
     <h2 class="section-title" id="temario">Temario · ≈ {horas} {"hora" if horas == 1 else "horas"}</h2>
 '''
     h += '    <ul class="lessons">\n'
@@ -484,12 +491,15 @@ def construir_portada():
         ls = [s for s in mod["lecciones"] if s in INFO]
         if not ls:
             continue
-        h += (f'      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo {mi + 1} · {esc(mod["nombre"])}</h3>'
-              f'<p style="color:var(--muted);margin:.2rem 0 0">{esc(mod["descripcion"])}</p></li>\n')
+        mins = sum(int(INFO[s]["minutos"]) for s in ls)
+        h += (f'      <li class="mod-head" data-mod="{mi + 1}"><span class="mod-n">{mi + 1}</span>'
+              f'<div class="mod-txt"><h3>{esc(mod["nombre"])}</h3><p>{esc(mod["descripcion"])}</p>'
+              f'<div class="mod-meta"><span>{len(ls)} {"lección" if len(ls) == 1 else "lecciones"}</span><span>≈ {mins} min</span>'
+              f'<span class="mod-prog" data-total="{len(ls)}"><i></i><b>0 / {len(ls)}</b></span></div></div></li>\n')
         for s in ls:
             h += tarjeta(s)
     if CUR.get("proyecto") and CUR["proyecto"] in INFO:
-        h += '      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Cierre del curso</h3></li>\n' + tarjeta(CUR["proyecto"])
+        h += '      <li class="mod-head" data-mod="fin"><span class="mod-n">★</span><div class="mod-txt"><h3>Cierre del curso</h3><p>Junta todo y entrega un bot real.</p></div></li>\n' + tarjeta(CUR["proyecto"])
     h += "    </ul>\n"
     h += "  </main>\n\n" + pie("Temario", "", "", SITE)
     (RAIZ / "index.html").write_text(h, encoding="utf8")

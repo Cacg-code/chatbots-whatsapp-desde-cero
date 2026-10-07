@@ -146,17 +146,49 @@ pre {
   .burbuja, .opciones { animation: aparece .18s ease-out; }
   @keyframes aparece { from { opacity: 0; transform: translateY(6px); } }
 }
+
+/* Guía interactiva */
+.guia-fondo { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 40; display: none; }
+.guia-fondo.abierta { display: block; }
+.guia { position: fixed; z-index: 50; left: 50%; bottom: 1rem; transform: translateX(-50%); width: min(440px, calc(100vw - 2rem)); background: var(--superficie); color: var(--texto); border: 1px solid var(--borde); border-radius: 14px; padding: 1rem 1.1rem; box-shadow: 0 12px 40px rgba(0,0,0,.35); display: none; }
+.guia.abierta { display: block; }
+.guia h2 { margin: 0 0 .35rem; font-size: 1.05rem; }
+.guia p { margin: 0 0 .8rem; color: var(--texto-suave); font-size: .93rem; line-height: 1.45; }
+.guia .pie { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.guia .pie .paso { margin-right: auto; font-size: .8rem; color: var(--texto-suave); }
+.resaltado { position: relative; z-index: 45; outline: 3px solid #ff8a3d; outline-offset: 3px; border-radius: 10px; animation: pulso 1.4s ease-in-out infinite; }
+@keyframes pulso { 50% { outline-color: transparent; } }
+@media (prefers-reduced-motion: reduce) { .resaltado { animation: none; } }
+.guiones { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; padding: .5rem 1rem; max-width: 1100px; margin: 0 auto; font-size: .85rem; color: var(--texto-suave); }
+.guiones .btn { font-size: .82rem; }
 </style>
 </head>
 <body>
 <header class="barra">
   <h1>Simulador de WhatsApp · Minimarket La Esquina</h1>
   <div class="acciones">
+    <button class="btn" id="btnGuia">¿Cómo se usa?</button>
     <button class="btn toggle-panel" id="btnPanel" aria-expanded="false" aria-controls="panel">Ver JSON</button>
     <button class="btn" id="btnTema" title="Cambiar tema">Tema</button>
     <button class="btn primario" id="btnReiniciar">Reiniciar</button>
   </div>
 </header>
+
+<div class="guiones" id="guiones" role="group" aria-label="Guiones para probar">
+  <span>Prueba un guion:</span>
+  <button class="btn" data-guion="pedido">Hacer un pedido completo</button>
+  <button class="btn" data-guion="ventana">Cerrar la ventana de 24 h</button>
+  <button class="btn" data-guion="error">Escribir algo que no entiende</button>
+</div>
+
+<div class="guia-fondo" id="guiaFondo"></div>
+<div class="guia" id="guia" role="dialog" aria-modal="true" aria-labelledby="guiaT">
+  <h2 id="guiaT"></h2><p id="guiaP"></p>
+  <div class="pie"><span class="paso" id="guiaN"></span>
+    <button class="btn" id="guiaSalir">Cerrar</button>
+    <button class="btn" id="guiaAtras">Atrás</button>
+    <button class="btn primario" id="guiaSig">Siguiente</button></div>
+</div>
 
 <main class="disposicion">
   <section class="telefono" aria-label="Teléfono simulado">
@@ -323,6 +355,59 @@ pre {
   });
   try { var g = localStorage.getItem('sim-tema'); if (g) document.documentElement.dataset.tema = g; } catch (e) {}
   setInterval(function () { if (sesion) actualizarVentana(); }, 30000);
+
+  // ----- Guía interactiva y guiones -----
+  var PASOS = [
+    { t: '¿Qué es esto?', p: 'Un WhatsApp de práctica. Habla con el mismo motor del bot del curso, sin cuenta de Meta, sin internet y sin gastar nada. Los mensajes son ficticios.', el: null },
+    { t: '1 · El chat', p: 'Escribe aquí como si fueras el cliente. Prueba con "hola", "2 leches" o "listo". El bot responde con texto, botones o listas, igual que en WhatsApp real.', el: '.telefono' },
+    { t: '2 · Botones y listas', p: 'Cuando el bot ofrece opciones, tócalas en vez de escribir. Esas respuestas llegan al motor como "interactivo" con un id, no como texto.', el: '#mensajes' },
+    { t: '3 · El JSON', p: 'Aquí ves lo que vería el programador: lo que llega del webhook, lo que responde el motor y la sesión guardada por cliente. Es lo más útil para depurar.', el: '#panel', panel: true },
+    { t: '4 · Reloj de 24 horas', p: 'Avanza el tiempo con +1 h, +12 h o +25 h y mira cómo la ventana se cierra. Pasadas 24 h solo puedes escribir con plantillas aprobadas.', el: '.reloj', panel: true },
+    { t: '5 · Guiones y reinicio', p: 'Los botones "Prueba un guion" reproducen conversaciones solas. "Reiniciar" borra la sesión y empieza de cero. ¿Se usa en el curso? Es opcional: sirve como complemento visual de las lecciones 5 a 8 y del proyecto.', el: '#guiones' }
+  ];
+  var GUIONES = {
+    pedido: ['hola', '2 leches', 'listo', 'recojo', 'efectivo', 'confirmar'],
+    ventana: ['hola', '+25', 'hola'],
+    error: ['hola', 'asdfgh', '???']
+  };
+  var paso = 0, resaltado = null, reproduciendo = false;
+  function quitarResalte() { if (resaltado) { resaltado.classList.remove('resaltado'); resaltado = null; } }
+  function mostrarPaso() {
+    var s = PASOS[paso];
+    $('guiaT').textContent = s.t; $('guiaP').textContent = s.p;
+    $('guiaN').textContent = (paso + 1) + ' de ' + PASOS.length;
+    $('guiaAtras').disabled = paso === 0;
+    $('guiaSig').textContent = paso === PASOS.length - 1 ? 'Entendido' : 'Siguiente';
+    quitarResalte();
+    if (s.panel) { $('panel').classList.remove('oculto-movil'); $('btnPanel').setAttribute('aria-expanded', 'true'); $('btnPanel').textContent = 'Ocultar JSON'; }
+    if (s.el) { var e = document.querySelector(s.el); if (e) { e.classList.add('resaltado'); resaltado = e; e.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
+  }
+  function abrirGuia() { paso = 0; $('guia').classList.add('abierta'); $('guiaFondo').classList.add('abierta'); mostrarPaso(); $('guiaSig').focus(); }
+  function cerrarGuia() {
+    $('guia').classList.remove('abierta'); $('guiaFondo').classList.remove('abierta'); quitarResalte();
+    try { localStorage.setItem('sim-guia', '1'); } catch (e) {}
+  }
+  $('btnGuia').addEventListener('click', abrirGuia);
+  $('guiaSalir').addEventListener('click', cerrarGuia);
+  $('guiaFondo').addEventListener('click', cerrarGuia);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('guia').classList.contains('abierta')) cerrarGuia(); });
+  $('guiaAtras').addEventListener('click', function () { if (paso > 0) { paso--; mostrarPaso(); } });
+  $('guiaSig').addEventListener('click', function () { if (paso < PASOS.length - 1) { paso++; mostrarPaso(); } else cerrarGuia(); });
+  document.querySelectorAll('[data-guion]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (reproduciendo) return;
+      reproduciendo = true; reiniciar();
+      var msgs = GUIONES[b.dataset.guion].slice(1), i = 0;
+      (function sig() {
+        if (i >= msgs.length) { reproduciendo = false; return; }
+        var m = msgs[i++];
+        if (m === '+25') { desfase += 25 * HORA; actualizarVentana(); }
+        else enviar({ tipo: 'texto', texto: m });
+        setTimeout(sig, 1100);
+      })();
+    });
+  });
+  try { if (!localStorage.getItem('sim-guia')) setTimeout(abrirGuia, 600); } catch (e) {}
   reiniciar();
 })();
 </script>

@@ -1024,11 +1024,26 @@
           $$('.chip', tb).forEach(function (x) { x.classList.toggle('on', x === ch); });
           var f = ch.getAttribute('data-f'), n = 0;
           cards.forEach(function (li) {
+            if (li.classList.contains('mod-head')) { return; }
             var a = $('a[data-leccion]', li), d = a && isDone(a.getAttribute('data-leccion')), show = f === 'all' || (f === 'done' ? d : !d);
             li.hidden = !show; if (show) { li.style.animation = 'none'; void li.offsetWidth; li.style.animation = 'rise .4s ease both'; li.style.animationDelay = (n++ * 40) + 'ms'; }
           });
+          syncMods();
         });
       });
+      // Módulos: progreso propio y ocultar encabezados sin tarjetas visibles
+      var syncMods = function () {
+        var head = null, vis = 0, dn = 0, tot = 0;
+        var close = function () { if (head) { head.hidden = !vis; var pr = $('.mod-prog', head); if (pr) { var T = +pr.getAttribute('data-total') || tot; pr.querySelector('b').textContent = dn + ' / ' + T; pr.querySelector('i').style.setProperty('--p', (T ? dn / T * 100 : 0) + '%'); head.classList.toggle('ok', T && dn === T); } } };
+        cards.forEach(function (li) {
+          if (li.classList.contains('mod-head')) { close(); head = li; vis = 0; dn = 0; tot = 0; return; }
+          var a = $('a[data-leccion]', li); tot++;
+          if (!li.hidden) vis++;
+          if (a && isDone(a.getAttribute('data-leccion'))) dn++;
+        });
+        close();
+      };
+      syncMods();
       if ('IntersectionObserver' in window && !reduce) {
         var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('seen'); io.unobserve(e.target); } }); }, { threshold: .3 });
         cards.forEach(function (li) { io.observe(li); });

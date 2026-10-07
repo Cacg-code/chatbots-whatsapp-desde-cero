@@ -850,3 +850,23 @@ html:root[data-skin="neon"][data-theme="dark"] { --accent: #f0abfc; --accent-sof
 @keyframes dotp { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
 @media (max-width: 860px) { .hero-visual { padding-bottom: 2.6rem; } .bub { font-size: .8rem; } .bub-3 { display: none; } }
 @media (prefers-reduced-motion: reduce) { .bub, .bub .dots i { animation: none !important; } }
+
+/* ---- Módulos del temario ---- */
+.lessons > li.mod-head { grid-column: 1 / -1; display: flex; gap: .9rem; align-items: flex-start; margin-top: 1.4rem; padding: 1rem 1.1rem; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 14px; }
+.lessons > li.mod-head:first-child { margin-top: 0; }
+.mod-n { flex: none; width: 2.6rem; height: 2.6rem; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 1.15rem; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.mod-txt { min-width: 0; flex: 1; }
+.mod-txt h3 { margin: 0; font-size: 1.1rem; }
+.mod-txt p { margin: .2rem 0 0; color: var(--muted); font-size: .95rem; }
+.mod-meta { display: flex; flex-wrap: wrap; gap: .4rem .9rem; margin-top: .6rem; font-size: .82rem; color: var(--muted); align-items: center; }
+.mod-prog { display: inline-flex; align-items: center; gap: .45rem; }
+.mod-prog i { display: inline-block; width: 90px; height: 6px; border-radius: 99px; background: var(--border); position: relative; overflow: hidden; }
+.mod-prog i::after { content: ""; position: absolute; inset: 0; width: var(--p, 0%); background: var(--accent-2); border-radius: 99px; transition: width .6s ease; }
+.mod-prog b { font-weight: 700; color: var(--text); }
+.lessons > li.mod-head.ok { border-left-color: var(--warm); }
+.sim-promo { margin: 2rem 0; padding: 1.3rem 1.4rem; border-radius: 16px; border: 1px dashed var(--accent); background: var(--surface); }
+.sim-promo h2 { margin: 0 0 .4rem; font-size: 1.25rem; }
+.sim-steps { padding-left: 1.2rem; margin: .6rem 0 1rem; }
+.sim-steps li { margin: .25rem 0; }
+@media (max-width: 560px) { .lessons > li.mod-head { padding: .85rem; gap: .7rem; } .mod-n { width: 2.2rem; height: 2.2rem; } .mod-prog i { width: 60px; } }
+.lessons > li.mod-head[hidden] { display: none; }

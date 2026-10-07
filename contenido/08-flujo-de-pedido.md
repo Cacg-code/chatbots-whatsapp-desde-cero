@@ -25,6 +25,9 @@ Hasta la [lección 7](../07-catalogo-y-carrito/) el cliente ya puede llenar su c
 
 El recorrido es lineal, pero el cliente puede salir de él en cualquier punto (cancelar, hablar con una persona, volver al menú). Esas salidas son las **globales** que viste en la lección 5.
 
+> [!consejo] Versión visual
+> Si prefieres verlo en pantalla, abre el [simulador de WhatsApp](../simulador/) y pulsa «Hacer un pedido completo». Es opcional: hace lo mismo que `consola.js`, con burbujas, botones y el JSON a la vista.
+
 Antes de leer el código, probemos el camino feliz con el simulador. Si usas Bash, este guion le pasa los mensajes al bot desde la entrada estándar (en PowerShell, usa `'hola','2 leches','listo','recojo','efectivo','confirmar' | node consola.js` o escribe las líneas a mano):
 
 ```bash
