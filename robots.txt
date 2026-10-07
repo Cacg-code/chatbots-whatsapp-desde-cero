@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://cacg-code.github.io/chatbots-whatsapp-desde-cero/sitemap.xml

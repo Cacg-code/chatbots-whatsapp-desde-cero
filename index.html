@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbots de WhatsApp desde cero · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Aprende a crear un bot de WhatsApp para cualquier negocio: del primer mensaje en consola a un bot real en la nube con pedidos, recordatorios y marketing responsable. Todo con un minimarket como proyecto guía.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Chatbots de WhatsApp desde cero · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Aprende a crear un bot de WhatsApp para cualquier negocio: del primer mensaje en consola a un bot real en la nube con pedidos, recordatorios y marketing responsable. Todo con un minimarket como proyecto guía.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="./"><span class="brand-logo">💬</span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="#temario" style="text-decoration:none">Temario</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="contenido">
+    <div class="hero-grid">
+      <div class="hero">
+        <span class="eyebrow">Gratis · En español · 1 lecciones</span>
+        <h1>Chatbots de WhatsApp desde cero</h1>
+        <p>Aprende a crear un bot de WhatsApp para cualquier negocio: del primer mensaje en consola a un bot real en la nube con pedidos, recordatorios y marketing responsable. Todo con un minimarket como proyecto guía.</p>
+        <a class="btn" href="01-como-funciona-un-bot/">Empezar la lección 1</a>
+        <a class="btn secondary" href="#temario">Ver el temario</a>
+        <div class="avance" id="avance"></div>
+      </div>
+      <div class="hero-demo" role="group" aria-label="Demostración: un bot que responde en consola">
+        <div class="win-bar"><i></i><i></i><i></i></div>
+        <pre id="typing" data-lines='[&quot;const msg = \&quot;quiero 2 gaseosas\&quot;;&quot;, &quot;const r = bot(msg);&quot;, &quot;console.log(r);&quot;]' data-outs='[&quot;&quot;, &quot;&quot;, &quot;Agregué 2 × Gaseosa 500 ml (S/ 5.00 c/u). ¿Algo más?&quot;]'></pre>
+        <div class="hero-out" id="typing-out"></div>
+      </div>
+    </div>
+
+    <section class="features" aria-label="Qué incluye el curso"><div class="feature"><div class="emoji">🧩</div><h2>Del cero al bot real</h2><p>Empiezas en tu consola, sin cuentas ni tarjetas, y terminas con un bot conectado a WhatsApp.</p></div><div class="feature"><div class="emoji">🛒</div><h2>Un proyecto de verdad</h2><p>Un minimarket: catálogo, carrito, pedidos, delivery, recordatorios y promociones.</p></div><div class="feature"><div class="emoji">✅</div><h2>Ejercicios que se comprueban</h2><p>Funciones de JavaScript que revisa tu navegador y práctica real en tu computadora.</p></div><div class="feature"><div class="emoji">🛡️</div><h2>Hecho para el mundo real</h2><p>Costos por mensaje, plantillas, permisos, privacidad y cómo no ser bloqueado.</p></div></section>
+
+    <div class="two-col">
+      <section><h2 class="section-title" style="margin-top:0">Antes de empezar</h2><ul class="checks-list"><li>Saber <strong>JavaScript</strong> básico (variables, funciones, arrays y objetos). Si no, haz primero el <a href="https://cacg-code.github.io/web-desde-cero/javascript/">curso de JavaScript</a>.</li><li>Una computadora con <strong>Node.js</strong> instalado (la lección 3 te guía).</li><li>Un celular con <strong>WhatsApp</strong> para probar al final. Hasta el módulo 4 no necesitas ni eso.</li></ul></section>
+      <section><h2 class="section-title" style="margin-top:0">Lo que construirás</h2><ul class="checks-list"><li>Un <strong>motor de conversación</strong> con menús, estado y lenguaje natural básico.</li><li>Un <strong>servidor</strong> con webhook desplegado en la nube, gratis.</li><li>Un bot conectado a la <strong>API oficial de WhatsApp</strong> que recibe y envía mensajes.</li><li><strong>Recordatorios</strong> y seguimiento automáticos con plantillas.</li><li>Las bases para <strong>vender</strong> bots a negocios: costos, privacidad y alcance.</li></ul></section>
+    </div>
+
+    <h2 class="section-title" id="temario">Temario · ≈ 1 hora</h2>
+    <ul class="lessons">
+      <li class="mod-head" style="grid-column:1/-1;margin-top:1.2rem"><h3 style="margin:0">Módulo 1 · Fundamentos</h3><p style="color:var(--muted);margin:.2rem 0 0">Qué es un bot de WhatsApp, qué puede hacer y cómo se diseña antes de programarlo.</p></li>
+      <li><a class="lesson-card" href="01-como-funciona-un-bot/" data-leccion="bot-01">
+        <span class="lesson-num">LECCIÓN 01</span><h3>Cómo funciona un bot de WhatsApp</h3>
+        <p>Qué es un bot de WhatsApp, qué piezas lo forman, qué diferencia a la API oficial de las apps no oficiales y qué reglas impone Meta.</p><span class="tag open">Disponible</span></a></li>
+    </ul>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Temario · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Chatbots%20de%20WhatsApp%20desde%20cero&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="assets/curso.js"></script>
+</body>
+</html>

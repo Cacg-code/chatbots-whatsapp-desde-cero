@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cómo funciona un bot de WhatsApp · Chatbots de WhatsApp desde cero</title>
+  <meta name="description" content="Qué es un bot de WhatsApp, qué piezas lo forman, qué diferencia a la API oficial de las apps no oficiales y qué reglas impone Meta.">
+  <link rel="canonical" href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/01-como-funciona-un-bot/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Chatbots de WhatsApp desde cero">
+  <meta property="og:locale" content="es_LA">
+  <meta property="og:title" content="Cómo funciona un bot de WhatsApp · Chatbots de WhatsApp desde cero">
+  <meta property="og:description" content="Qué es un bot de WhatsApp, qué piezas lo forman, qué diferencia a la API oficial de las apps no oficiales y qué reglas impone Meta.">
+  <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/01-como-funciona-un-bot/">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-logo">💬</span> Chatbots de WhatsApp desde cero</a>
+    <div class="topbar-actions">
+      <a class="icon-btn nav-cursos" href="../#temario" style="text-decoration:none">Temario</a>
+      <a class="icon-btn" href="ejercicio.html" style="text-decoration:none">Ir al ejercicio →</a>
+      <button class="icon-btn" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">◐ Tema</button>
+    </div>
+  </header>
+
+  <main class="wrap lesson-layout" id="contenido">
+    <nav class="toc" aria-label="Índice de la lección">
+      <h4>En esta lección</h4>
+      <ol><li><a href="#que-es-y-que-no-es-un-bot-de-whatsapp">Qué es (y qué no es) un bot de WhatsApp</a></li><li><a href="#el-camino-de-un-mensaje">El camino de un mensaje</a></li><li><a href="#tres-cosas-que-se-llaman-whatsapp">Tres cosas que se llaman «WhatsApp»</a></li><li><a href="#las-piezas-de-la-api-oficial">Las piezas de la API oficial</a></li><li><a href="#por-que-no-usar-librerias-no-oficiales">Por qué no usar librerías «no oficiales»</a></li><li><a href="#la-regla-de-las-24-horas">La regla de las 24 horas</a></li><li><a href="#permiso-del-cliente-opt-in">Permiso del cliente (opt-in)</a></li><li><a href="#que-construiras-y-en-que-orden">Qué construirás y en qué orden</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+    </nav>
+
+    <article>
+      <header class="lesson-head">
+        <div class="breadcrumb"><a href="../">Chatbots de WhatsApp desde cero</a> › Lección 1</div>
+        <h1>Cómo funciona un bot de WhatsApp</h1>
+        <ul class="meta"><li>⏱ 50 minutos</li><li>📶 Nivel: básico</li><li>🧩 Incluye ejercicio</li></ul>
+      </header>
+<div class="callout consejo">
+<p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
+<ul><li>Explicar qué es un bot de WhatsApp y cómo viaja un mensaje desde el cliente hasta tu código y de vuelta.</li><li>Distinguir WhatsApp, WhatsApp Business (app) y la plataforma de API, y saber cuándo conviene cada una.</li><li>Nombrar las piezas de la API oficial: cuenta de WhatsApp Business, número, app de Meta, token y webhook.</li><li>Aplicar la regla de la ventana de 24 horas para decidir qué mensajes puedes enviar.</li><li>Explicar por qué las librerías no oficiales son un riesgo para un negocio.</li></ul>
+</div>
+
+<h2 id="que-es-y-que-no-es-un-bot-de-whatsapp"><span class="n">1.</span>Qué es (y qué no es) un bot de WhatsApp</h2>
+<p>Un <strong>bot de WhatsApp</strong> es un programa que lee los mensajes que le escriben a un número de WhatsApp y responde automáticamente. Para el cliente es una conversación normal; al otro lado no hay una persona tecleando, hay código que decide qué contestar.</p>
+<p>Un bot no es magia ni «inteligencia artificial» por definición. La mayoría de los bots útiles en negocios pequeños son <strong>bots de reglas</strong>: si el cliente escribe tal cosa, responde tal otra. Eso es lo que aprenderás a construir primero, porque es predecible, barato y fácil de depurar. En la <a href="../22-ia-como-complemento/">lección 22</a> verás cuándo tiene sentido sumar IA.</p>
+<p>A lo largo del curso construirás el bot de un <strong>minimarket ficticio</strong> («Minimarket La Esquina»): mostrará su catálogo, armará pedidos, preguntará por delivery, enviará recordatorios y promociones. Lo que aprendas sirve para cualquier negocio: una ferretería, un taller, una academia, un restaurante.</p>
+<div class="callout ejemplo">
+<p class="callout-title">🧪 Ejemplo · Una conversación típica</p>
+<p><strong>Cliente:</strong> hola, tienen pan?
+<strong>Bot:</strong> Hola, bienvenido a Minimarket La Esquina. Sí, tenemos pan francés (S/ 0.30 c/u) y pan de molde (S/ 6.50). ¿Cuántos quieres?
+<strong>Cliente:</strong> 10 francés
+<strong>Bot:</strong> Agregué 10 × Pan francés. Total parcial: S/ 3.00. ¿Algo más o confirmamos el pedido?</p></div>
+<h2 id="el-camino-de-un-mensaje"><span class="n">2.</span>El camino de un mensaje</h2>
+<p>Cuando un cliente escribe, el mensaje no llega mágicamente a tu programa. Pasa por estos pasos:</p>
+<div class="flow"><div class="node"><strong>Cliente</strong><span>su WhatsApp</span></div><div class="arrow">→<code>escribe</code></div><div class="node"><strong>Servidores de Meta</strong><span>WhatsApp Cloud API</span></div><div class="arrow">→<code>webhook (HTTPS)</code></div><div class="node"><strong>Tu servidor</strong><span>tu código y tu bot</span></div><div class="arrow">→<code>llamada a la API</code></div><div class="node"><strong>Servidores de Meta</strong><span>WhatsApp Cloud API</span></div><div class="arrow">→<code>entrega</code></div><div class="node"><strong>Cliente</strong><span>su WhatsApp</span></div></div>
+<ol>
+<li>El cliente escribe a tu número de negocio.</li>
+<li>Los servidores de Meta (la empresa dueña de WhatsApp) reciben el mensaje.</li>
+<li>Meta llama a una dirección web tuya, el <strong>webhook</strong>, y le entrega el mensaje en formato JSON.</li>
+<li>Tu código lee el mensaje, decide la respuesta y la envía haciendo una petición HTTPS a la API de Meta.</li>
+<li>Meta entrega tu respuesta al cliente.</li>
+</ol>
+<p>Fíjate en la idea clave: <strong>tu bot es un servidor web</strong>. Recibe peticiones (los mensajes) y hace peticiones (las respuestas). Si ya viste el curso de <a href="https://cacg-code.github.io/web-desde-cero/node/">Node.js y APIs</a>, esto te resultará familiar: es el mismo trabajo, con WhatsApp como cliente.</p>
+<h2 id="tres-cosas-que-se-llaman-whatsapp"><span class="n">3.</span>Tres cosas que se llaman «WhatsApp»</h2>
+<p>Mucha confusión inicial viene de mezclar estas opciones:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Opción</th>
+<th>Para quién</th>
+<th>¿Se puede programar un bot?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WhatsApp</strong> (personal)</td>
+<td>Personas</td>
+<td>No. Automatizarlo rompe las condiciones de uso.</td>
+</tr>
+<tr>
+<td><strong>WhatsApp Business</strong> (la app gratuita)</td>
+<td>Negocios pequeños que atienden a mano</td>
+<td>Solo lo básico: respuestas rápidas, mensaje de bienvenida, mensaje de ausencia, etiquetas, catálogo.</td>
+</tr>
+<tr>
+<td><strong>WhatsApp Business Platform</strong> (la API)</td>
+<td>Quien quiere automatizar de verdad</td>
+<td>Sí. Es lo que usarás en este curso.</td>
+</tr>
+</tbody>
+</table></div>
+<p>La app de WhatsApp Business ya resuelve mucho para un negocio muy pequeño (y a veces es suficiente). Pasas a la API cuando necesitas <strong>automatizar conversaciones, conectarlas con tus datos</strong> (pedidos, citas, inventario) o <strong>escribirle a muchos clientes</strong> con mensajes aprobados.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Un número, un uso</p>
+<p>Normalmente un número de teléfono se usa <strong>o</strong> con la app de WhatsApp Business <strong>o</strong> con la API, no con ambas a la vez de forma libre. Existen modos de convivencia, pero cambian con el tiempo: antes de registrar el número real de un cliente en la API, revisa la documentación oficial de Meta (te dejo el enlace al final de la lección).</p></div>
+<h2 id="las-piezas-de-la-api-oficial"><span class="n">4.</span>Las piezas de la API oficial</h2>
+<p>La API oficial se llama <strong>WhatsApp Cloud API</strong>: Meta la aloja por ti y no tienes que instalar nada. (Existió una versión «On-Premises» que se instalaba en un servidor propio; Meta la retiró, así que si encuentras tutoriales que la usan, están desactualizados.)</p>
+<p>Para usarla necesitas conocer estas piezas, que configurarás en la <a href="../12-cuenta-y-app-de-meta/">lección 12</a>:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pieza</th>
+<th>Para qué sirve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Portafolio comercial de Meta</strong> (antes «Business Manager»)</td>
+<td>La «cuenta empresa» que agrupa todo lo demás.</td>
+</tr>
+<tr>
+<td><strong>Cuenta de WhatsApp Business (WABA)</strong></td>
+<td>El contenedor de tus números, plantillas y facturación.</td>
+</tr>
+<tr>
+<td><strong>Número de teléfono</strong> (con su <em>Phone Number ID</em>)</td>
+<td>El número desde el que escribe tu bot. Meta da uno de prueba para practicar.</td>
+</tr>
+<tr>
+<td><strong>App de Meta</strong></td>
+<td>Tu aplicación en Meta for Developers; da acceso a la API y registra el webhook.</td>
+</tr>
+<tr>
+<td><strong>Token de acceso</strong></td>
+<td>Una «contraseña» que demuestra que tu código puede enviar mensajes.</td>
+</tr>
+<tr>
+<td><strong>Webhook</strong></td>
+<td>La URL pública de tu servidor donde Meta te entrega los mensajes.</td>
+</tr>
+</tbody>
+</table></div>
+<p>También puedes saltarte parte de esa burocracia contratando un <strong>proveedor de soluciones</strong> (BSP), como Twilio o 360dialog, que ofrece sus propias herramientas encima de la API oficial y cobra por ello. En el curso usas la API directa de Meta porque es la forma más barata y la que mejor enseña cómo funciona todo; lo que aprendas se traslada a cualquier proveedor.</p>
+<h2 id="por-que-no-usar-librerias-no-oficiales"><span class="n">5.</span>Por qué no usar librerías «no oficiales»</h2>
+<p>Quizá viste tutoriales que prometen «un bot de WhatsApp gratis en 10 minutos» con librerías como <em>whatsapp-web.js</em> o <em>Baileys</em>. Funcionan imitando a <strong>WhatsApp Web</strong>: tu programa se hace pasar por un navegador con tu cuenta.</p>
+<p>Parece una ganga, pero para un negocio es una mala idea:</p>
+<ul>
+<li><strong>Violan las condiciones de uso</strong> de WhatsApp. Pueden <strong>bloquear el número</strong> sin previo aviso, y con él se van tus conversaciones y tus clientes.</li>
+<li>Dependen de ingeniería inversa: cualquier cambio de WhatsApp las rompe.</li>
+<li>No tienen garantías, ni soporte, ni forma de apelar un bloqueo.</li>
+<li>Si vendes un bot a un cliente y se cae o lo bloquean, el problema es tuyo.</li>
+</ul>
+<p>La API oficial cuesta algo (lo verás en la <a href="../21-costos-y-metricas/">lección 21</a>), pero es la única opción seria para un servicio que otros usarán.</p>
+<h2 id="la-regla-de-las-24-horas"><span class="n">6.</span>La regla de las 24 horas</h2>
+<p>Es la regla más importante de toda la plataforma y condiciona el diseño de tu bot.</p>
+<ul>
+<li>Cuando <strong>el cliente te escribe</strong>, se abre una <strong>ventana de atención al cliente de 24 horas</strong>.</li>
+<li><strong>Dentro de la ventana</strong> puedes enviar mensajes libres: texto, imágenes, botones, listas… lo que quieras.</li>
+<li><strong>Fuera de la ventana</strong> solo puedes enviar <strong>plantillas de mensaje</strong> (<em>message templates</em>): textos con formato fijo que <strong>Meta aprueba antes</strong> y que se envían solo a clientes que aceptaron recibirlos.</li>
+<li>Cada vez que el cliente escribe de nuevo, la ventana se renueva.</li>
+</ul>
+<div class="flow"><div class="node"><strong>Cliente escribe</strong><span>abre la ventana</span></div><div class="arrow">→<code>24 horas</code></div><div class="node"><strong>Mensajes libres</strong><span>texto, botones, listas</span></div><div class="arrow">→<code>ventana vencida</code></div><div class="node"><strong>Solo plantillas</strong><span>aprobadas por Meta</span></div></div>
+<p>Por eso un recordatorio de pedido enviado al día siguiente casi siempre sale como plantilla, y por eso un bot bien diseñado intenta resolver todo mientras la ventana está abierta. Las plantillas se pagan y tienen categorías (marketing, utilidad, autenticación); las verás con calma en las lecciones <a href="../17-plantillas/">17</a>, <a href="../18-recordatorios-y-seguimiento/">18</a> y <a href="../21-costos-y-metricas/">21</a>.</p>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · Verifica este dato</p>
+<p>Los precios, las categorías y qué mensajes dentro de la ventana son gratuitos cambian con el tiempo (Meta modificó el modelo de cobro en 2025 y de nuevo en 2026). Consulta siempre la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página oficial de precios</a> antes de cotizar un proyecto.</p></div>
+<h2 id="permiso-del-cliente-opt-in"><span class="n">7.</span>Permiso del cliente (opt-in)</h2>
+<p>Para escribirle a alguien <strong>por iniciativa tuya</strong> (fuera de una conversación que él empezó) necesitas su <strong>consentimiento previo</strong>: el <em>opt-in</em>. Por ejemplo, un cliente que marca una casilla «Quiero recibir novedades por WhatsApp» al comprar, o que te escribe «quiero que me avisen cuando haya ofertas».</p>
+<p>Sin opt-in, tus mensajes serán reportados como spam, la <strong>calidad de tu número</strong> bajará y Meta puede limitar o suspender tu cuenta. Es una regla de convivencia y de negocio: un bot que molesta pierde clientes. Volverás a esto en la <a href="../20-marketing-responsable/">lección 20</a>.</p>
+<h2 id="que-construiras-y-en-que-orden"><span class="n">8.</span>Qué construirás y en qué orden</h2>
+<p>El curso va de lo seguro a lo real, para que puedas aprender sin gastar un sol ni esperar aprobaciones de nadie:</p>
+<ol>
+<li><strong>Lecciones 1 a 8:</strong> el bot funciona en tu consola. Aprendes diseño y el «cerebro» sin necesitar WhatsApp.</li>
+<li><strong>Lecciones 9 a 11:</strong> lo conviertes en un servidor con webhook y lo publicas en la nube.</li>
+<li><strong>Lecciones 12 a 14:</strong> lo conectas a WhatsApp de verdad.</li>
+<li><strong>Lecciones 15 a 21:</strong> memoria, recordatorios, plantillas, formularios y marketing.</li>
+<li><strong>Lecciones 22 a 26 y proyecto final:</strong> IA opcional, pruebas, seguridad, atención humana y cómo ofrecerlo a un negocio.</li>
+</ol>
+<h2 id="errores-frecuentes"><span class="n">9.</span>Errores frecuentes</h2>
+<ul>
+<li><strong>Creer que la API es «gratis y sin límites».</strong> Tiene costos por mensaje de plantilla y reglas estrictas. Entenderlas desde el inicio evita sorpresas.</li>
+<li><strong>Usar una librería no oficial para ahorrar.</strong> Funciona hasta que bloquean el número del negocio.</li>
+<li><strong>Intentar escribir primero a un cliente con texto libre.</strong> Fuera de la ventana de 24 horas, la API lo rechaza: hay que usar una plantilla aprobada.</li>
+<li><strong>Enviar promociones sin permiso.</strong> El opt-in es una condición para existir en la plataforma, no un detalle.</li>
+<li><strong>Confundir el número de prueba con el de producción.</strong> El número de prueba es solo para practicar y tiene límites de destinatarios.</li>
+</ul>
+<h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
+<ul>
+<li>Un bot de WhatsApp es un <strong>servidor web</strong>: recibe mensajes por webhook y responde con llamadas a la API.</li>
+<li>Para negocios se usa la <strong>WhatsApp Cloud API</strong> (oficial, alojada por Meta); las librerías no oficiales arriesgan el bloqueo del número.</li>
+<li>Las piezas: portafolio de Meta, cuenta WABA, número, app, token y webhook.</li>
+<li><strong>Ventana de 24 horas:</strong> dentro, mensajes libres; fuera, solo plantillas aprobadas.</li>
+<li>Escribir por iniciativa propia exige <strong>opt-in</strong> del cliente.</li>
+<li>Precios y reglas cambian: consulta siempre la documentación oficial de Meta.</li>
+</ul>
+<h2 id="glosario"><span class="n">11.</span>Glosario</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bot</td>
+<td>Programa que responde mensajes automáticamente.</td>
+</tr>
+<tr>
+<td>Cloud API</td>
+<td>API oficial de WhatsApp Business alojada por Meta.</td>
+</tr>
+<tr>
+<td>WABA</td>
+<td>Cuenta de WhatsApp Business: agrupa números, plantillas y facturación.</td>
+</tr>
+<tr>
+<td>Webhook</td>
+<td>URL de tu servidor a la que Meta envía los mensajes entrantes.</td>
+</tr>
+<tr>
+<td>Token de acceso</td>
+<td>Credencial que autoriza a tu código a usar la API.</td>
+</tr>
+<tr>
+<td>Ventana de 24 h</td>
+<td>Período tras el último mensaje del cliente en el que puedes escribir libremente.</td>
+</tr>
+<tr>
+<td>Plantilla</td>
+<td>Mensaje de formato fijo aprobado por Meta, enviable fuera de la ventana.</td>
+</tr>
+<tr>
+<td>Opt-in</td>
+<td>Consentimiento del cliente para recibir mensajes tuyos.</td>
+</tr>
+<tr>
+<td>BSP</td>
+<td>Proveedor de soluciones que ofrece herramientas sobre la API oficial.</td>
+</tr>
+</tbody>
+</table></div>
+<section class="quiz" id="quiz" aria-labelledby="t-quiz">
+<h2 id="t-quiz">🧠 Comprueba lo aprendido</h2>
+<p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
+<div class="quiz-q"><p>¿Cómo recibe tu código los mensajes que escriben los clientes?</p><ul class="opts"><li><button type="button" class="opt">Tu programa abre WhatsApp en un navegador y los lee</button></li><li><button type="button" class="opt" data-ok>Meta llama a tu webhook (una URL de tu servidor) y le entrega el mensaje en JSON</button></li><li><button type="button" class="opt">Los mensajes llegan a tu correo y los lees con un script</button></li><li><button type="button" class="opt">Tu programa los consulta cada segundo en el teléfono del cliente</button></li></ul><p class="explain" hidden>En la API oficial, Meta empuja cada mensaje a tu webhook por HTTPS.</p></div>
+<div class="quiz-q"><p>Un cliente te escribió ayer a las 20:00. Hoy a las 21:00 quieres enviarle un texto libre. ¿Qué pasa?</p><ul class="opts"><li><button type="button" class="opt">Funciona, porque ya hubo una conversación</button></li><li><button type="button" class="opt" data-ok>Se rechaza: pasaron más de 24 horas y fuera de la ventana solo puedes usar una plantilla aprobada</button></li><li><button type="button" class="opt">Funciona si pagas un extra</button></li><li><button type="button" class="opt">Funciona si lo envías desde la app de WhatsApp Business</button></li></ul><p class="explain" hidden>Fuera de la ventana de 24 horas solo se permiten plantillas aprobadas por Meta.</p></div>
+<div class="quiz-q"><p>¿Cuál es el principal riesgo de usar una librería no oficial que imita WhatsApp Web?</p><ul class="opts"><li><button type="button" class="opt">Que es más lenta que la API oficial</button></li><li><button type="button" class="opt">Que no permite enviar texto</button></li><li><button type="button" class="opt" data-ok>Que viola las condiciones de uso y pueden bloquear el número del negocio</button></li><li><button type="button" class="opt">Que solo funciona en Linux</button></li></ul><p class="explain" hidden>El bloqueo del número es el riesgo real: pierdes el canal y los clientes asociados.</p></div>
+<div class="quiz-q"><p>¿Qué es el opt-in?</p><ul class="opts"><li><button type="button" class="opt">Un tipo de plantilla de autenticación</button></li><li><button type="button" class="opt">El token de acceso de la API</button></li><li><button type="button" class="opt" data-ok>El consentimiento del cliente para recibir mensajes por iniciativa del negocio</button></li><li><button type="button" class="opt">El número de prueba que da Meta</button></li></ul><p class="explain" hidden>Sin opt-in, escribir por iniciativa propia puede reportarse como spam y afectar tu cuenta.</p></div>
+<div class="quiz-q"><p>¿Qué ventaja tiene la app WhatsApp Business gratuita frente a la API?</p><ul class="opts"><li><button type="button" class="opt">Permite programar bots complejos</button></li><li><button type="button" class="opt" data-ok>Es sencilla y suficiente para un negocio muy pequeño que atiende a mano, con respuestas rápidas y etiquetas</button></li><li><button type="button" class="opt">Permite enviar mensajes masivos sin permiso</button></li><li><button type="button" class="opt">No necesita número de teléfono</button></li></ul><p class="explain" hidden>La app cubre lo básico sin programar; la API se usa cuando hay que automatizar y conectar datos.</p></div>
+<p class="quiz-score" aria-live="polite"></p>
+</section>
+
+<div class="complete"><button class="btn" type="button" data-complete="bot-01">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>
+
+<div class="callout consejo">
+<p class="callout-title">💡 🚀 ¡Ahora te toca!</p>
+<p>La práctica fija lo aprendido. Pasa al ejercicio de esta lección.</p>
+<p><a class="btn" href="ejercicio.html">Ir al ejercicio</a></p></div>
+
+      <nav class="pager" aria-label="Navegación entre lecciones">
+        <a href="../"><small>← Inicio</small>Temario del curso</a>
+        <a class="next" href="ejercicio.html"><small>Siguiente →</small>Ejercicio de esta lección</a>
+      </nav>
+    </article>
+  </main>
+
+  <footer class="site-footer">Chatbots de WhatsApp desde cero · Lección 1 · Material elaborado con ayuda de inteligencia artificial.<span class="foot-links"><a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new?title=%5BError%5D%20Lección%201:%20Cómo%20funciona%20un%20bot%20de%20WhatsApp&amp;pagina=https://cacg-code.github.io/chatbots-whatsapp-desde-cero/01-como-funciona-un-bot/" target="_blank" rel="noopener">Reportar un error en esta página</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new" target="_blank" rel="noopener">Sugerencias y dudas</a> · <a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/blob/main/LICENSE" target="_blank" rel="noopener">Licencia</a></span></footer>
+  <script src="../assets/curso.js"></script>
+</body>
+</html>
