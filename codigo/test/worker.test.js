@@ -12,6 +12,7 @@ function crearEntorno() {
   const BOT_KV = {
     get: async (k) => datos.get(k) ?? null,
     put: async (k, v) => { datos.set(k, v); },
+    delete: async (k) => { datos.delete(k); },
     list: async ({ prefix }) => ({ keys: [...datos.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })) }),
   };
   return { BOT_KV, datos, VERIFY_TOKEN: 'verifica', WA_TOKEN: 'tok', WA_PHONE_ID: '123', APP_SECRET: 'secreto' };
@@ -111,6 +112,31 @@ test('idempotencia: el mismo mensaje reenviado se ignora', simularGraph(async (l
   assert.equal(sesion.carrito[0].cantidad, 2, 'no debe sumar 4');
   assert.equal(llamadas.filter((l) => l.cuerpo.status === 'read').length, 1);
 }));
+
+test('si el envío falla, se deshace y el reintento de Meta se procesa', async () => {
+  const env = crearEntorno();
+  const original = globalThis.fetch;
+  const llamadas = [];
+  let fallar = true;
+  globalThis.fetch = async (url, op) => {
+    const cuerpo = JSON.parse(op.body);
+    llamadas.push(cuerpo);
+    if (fallar && cuerpo.type) return { ok: false, status: 500, json: async () => ({ error: { message: 'caído' } }) };
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  try {
+    let ctx = crearCtx();
+    await worker.fetch(await postFirmado(cuerpoTexto), env, ctx);
+    await ctx.terminar();
+    assert.equal(env.datos.has('visto:wamid.TEXTO001'), false, 'la marca visto se debe borrar');
+    fallar = false;
+    ctx = crearCtx();
+    await worker.fetch(await postFirmado(cuerpoTexto), env, ctx);
+    await ctx.terminar();
+    assert.equal(llamadas.filter((c) => c.type).length >= 2, true, 'el reintento sí responde');
+    assert.equal(JSON.parse(env.datos.get('sesion:51999000111')).carrito[0].cantidad, 2, 'sin duplicar el carrito');
+  } finally { globalThis.fetch = original; }
+});
 
 test('al confirmar, el pedido se guarda en KV', simularGraph(async () => {
   const env = crearEntorno();

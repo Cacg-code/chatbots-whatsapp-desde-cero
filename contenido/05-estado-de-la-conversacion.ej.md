@@ -29,7 +29,7 @@ La tabla de transiciones que debes implementar (cada fila: estado actual, evento
 Reglas extra: en `ESPERANDO_HUMANO` solo funcionan `menu` y `cancelar`; cualquier otro evento se ignora **sin contarlo como fallo** (el bot calla). Si el estado es `FIN`, el siguiente evento empieza una sesión nueva.
 
 ```pasos
-Parte A. En la carpeta `codigo/` del curso ejecuta `printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js` y anota en `notas.md` el estado en que quedó la sesión después de cada mensaje (los nombres están en `ESTADOS` de `src/motor.js`).
+Parte A. En la carpeta `codigo/` del curso ejecuta `printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js` (en PowerShell: `'hola','2 leches','listo','recojo','efectivo','confirmar' | node consola.js`) y anota en `notas.md` el estado en que quedó la sesión después de cada mensaje (los nombres están en `ESTADOS` de `src/motor.js`).
 Parte A. Escribe un script `probar-estado.mjs` que importe `crearSesion` y `procesar` de `src/motor.js`, envíe `{ tipo: 'texto', texto: 'hola' }` y compruebe que la sesión original **no cambió** (`sesion.estado` sigue en `INICIO`).
 Parte B. Escribe `crearSesion(telefono, ahora = 0)`: devuelve un objeto con `telefono`, `estado: "INICIO"`, `fallos: 0` y `ultimoMensajeCliente: ahora`.
 Parte B. Escribe `siguienteEstado(estado, evento)`: devuelve el estado siguiente según la tabla o `null` si el evento no vale en ese estado.

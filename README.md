@@ -48,7 +48,7 @@ Necesitas lo básico de JavaScript. Si vienes de cero, haz primero [Desarrollo w
 
 ## Código de referencia
 
-La carpeta [`codigo/`](codigo/) contiene el bot terminado, con 112 pruebas (`npm test`) y una consola para conversar con él (`node consola.js`). Las lecciones se escriben contra ese código real.
+La carpeta [`codigo/`](codigo/) contiene el bot terminado, con 113 pruebas (`npm test`) y una consola para conversar con él (`node consola.js`). Las lecciones se escriben contra ese código real.
 
 ```bash
 cd codigo

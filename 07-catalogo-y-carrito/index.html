@@ -16,7 +16,8 @@
   <meta property="og:title" content="Catálogo y carrito · Chatbots de WhatsApp desde cero">
   <meta property="og:description" content="Modela el catálogo del minimarket como datos, respeta los límites de botones y listas de WhatsApp y construye un carrito puro e inmutable que suma en céntimos.">
   <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/07-catalogo-y-carrito/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/assets/compartir.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="../assets/estilos.css">
 </head>
 <body>
@@ -137,7 +138,7 @@ console.log(PRODUCTOS.length, Object.keys(CATEGORIAS).map((k) =&gt; k + &#x27;:&
 <p>Observa que <code>productoPorId</code> devuelve <code>null</code> si el id no existe, en lugar de lanzar un error. El motor siempre lo valida antes de usarlo, porque el id puede venir de un botón viejo o de un mensaje manipulado.</p>
 <div class="callout nota">
 <p class="callout-title">📌 Nota · ¿Y si el catálogo cambia seguido?</p>
-<p>Un archivo de código sirve para aprender y para negocios con pocos cambios. Si el dueño debe actualizar precios él mismo, el catálogo se mueve a una hoja de cálculo o a una base de datos y el bot lo lee desde allí. La <a href="../16-panel-con-google-sheets/">lección 16</a> muestra la idea. La lógica no cambia: sigue recibiendo una lista de productos.</p></div>
+<p>Un archivo de código sirve para aprender y para negocios con pocos cambios. Si el dueño debe actualizar precios él mismo, el catálogo se mueve a una hoja de cálculo o a una base de datos y el bot lo lee desde allí. La <a href="../16-panel-con-google-sheets/">lección 16</a> conecta el bot con una hoja de cálculo (allí para guardar pedidos), y la misma técnica de lectura sirve para el catálogo. La lógica no cambia: sigue recibiendo una lista de productos.</p></div>
 <h2 id="el-catalogo-debe-caber-en-whatsapp"><span class="n">2.</span>El catálogo debe caber en WhatsApp</h2>
 <p>Aquí entra una restricción real de la plataforma. Para mostrar muchas opciones a la vez, WhatsApp ofrece <strong>mensajes interactivos</strong>: botones de respuesta y listas. Ambos tienen límites. Estos son los que usa el código de referencia, válidos al momento de escribirlo:</p>
 <div class="table-wrap"><table>

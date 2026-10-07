@@ -16,7 +16,8 @@
   <meta property="og:title" content="Flujo de pedido · Chatbots de WhatsApp desde cero">
   <meta property="og:description" content="Cierra el pedido de punta a punta, con entrega o recojo, mínimo de delivery, dirección, pago y confirmación, y aprende a probar todo el recorrido.">
   <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/08-flujo-de-pedido/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/assets/compartir.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="../assets/estilos.css">
 </head>
 <body>
@@ -91,7 +92,7 @@
 </tbody>
 </table></div>
 <p>El recorrido es lineal, pero el cliente puede salir de él en cualquier punto (cancelar, hablar con una persona, volver al menú). Esas salidas son las <strong>globales</strong> que viste en la lección 5.</p>
-<p>Antes de leer el código, probemos el camino feliz con el simulador. Si usas Bash, este guion le pasa los mensajes al bot desde la entrada estándar (en PowerShell, ejecuta <code>node consola.js</code> y escribe las líneas a mano):</p>
+<p>Antes de leer el código, probemos el camino feliz con el simulador. Si usas Bash, este guion le pasa los mensajes al bot desde la entrada estándar (en PowerShell, usa <code>'hola','2 leches','listo','recojo','efectivo','confirmar' | node consola.js</code> o escribe las líneas a mano):</p>
 <div class="code">
   <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
 <pre><code>printf &#x27;hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n&#x27; | node consola.js</code></pre>

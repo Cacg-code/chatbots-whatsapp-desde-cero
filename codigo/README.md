@@ -16,7 +16,7 @@ src/
   whatsapp.js       payloads de la Cloud API, firma del webhook, envío
   recordatorios.js  qué recordar y cuándo (puro)
   worker.js         Cloudflare Worker (webhook + cron)
-test/               112 pruebas con node:test; test/payloads/*.json son ejemplos de webhook
+test/               113 pruebas con node:test; test/payloads/*.json son ejemplos de webhook
 wrangler.toml       configuración del Worker (ids de ejemplo)
 .dev.vars.example   variables secretas de ejemplo
 API.md              referencia de cada módulo
@@ -26,7 +26,7 @@ Idea central: `motor.js` no hace entrada/salida. Recibe sesión + mensaje y devu
 
 ## Cómo correr
 ```
-npm test            # 112 pruebas, todas deben pasar
+npm test            # 113 pruebas, todas deben pasar
 npm run chat        # conversar con el bot; escribe "hola"
 ```
 En la consola, cuando el bot muestra botones o listas, escribe el número de la opción (o su id). Para un guion rápido:

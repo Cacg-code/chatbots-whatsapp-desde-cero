@@ -25,7 +25,7 @@ Hasta la [lección 7](../07-catalogo-y-carrito/) el cliente ya puede llenar su c
 
 El recorrido es lineal, pero el cliente puede salir de él en cualquier punto (cancelar, hablar con una persona, volver al menú). Esas salidas son las **globales** que viste en la lección 5.
 
-Antes de leer el código, probemos el camino feliz con el simulador. Si usas Bash, este guion le pasa los mensajes al bot desde la entrada estándar (en PowerShell, ejecuta `node consola.js` y escribe las líneas a mano):
+Antes de leer el código, probemos el camino feliz con el simulador. Si usas Bash, este guion le pasa los mensajes al bot desde la entrada estándar (en PowerShell, usa `'hola','2 leches','listo','recojo','efectivo','confirmar' | node consola.js` o escribe las líneas a mano):
 
 ```bash
 printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js

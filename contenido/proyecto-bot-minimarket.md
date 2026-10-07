@@ -79,6 +79,12 @@ Haz el recorrido en la consola, sin WhatsApp. El simulador `consola.js` usa el m
 printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js
 ```
 
+En PowerShell, el equivalente es:
+
+```powershell
+'hola','2 leches','listo','recojo','efectivo','confirmar' | node consola.js
+```
+
 ```salida
 tu> confirmar
 

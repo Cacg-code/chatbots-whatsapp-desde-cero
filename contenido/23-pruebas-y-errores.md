@@ -47,9 +47,9 @@ test('sumar soles sin decimales raros', () => {
 Se ejecuta con `node --test` (busca solo los archivos `*.test.js`) o con `npm test` si lo definiste en `package.json`. El código de referencia del curso ya trae sus pruebas. Si corres `npm test` en la carpeta `codigo/`, el final de la salida es:
 
 ```salida
-ℹ tests 112
+ℹ tests 113
 ℹ suites 0
-ℹ pass 112
+ℹ pass 113
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0

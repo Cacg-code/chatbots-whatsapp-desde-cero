@@ -80,7 +80,7 @@ null
 Observa que `productoPorId` devuelve `null` si el id no existe, en lugar de lanzar un error. El motor siempre lo valida antes de usarlo, porque el id puede venir de un botón viejo o de un mensaje manipulado.
 
 > [!nota] ¿Y si el catálogo cambia seguido?
-> Un archivo de código sirve para aprender y para negocios con pocos cambios. Si el dueño debe actualizar precios él mismo, el catálogo se mueve a una hoja de cálculo o a una base de datos y el bot lo lee desde allí. La [lección 16](../16-panel-con-google-sheets/) muestra la idea. La lógica no cambia: sigue recibiendo una lista de productos.
+> Un archivo de código sirve para aprender y para negocios con pocos cambios. Si el dueño debe actualizar precios él mismo, el catálogo se mueve a una hoja de cálculo o a una base de datos y el bot lo lee desde allí. La [lección 16](../16-panel-con-google-sheets/) conecta el bot con una hoja de cálculo (allí para guardar pedidos), y la misma técnica de lectura sirve para el catálogo. La lógica no cambia: sigue recibiendo una lista de productos.
 
 ## El catálogo debe caber en WhatsApp
 

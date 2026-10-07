@@ -12,7 +12,7 @@ Este ejercicio no tiene comprobaciones automáticas en la página: tu evidencia 
 
 ```pasos
 Copia `codigo/` a `mi-bot-minimarket`, ejecuta `npm install` y `npm test`. Anota cuántas pruebas pasan antes de cambiar nada.
-Corre el recorrido de la consola con `printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js` y explica con tus palabras qué estado atraviesa la sesión en cada mensaje.
+Corre el recorrido de la consola con `printf 'hola\n2 leches\nlisto\nrecojo\nefectivo\nconfirmar\n' | node consola.js` (en PowerShell: `'hola','2 leches','listo','recojo','efectivo','confirmar' | node consola.js`) y explica con tus palabras qué estado atraviesa la sesión en cada mensaje.
 Personaliza `src/catalogo.js`: cambia horario, dirección ficticia y zonas, y agrega 3 productos con categoría, unidad y varios sinónimos. Vuelve a correr `npm test`.
 Crea `test/aceptacion.test.js` con los escenarios A1 a A6 de la lección y agrega 2 escenarios propios, uno de ellos con un producto que tú agregaste.
 Crea `src/humano.js` con las funciones de la lección 25, conecta `procesarConHumano` y `liberarHumanosVencidos` en `src/worker.js` y añade las pruebas de humano. Escribe una prueba de extremo a extremo con un POST firmado.

@@ -200,8 +200,8 @@ claves guardadas: [ 'visto:wamid.TEXTO001', 'sesion:51999000111' ]
 
 La primera entrega produjo dos llamadas a Meta (marcar leído y un mensaje con botones). La repetida no produjo ninguna: seguimos en 2.
 
-> [!nota] Una decisión con costo
-> El código anota `visto:` **antes** de enviar. Esto previene duplicados, pero tiene un precio: si el envío a Meta falla (token vencido, por ejemplo), Meta reintentará y esa repetición será ignorada, así que ese mensaje del cliente se pierde. Lo comprobé en local: con un token falso, el primer intento falló y el segundo POST idéntico respondió 200 sin hacer nada. Para un bot pequeño es un compromiso razonable; en la [lección 23](../23-pruebas-y-errores/) verás cómo hacerlo más robusto. Y recuerda el límite del propio KV: **no es atómico**, así que dos mensajes simultáneos del mismo cliente pueden pisarse (para mucho volumen existen los *Durable Objects*).
+> [!nota] Una decisión con cuidado
+> El código anota `visto:` **antes** de enviar para que dos entregas casi simultáneas no respondan dos veces. Pero si el envío a Meta falla (token vencido, por ejemplo), Meta reintentará, y una marca que ya existe haría que ese reintento se ignorara y el mensaje del cliente se perdiera. Por eso `procesarMensaje` envuelve los envíos en un `try/catch`: si algo falla, **restaura la sesión anterior, borra la marca `visto:` y relanza el error**. Así el reintento de Meta se procesa como si fuera la primera vez. La prueba «si el envío falla, se deshace y el reintento de Meta se procesa» lo comprueba (verás las pruebas en la [lección 23](../23-pruebas-y-errores/)). Y recuerda el límite del propio KV: **no es atómico**, así que dos mensajes simultáneos del mismo cliente pueden pisarse (para mucho volumen existen los *Durable Objects*).
 
 ## Probarlo en local con wrangler dev
 

@@ -195,7 +195,8 @@ def cabecera(titulo, desc, ruta, prof, brand_href):
   <meta property="og:title" content="{esc(titulo)}">
   <meta property="og:description" content="{esc(desc)}">
   <meta property="og:url" content="{url}">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/assets/compartir.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="{prof}assets/estilos.css">
 </head>
 <body>

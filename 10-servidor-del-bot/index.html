@@ -16,7 +16,8 @@
   <meta property="og:title" content="El servidor del bot · Chatbots de WhatsApp desde cero">
   <meta property="og:description" content="Cómo un Cloudflare Worker une webhook, motor y KV: rutas, firma, idempotencia, respuesta rápida con ctx.waitUntil y pruebas locales con wrangler dev.">
   <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/10-servidor-del-bot/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/assets/compartir.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="../assets/estilos.css">
 </head>
 <body>
@@ -246,8 +247,8 @@ claves guardadas: [ &#x27;visto:wamid.TEXTO001&#x27;, &#x27;sesion:51999000111&#
 </div>
 <p>La primera entrega produjo dos llamadas a Meta (marcar leído y un mensaje con botones). La repetida no produjo ninguna: seguimos en 2.</p>
 <div class="callout nota">
-<p class="callout-title">📌 Nota · Una decisión con costo</p>
-<p>El código anota <code>visto:</code> <strong>antes</strong> de enviar. Esto previene duplicados, pero tiene un precio: si el envío a Meta falla (token vencido, por ejemplo), Meta reintentará y esa repetición será ignorada, así que ese mensaje del cliente se pierde. Lo comprobé en local: con un token falso, el primer intento falló y el segundo POST idéntico respondió 200 sin hacer nada. Para un bot pequeño es un compromiso razonable; en la <a href="../23-pruebas-y-errores/">lección 23</a> verás cómo hacerlo más robusto. Y recuerda el límite del propio KV: <strong>no es atómico</strong>, así que dos mensajes simultáneos del mismo cliente pueden pisarse (para mucho volumen existen los <em>Durable Objects</em>).</p></div>
+<p class="callout-title">📌 Nota · Una decisión con cuidado</p>
+<p>El código anota <code>visto:</code> <strong>antes</strong> de enviar para que dos entregas casi simultáneas no respondan dos veces. Pero si el envío a Meta falla (token vencido, por ejemplo), Meta reintentará, y una marca que ya existe haría que ese reintento se ignorara y el mensaje del cliente se perdiera. Por eso <code>procesarMensaje</code> envuelve los envíos en un <code>try/catch</code>: si algo falla, <strong>restaura la sesión anterior, borra la marca <code>visto:</code> y relanza el error</strong>. Así el reintento de Meta se procesa como si fuera la primera vez. La prueba «si el envío falla, se deshace y el reintento de Meta se procesa» lo comprueba (verás las pruebas en la <a href="../23-pruebas-y-errores/">lección 23</a>). Y recuerda el límite del propio KV: <strong>no es atómico</strong>, así que dos mensajes simultáneos del mismo cliente pueden pisarse (para mucho volumen existen los <em>Durable Objects</em>).</p></div>
 <h2 id="probarlo-en-local-con-wrangler-dev"><span class="n">6.</span>Probarlo en local con wrangler dev</h2>
 <p><strong>Wrangler</strong> es la herramienta de línea de comandos de Cloudflare. Con <code>wrangler dev</code> levantas tu Worker en <code>http://127.0.0.1:8787</code> (o el puerto que elijas), con un KV <strong>simulado en tu disco</strong>: no necesitas cuenta ni internet para esta parte.</p>
 <p>En la carpeta <code>codigo/</code> del proyecto:</p>

@@ -258,7 +258,7 @@ npx wrangler rollback <id-de-version>
 
 Un hábito sano antes de cada despliegue:
 
-1. `npm test` (las 112 pruebas del proyecto en verde).
+1. `npm test` (las 113 pruebas del proyecto en verde).
 2. `npx wrangler deploy --dry-run`.
 3. `npx wrangler deploy`.
 4. `curl` a `/salud` y un vistazo a `wrangler tail`.

@@ -16,7 +16,8 @@
   <meta property="og:title" content="Memoria con Cloudflare KV · Chatbots de WhatsApp desde cero">
   <meta property="og:description" content="Guarda sesiones, pedidos e ids de mensajes en Cloudflare KV con vencimiento automático (TTL) y aprende sus límites reales para no perder datos.">
   <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/15-memoria-con-kv/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/assets/compartir.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="../assets/estilos.css">
 </head>
 <body>
@@ -166,7 +167,7 @@ MENU carrito: 0</code></pre>
 if (await kv.get(claveVisto)) return;
 await kv.put(claveVisto, &#x27;1&#x27;, { expirationTtl: TTL_VISTO });</code></pre>
 </div>
-<p>La primera vez no existe y el mensaje se procesa. La segunda, la clave existe y el Worker retorna sin hacer nada. El valor da igual (<code>'1'</code>): lo que importa es que la clave exista. Y como tiene TTL de un día, la lista de ids no crece sin fin.</p>
+<p>La primera vez no existe y el mensaje se procesa. La segunda, la clave existe y el Worker retorna sin hacer nada. El valor da igual (<code>'1'</code>): lo que importa es que la clave exista. Y como tiene TTL de un día, la lista de ids no crece sin fin. Si el envío a Meta falla, el Worker restaura la sesión anterior y borra la marca <code>visto:</code> para que el reintento de Meta se procese de nuevo (lo verás en la <a href="../10-servidor-del-bot/">lección 10</a>).</p>
 <h2 id="que-le-cuesta-a-tu-cuenta-cada-conversac"><span class="n">6.</span>Qué le cuesta a tu cuenta cada conversación</h2>
 <p>KV cobra (o limita, en el plan gratuito) por operación. Para saber cuánto gasta tu bot, lo mejor es <strong>medirlo</strong>: contamos las llamadas a un KV falso mientras un cliente completa un pedido de cinco mensajes (<code>2 leches</code>, <code>listo</code>, <code>recojo</code>, <code>efectivo</code>, <code>confirmar</code>):</p>
 <div class="code">

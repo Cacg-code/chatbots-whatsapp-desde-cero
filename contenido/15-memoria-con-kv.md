@@ -142,7 +142,7 @@ if (await kv.get(claveVisto)) return;
 await kv.put(claveVisto, '1', { expirationTtl: TTL_VISTO });
 ```
 
-La primera vez no existe y el mensaje se procesa. La segunda, la clave existe y el Worker retorna sin hacer nada. El valor da igual (`'1'`): lo que importa es que la clave exista. Y como tiene TTL de un día, la lista de ids no crece sin fin.
+La primera vez no existe y el mensaje se procesa. La segunda, la clave existe y el Worker retorna sin hacer nada. El valor da igual (`'1'`): lo que importa es que la clave exista. Y como tiene TTL de un día, la lista de ids no crece sin fin. Si el envío a Meta falla, el Worker restaura la sesión anterior y borra la marca `visto:` para que el reintento de Meta se procese de nuevo (lo verás en la [lección 10](../10-servidor-del-bot/)).
 
 ## Qué le cuesta a tu cuenta cada conversación
 

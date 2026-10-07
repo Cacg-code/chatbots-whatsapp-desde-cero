@@ -16,7 +16,8 @@
   <meta property="og:title" content="Despliegue en Cloudflare · Chatbots de WhatsApp desde cero">
   <meta property="og:description" content="Publicar el bot en Cloudflare Workers paso a paso: cuenta, Wrangler, KV, secretos, wrangler.toml, dry-run, deploy, logs con tail y cómo volver atrás.">
   <meta property="og:url" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/11-despliegue-en-cloudflare/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/assets/compartir.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="../assets/estilos.css">
 </head>
 <body>
@@ -310,7 +311,7 @@ npx wrangler rollback &lt;id-de-version&gt;</code></pre>
 <p><code>deployments list</code> muestra los 10 despliegues más recientes con sus ids. <code>rollback</code> publica de nuevo la versión que le indiques (sin ella, vuelve a la anterior). Es tu botón de pánico mientras investigas con calma.</p>
 <p>Un hábito sano antes de cada despliegue:</p>
 <ol>
-<li><code>npm test</code> (las 112 pruebas del proyecto en verde).</li>
+<li><code>npm test</code> (las 113 pruebas del proyecto en verde).</li>
 <li><code>npx wrangler deploy --dry-run</code>.</li>
 <li><code>npx wrangler deploy</code>.</li>
 <li><code>curl</code> a <code>/salud</code> y un vistazo a <code>wrangler tail</code>.</li>

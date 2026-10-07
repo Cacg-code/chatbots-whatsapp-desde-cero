@@ -102,8 +102,16 @@ export async function procesarMensaje(env, evento, ahora = Date.now(), llamar = 
 
   // Marcamos como leído y enviamos las respuestas en orden.
   await enviarMensaje(env, construirLeido(evento.id), llamar).catch((e) => console.error(e.message));
-  for (const respuesta of respuestas) {
-    await enviarMensaje(env, construirEnvio(evento.de, respuesta), llamar);
+  try {
+    for (const respuesta of respuestas) {
+      await enviarMensaje(env, construirEnvio(evento.de, respuesta), llamar);
+    }
+  } catch (error) {
+    // Si el envío falla, deshacemos: así el reintento de Meta se procesa de nuevo
+    // y el cliente no se queda sin respuesta ni con el estado avanzado a medias.
+    await guardarJson(kv, claveSesion, sesionPrevia, TTL_SESION);
+    await kv.delete(claveVisto);
+    throw error;
   }
 }
 
