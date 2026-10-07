@@ -16,6 +16,15 @@ Se abre en el navegador, con ejercicios que se corrigen solos, simulador de chat
 
 </div>
 
+## Simulador de WhatsApp
+
+Un WhatsApp de práctica que corre en tu navegador con el mismo motor del bot del curso: sin cuenta de Meta, sin internet y sin costo.
+
+- **Guía interactiva** de 6 pasos la primera vez que lo abres (o con «¿Cómo se usa?»).
+- **Guiones automáticos**: pedido completo, cierre de la ventana de 24 h y mensaje que el bot no entiende.
+- **Panel JSON** con lo que entra y sale del motor, y reloj simulado para probar la ventana de 24 h.
+- Es opcional: el curso también se sigue con la terminal (`consola.js`).
+
 ## Qué vas a construir
 
 Un bot para un negocio ficticio, **Minimarket La Esquina**: muestra el catálogo, arma el carrito, toma el pedido (recojo o delivery, Yape o efectivo), guarda la sesión de cada cliente, avisa al dueño, envía recordatorios con plantillas y pasa a una persona cuando hace falta. La misma base sirve para citas, pedidos o preguntas frecuentes de cualquier negocio.
