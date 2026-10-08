@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="484" height="140" viewBox="0 0 484 140" role="img" aria-label="Módulo 5: Conectar con WhatsApp. Lecciones 12–14, 27–28 · 4 h 30 min"><style>.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.gl{animation:gl 3s ease-in-out infinite}@keyframes gl{0%,100%{opacity:.55}50%{opacity:1}}</style>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:1.6s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#4ade80" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#4ade80"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#4ade80" fill-opacity=".22" stroke="#4ade80" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#4ade80">5</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Conectar con WhatsApp</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Cuenta Meta · Recibir · Enviar</text><text x="96" y="80" font-size="13.5" fill="#9fb8bb">Telegram · Otros proveedores</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#4ade80" font-weight="700">Lecciones 12–14, 27–28 · 4 h 30 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg>

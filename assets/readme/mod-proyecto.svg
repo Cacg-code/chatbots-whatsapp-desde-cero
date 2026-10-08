@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="70" viewBox="0 0 1000 70" role="img" aria-label="Proyecto final: el bot completo del Minimarket La Esquina"><style>.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.gl{animation:gl 3s ease-in-out infinite}@keyframes gl{0%,100%{opacity:.55}50%{opacity:1}}</style>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g class="t gl"><rect x="10" y="10" width="980" height="48" rx="24" fill="#d97706" fill-opacity=".25" stroke="#fbbf24"/><text x="500" y="40" text-anchor="middle" font-size="17" font-weight="800" fill="#fde68a">🏆 Proyecto final: el bot completo del Minimarket La Esquina  ›</text></g></svg>
