@@ -135,7 +135,7 @@ Un Flow se describe con un JSON: una lista de **pantallas** y, dentro de cada un
 
 Lectura guiada:
 
-- **`version`**: la versión del formato del Flow JSON. Aquí `"5.1"` es el valor que aparece en los ejemplos de la documentación consultada. Verifica la versión vigente en la [referencia del Flow JSON](https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson).
+- **`version`**: la versión del formato del Flow JSON. Aquí usamos `"5.1"`, que sigue estando soportada para Flows de envío, pero el [registro de cambios oficial](https://developers.facebook.com/docs/whatsapp/flows/changelogs) (actualizado el 7 de noviembre de 2025) recomienda la **7.3**. Para un Flow real, parte de la versión recomendada y comprueba que cada componente que uses exista en ella; el `flow_message_version` recomendado sigue siendo `"3"`. Verifica la versión vigente en la [referencia del Flow JSON](https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson).
 - **`screens`**: la lista de pantallas. Cada una tiene un `id` único (en mayúsculas y con guiones bajos, por convención) y un `layout`.
 - **`layout` y `children`**: el layout `SingleColumnLayout` apila los componentes en una columna. Los hijos son los componentes visibles.
 - **Componentes de texto** (`TextHeading`, `TextBody`): muestran información.

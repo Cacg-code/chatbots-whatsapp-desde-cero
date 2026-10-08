@@ -167,7 +167,7 @@
 </div>
 <p>Lectura guiada:</p>
 <ul>
-<li><strong><code>version</code></strong>: la versión del formato del Flow JSON. Aquí <code>"5.1"</code> es el valor que aparece en los ejemplos de la documentación consultada. Verifica la versión vigente en la <a href="https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson">referencia del Flow JSON</a>.</li>
+<li><strong><code>version</code></strong>: la versión del formato del Flow JSON. Aquí usamos <code>"5.1"</code>, que sigue estando soportada para Flows de envío, pero el <a href="https://developers.facebook.com/docs/whatsapp/flows/changelogs">registro de cambios oficial</a> (actualizado el 7 de noviembre de 2025) recomienda la <strong>7.3</strong>. Para un Flow real, parte de la versión recomendada y comprueba que cada componente que uses exista en ella; el <code>flow_message_version</code> recomendado sigue siendo <code>"3"</code>. Verifica la versión vigente en la <a href="https://developers.facebook.com/docs/whatsapp/flows/reference/flowjson">referencia del Flow JSON</a>.</li>
 <li><strong><code>screens</code></strong>: la lista de pantallas. Cada una tiene un <code>id</code> único (en mayúsculas y con guiones bajos, por convención) y un <code>layout</code>.</li>
 <li><strong><code>layout</code> y <code>children</code></strong>: el layout <code>SingleColumnLayout</code> apila los componentes en una columna. Los hijos son los componentes visibles.</li>
 <li><strong>Componentes de texto</strong> (<code>TextHeading</code>, <code>TextBody</code>): muestran información.</li>

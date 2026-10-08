@@ -1,5 +1,5 @@
 // Service worker: uso sin conexión. Sube VERSION cuando cambies el sitio.
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE = 'chatbots-whatsapp-' + VERSION;
 const ROOT = new URL('./', self.location).href;
 
