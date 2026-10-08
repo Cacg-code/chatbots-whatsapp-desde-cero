@@ -29,6 +29,9 @@ Desde el **1 de julio de 2025**, Meta cobra **por mensaje de plantilla entregado
 1. **La categoría de la plantilla**: marketing, utilidad o autenticación.
 2. **El país del destinatario**, según el código de país de su número (no el tuyo).
 
+> [!importante] Verifica este dato
+> **INFO REFERENCIAL: es mejor que revises los sitios oficiales.** Al 7 de octubre de 2026, la documentación de Meta indica que Perú tiene tarifa propia (prefijo +51) y que desde el 1 de abril de 2026 se puede facturar en soles (PEN). Las tarifas vigentes y los cambios anunciados cambian cada trimestre: consúltalos en la [página oficial de precios](https://developers.facebook.com/docs/whatsapp/pricing). Los importes de esta lección son de ejemplo.
+
 Cuando aprobaste una plantilla en una categoría, aceptaste pagar esa categoría. Meta puede reclasificar una plantilla si su contenido corresponde a otra, así que revisa la categoría que queda aprobada.
 
 | Categoría | Para qué | Ejemplo en La Esquina |
