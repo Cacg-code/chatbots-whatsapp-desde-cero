@@ -45,7 +45,7 @@
       </header>
 <div class="callout consejo">
 <p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
-<ul><li>Explicar el modelo de cobro por mensaje de plantilla y distinguir las categorías marketing, utilidad, autenticación y servicio.</li><li>Identificar qué mensajes son gratis y cómo influyen la ventana de 24 horas y la de punto de entrada de anuncios.</li><li>Calcular el costo mensual de un bot pequeño con una función y tarifas parametrizables.</li><li>Estimar el costo de infraestructura en Cloudflare Workers y KV y el costo total para el cliente.</li><li>Definir y registrar métricas útiles: resolución sin humano, pedidos por conversación, tiempos, lectura de plantillas y bajas.</li></ul>
+<ul><li>Explicar el modelo de cobro por mensaje de plantilla y distinguir las categorías marketing, utilidad, autenticación y servicio.</li><li>Identificar qué mensajes no se cobran (el nivel gratuito mensual de servicio y la ventana de punto de entrada de anuncios) y cómo influye la ventana de 24 horas.</li><li>Calcular el costo mensual de un bot pequeño con una función y tarifas parametrizables.</li><li>Estimar el costo de infraestructura en Cloudflare Workers y KV y el costo total para el cliente.</li><li>Definir y registrar métricas útiles: resolución sin humano, pedidos por conversación, tiempos, lectura de plantillas y bajas.</li></ul>
 </div>
 
 <h2 id="antes-de-empezar-los-numeros-que-veras-s"><span class="n">1.</span>Antes de empezar: los números que verás son de ejemplo</h2>
@@ -56,7 +56,7 @@
 </ul>
 <div class="callout importante">
 <p class="callout-title">⚠️ Importante · Verifica este dato</p>
-<p>Varios blogs de proveedores afirman que desde el <strong>1 de octubre de 2026</strong> los mensajes libres dentro de la ventana de 24 horas y las plantillas de utilidad enviadas dentro de ella <strong>dejan de ser gratuitos</strong>. Al redactar esta lección, la página oficial de Meta que pude consultar seguía describiendo ambos como gratuitos y solo anunciaba, para esa fecha, ajustes de tarifas en algunos países. No pude confirmar el cambio en una fuente de Meta. Antes de cotizar, revisa la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página de precios</a> y la <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/updates-to-pricing">sección de actualizaciones de precios</a>, y compara con una factura real o con WhatsApp Manager. Por eso la calculadora de esta lección permite cobrar o no cobrar ese caso con una sola opción.</p></div>
+<p>Meta cambió el cobro el <strong>1 de octubre de 2026</strong>. La <a href="https://developers.facebook.com/docs/whatsapp/pricing">página oficial de precios</a> (actualizada el 30 de septiembre de 2026) dice que los mensajes de servicio vuelven a cobrarse, con un nivel gratuito de 1.000 por mes y por número, y que solo hay dos casos sin cobro. Contrastado con esa página el 8 de octubre de 2026. Meta actualiza esa página con frecuencia: confírmalo antes de cotizar.</p></div>
 <h2 id="el-modelo-de-cobro-por-mensaje"><span class="n">2.</span>El modelo de cobro por mensaje</h2>
 <p>Desde el <strong>1 de julio de 2025</strong>, Meta cobra <strong>por mensaje de plantilla entregado</strong>, no por «conversaciones» de 24 horas como antes. La tarifa depende de dos cosas:</p>
 <ol>
@@ -96,67 +96,72 @@
 </tbody>
 </table></div>
 <h2 id="que-es-gratis-y-que-no"><span class="n">3.</span>Qué es gratis y qué no</h2>
-<p>Según la documentación oficial de precios, vigente al preparar esta lección:</p>
-<ul>
-<li><strong>Los mensajes que el cliente te envía no se cobran.</strong></li>
-<li><strong>Los mensajes que no son plantilla</strong> (texto libre, botones, listas) son gratis, pero <strong>solo se pueden enviar dentro de la ventana de atención al cliente de 24 horas</strong>.</li>
-<li><strong>Las plantillas de utilidad enviadas dentro de una ventana abierta</strong> también son gratuitas.</li>
-<li><strong>Las plantillas de marketing y autenticación se cobran siempre</strong>, dentro o fuera de la ventana.</li>
-<li><strong>Las plantillas de utilidad fuera de la ventana se cobran.</strong></li>
-</ul>
-<div class="flow"><div class="node"><strong>Cliente te escribe</strong><span>se abre la ventana</span></div><div class="arrow">→<code>24 horas</code></div><div class="node"><strong>Texto libre</strong><span>gratis (hoy)</span></div><div class="arrow">→<code>misma ventana</code></div><div class="node"><strong>Utilidad</strong><span>gratis (hoy)</span></div><div class="arrow">→<code>ventana cerrada</code></div><div class="node"><strong>Cualquier plantilla</strong><span>se cobra</span></div></div>
-<p>Esto tiene una consecuencia de diseño que ya conoces: <strong>un bot barato resuelve todo mientras la ventana está abierta</strong> y deja las plantillas de pago para cuando no hay alternativa (un recordatorio al día siguiente, una promoción).</p>
+<p>Según la <a href="https://developers.facebook.com/docs/whatsapp/pricing">página oficial de precios</a>, vigente desde el 1 de octubre de 2026, <strong>Meta solo deja de cobrar en dos casos</strong> cuando una empresa envía un mensaje a un usuario:</p>
+<ol>
+<li><strong>La ventana de punto de entrada de anuncios</strong> (la explicamos abajo): mientras está abierta, no se cobra ninguna categoría.</li>
+<li><strong>Los primeros 1.000 mensajes de servicio de cada mes, por número de teléfono</strong>: el nivel gratuito no se acumula y se reinicia cada mes. Desde el mensaje 1.001 se cobra la tarifa de servicio.</li>
+</ol>
+<p>Además, <strong>los mensajes que el cliente te envía nunca se cobran</strong>. Todo lo demás se cobra por mensaje entregado: marketing, utilidad, autenticación y los mensajes de servicio que pasen del nivel gratuito.</p>
+<div class="flow"><div class="node"><strong>Cliente te escribe</strong><span>se abre la ventana de 24 h</span></div><div class="arrow">→<code>dentro de la ventana</code></div><div class="node"><strong>Texto libre (servicio)</strong><span>gratis hasta 1.000 al mes</span></div><div class="arrow">→<code>mismas 24 horas</code></div><div class="node"><strong>Plantilla de utilidad</strong><span>se cobra</span></div><div class="arrow">→<code>ventana cerrada</code></div><div class="node"><strong>Cualquier plantilla</strong><span>se cobra</span></div></div>
+<p>Las respuestas libres (texto, botones, listas) <strong>solo se pueden enviar dentro de la ventana de atención al cliente de 24 horas</strong>; fuera de ella solo hay plantillas. Esto tiene una consecuencia de diseño que ya conoces: <strong>un bot barato resuelve todo mientras la ventana está abierta</strong> y deja las plantillas para cuando no hay alternativa (un recordatorio al día siguiente, una promoción). Un minimarket pequeño rara vez pasa de 1.000 respuestas libres al mes por número, así que esa parte suele salir gratis.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Cambió en octubre de 2026</p>
+<p>Hasta septiembre de 2026 los mensajes de servicio y las plantillas de utilidad enviadas dentro de la ventana de 24 horas no se cobraban. Si lees tutoriales anteriores, verás ese modelo; ya no aplica.</p></div>
 <h3>Ventana de punto de entrada de anuncios</h3>
-<p>Si el cliente te escribe desde un <strong>anuncio de «Click to WhatsApp»</strong> (o un botón de llamada a la acción de una página de Facebook) usando la app móvil, y tú respondes dentro de las primeras 24 horas, se abre una <strong>ventana de 72 horas</strong> en la que <strong>todos los mensajes, incluidas las plantillas, son gratuitos</strong>. Es independiente de la ventana de 24 horas: si esta se cierra, solo puedes enviar plantillas. Para un negocio que paga anuncios, es un incentivo para responder rápido (el bot ayuda).</p>
+<p>Si el cliente te escribe desde un <strong>anuncio de «Click to WhatsApp»</strong> (o un botón de llamada a la acción de una página de Facebook) usando la app móvil, y tú respondes dentro de la ventana de atención de 24 horas con un mensaje de marketing, utilidad, autenticación o servicio, ese mensaje no se cobra y <strong>abre una ventana de punto de entrada gratuita de hasta 7 días</strong>. Mientras está abierta, <strong>tampoco se cobran las plantillas</strong> de marketing, utilidad ni autenticación. Es independiente de la ventana de 24 horas: si esta se cierra, solo puedes enviar plantillas (que dentro de la ventana de punto de entrada son gratis). Para un negocio que paga anuncios, es un incentivo para responder rápido (el bot ayuda).</p>
 <h3>Descuentos por volumen</h3>
 <p>Hay descuentos por volumen, pero con matices importantes:</p>
 <ul>
 <li>Solo para plantillas de <strong>utilidad y autenticación</strong>, no marketing.</li>
 <li>Se calculan por <strong>portafolio comercial</strong>, sumando todas sus cuentas, por mercado y categoría.</li>
-<li>Los mensajes gratuitos no cuentan para los niveles.</li>
+<li>Los mensajes que no se cobran no cuentan para los niveles.</li>
 <li>Los niveles se reinician cada mes y los define Meta.</li>
 </ul>
 <p>Un minimarket de barrio <strong>nunca llegará</strong> a esos niveles. Lo mencionamos para que entiendas la factura, no para que cuentes con ellos.</p>
 <h3>Cambios por fecha</h3>
-<p>Meta puede cambiar tarifas solo el <strong>primer día de un trimestre</strong> y avisa con anticipación (un mes para tarifas, tres para niveles de volumen y seis para cambios del modelo). La página oficial indicaba, por ejemplo, actualizaciones de tarifas para algunos países el 1 de octubre de 2026. Mira la cabecera de la página de precios cada trimestre y guarda en tu hoja de costos <strong>la fecha de la tarifa que usaste</strong>.</p>
+<p>Meta puede cambiar tarifas solo el <strong>primer día de un trimestre</strong> y avisa con anticipación (un mes para tarifas, tres para niveles de volumen y seis para cambios del modelo). La actualización del 1 de octubre de 2026 es un ejemplo: trajo el cobro de los mensajes de servicio con su nivel gratuito. Mira la cabecera de la página de precios cada trimestre y guarda en tu hoja de costos <strong>la fecha de la tarifa que usaste</strong>.</p>
 <h2 id="calcular-el-costo-mensual-de-un-bot-pequ"><span class="n">4.</span>Calcular el costo mensual de un bot pequeño</h2>
 <p>La parte de Meta de la factura es, en esencia, una suma: para cada categoría, <strong>cantidad de mensajes por tarifa</strong>. Lo único delicado es qué no se cobra. Escribamos una función <code>costoMensual</code> que acepte las tarifas como <strong>parámetro</strong>, de modo que cuando Meta cambie algo no cambies el código, solo los datos:</p>
 <div class="code">
   <div class="code-head"><span>costos.js</span><button class="copy" type="button">Copiar</button></div>
 <pre><code>function costoMensual(mensajes, tarifas) {
   let total = 0;
+  let gratisServicio = tarifas.servicioGratis ?? 0; // nivel gratuito mensual de servicio
   for (const m of mensajes) {
-    let precio = tarifas[m.categoria] ?? 0;
-    // Utilidad dentro de la ventana: gratis salvo que se indique lo contrario
-    if (m.categoria === &quot;utilidad&quot; &amp;&amp; m.enVentana &amp;&amp; !tarifas.cobrarUtilidadEnVentana) precio = 0;
-    total += precio * m.cantidad;
+    if (m.enPuntoDeEntrada) continue;               // ventana de punto de entrada: sin cobro
+    let cobrables = m.cantidad;
+    if (m.categoria === &quot;servicio&quot;) {
+      cobrables = Math.max(0, m.cantidad - gratisServicio);
+      gratisServicio = Math.max(0, gratisServicio - m.cantidad);
+    }
+    total += (tarifas[m.categoria] ?? 0) * cobrables;
   }
   return Math.round(total * 100) / 100;
 }</code></pre>
 </div>
-<p>Probémosla con un mes <strong>de ejemplo</strong>: tarifas inventadas en dólares (<strong>no son las de Meta</strong>) y un minimarket con 80 plantillas de marketing, 120 de utilidad fuera de la ventana, 300 de utilidad dentro de ella y 900 mensajes libres:</p>
+<p>Probémosla con un mes <strong>de ejemplo</strong>: tarifas inventadas en dólares (<strong>no son las de Meta</strong>) y un minimarket con 80 plantillas de marketing, 420 de utilidad, 50 de utilidad enviadas mientras había una ventana de punto de entrada abierta y 1.300 mensajes libres (servicio):</p>
 <div class="code">
   <div class="code-head"><span>costos.js</span><button class="copy" type="button">Copiar</button></div>
 <pre><code>// Tarifas DE EJEMPLO en dólares (no son las de Meta)
-const tarifasEjemplo = { marketing: 0.06, utilidad: 0.02, autenticacion: 0.02, servicio: 0 };
+const tarifasEjemplo = { marketing: 0.06, utilidad: 0.02, autenticacion: 0.02, servicio: 0.01, servicioGratis: 1000 };
 const mes = [
   { categoria: &quot;marketing&quot;, cantidad: 80 },
-  { categoria: &quot;utilidad&quot;, cantidad: 120, enVentana: false },
-  { categoria: &quot;utilidad&quot;, cantidad: 300, enVentana: true },
-  { categoria: &quot;servicio&quot;, cantidad: 900 },
+  { categoria: &quot;utilidad&quot;, cantidad: 420 },
+  { categoria: &quot;utilidad&quot;, cantidad: 50, enPuntoDeEntrada: true },
+  { categoria: &quot;servicio&quot;, cantidad: 1300 },
 ];
-console.log(&quot;Hoy (utilidad en ventana gratis):&quot;, costoMensual(mes, tarifasEjemplo));
-console.log(&quot;Si se cobrara en ventana:&quot;, costoMensual(mes, { ...tarifasEjemplo, cobrarUtilidadEnVentana: true }));</code></pre>
+console.log(&quot;Con el nivel gratuito de servicio:&quot;, costoMensual(mes, tarifasEjemplo));
+console.log(&quot;Sin el nivel gratuito de servicio:&quot;, costoMensual(mes, { ...tarifasEjemplo, servicioGratis: 0 }));</code></pre>
 </div>
 <div class="code">
   <div class="code-head"><span>Salida esperada</span></div>
-<pre><code>Hoy (utilidad en ventana gratis): 7.2
-Si se cobrara en ventana: 13.2</code></pre>
+<pre><code>Con el nivel gratuito de servicio: 16.2
+Sin el nivel gratuito de servicio: 26.2</code></pre>
 </div>
-<p>Revisa las cuentas a mano: 80 × 0,06 = 4,80 y 120 × 0,02 = 2,40, suman 7,20. Si los 300 de utilidad en ventana también se cobraran, se añaden 6,00. Para un negocio chico, <strong>la diferencia son unos pocos dólares al mes</strong>. Aun así, mostrarle al cliente ambos escenarios te protege de sorpresas y demuestra que sabes lo que haces.</p>
+<p>Revisa las cuentas a mano: 80 × 0,06 = 4,80 y 420 × 0,02 = 8,40; las 50 de utilidad en la ventana de punto de entrada cuestan 0. De los 1.300 mensajes de servicio, 1.000 son gratis y los 300 restantes cuestan 300 × 0,01 = 3,00. Total: 16,20. Sin el nivel gratuito, los 1.300 costarían 13,00 y el total subiría a 26,20. Para un negocio chico, <strong>la diferencia son pocos dólares al mes</strong>. Aun así, mostrarle al cliente ambos escenarios te protege de sorpresas y demuestra que sabes lo que haces.</p>
 <div class="callout nota">
-<p class="callout-title">📌 Nota · Servicio con tarifa</p>
-<p>Si Meta confirmara que los mensajes de servicio dejan de ser gratis, solo cambias <code>servicio: 0</code> por la tarifa real en el objeto de tarifas. Ese es el beneficio de parametrizar.</p></div>
+<p class="callout-title">📌 Nota · Tarifas parametrizadas</p>
+<p>Si Meta vuelve a cambiar el nivel gratuito o la tarifa de servicio, solo cambias <code>servicioGratis</code> y <code>servicio</code> en el objeto de tarifas. Ese es el beneficio de parametrizar.</p></div>
 <h2 id="costos-de-infraestructura"><span class="n">5.</span>Costos de infraestructura</h2>
 <p>El bot corre en <strong>Cloudflare Workers</strong> y guarda datos en <strong>Workers KV</strong> (lecciones <a href="../11-despliegue-en-cloudflare/">11</a> y <a href="../15-memoria-con-kv/">15</a>). Según la documentación de Cloudflare al preparar la lección, el <strong>plan gratuito</strong> incluye:</p>
 <div class="table-wrap"><table>
@@ -338,7 +343,7 @@ function resumenMetricas(eventos) {
 <li><strong>Usar cifras viejas de blogs o de memoria.</strong> Las tarifas dependen del país del destinatario y del trimestre; cotiza con la tarifa oficial vigente y anota la fecha.</li>
 <li><strong>Olvidar que marketing se cobra siempre.</strong> Un cliente que quiere «promociones masivas» necesita ver este costo desde la propuesta.</li>
 <li><strong>Disfrazar marketing como utilidad para pagar menos.</strong> Puede terminar en reclasificación o problemas de calidad.</li>
-<li><strong>Prometer «cero costo».</strong> Tienes una parte gratis (ventana, plan gratuito) y otra que no.</li>
+<li><strong>Prometer «cero costo».</strong> Tienes una parte gratis (nivel gratuito de servicio, ventana de punto de entrada, plan gratuito de Cloudflare) y otra que no.</li>
 <li><strong>No separar quién paga qué.</strong> Si Meta le factura al cliente y tú te quedas con la infraestructura, que quede escrito.</li>
 <li><strong>Medir mensajes enviados en lugar de resultados.</strong> Más mensajes no es mejor; más pedidos con menos bajas, sí.</li>
 <li><strong>Dividir por cero en las métricas.</strong> Un mes sin conversaciones no debe romper el reporte.</li>
@@ -346,8 +351,8 @@ function resumenMetricas(eventos) {
 <h2 id="apuntes-para-llevar"><span class="n">10.</span>Apuntes para llevar</h2>
 <ul>
 <li>Meta cobra por <strong>mensaje de plantilla entregado</strong>, según <strong>categoría</strong> y <strong>país del destinatario</strong>; marketing, utilidad y autenticación son las categorías de plantilla.</li>
-<li>Texto libre dentro de la ventana de 24 h y las plantillas de utilidad dentro de ella eran gratis según la documentación consultada; <strong>verifica</strong> si cambió el 1-oct-2026.</li>
-<li>La ventana de punto de entrada de anuncios de 72 h hace gratuitos todos los mensajes si respondes dentro de las primeras 24 h.</li>
+<li>Desde el 1-oct-2026 Meta cobra también los mensajes de servicio: los primeros 1.000 de cada mes por número son gratis; las plantillas de utilidad dentro de la ventana de 24 h ya se cobran.</li>
+<li>La ventana de punto de entrada de anuncios (hasta 7 días) hace gratuitos todos los mensajes si respondes dentro de las primeras 24 h.</li>
 <li>Las tarifas se <strong>parametrizan</strong>: el código no lleva precios fijos.</li>
 <li>Cloudflare tiene plan gratuito (100.000 peticiones/día; KV 1.000 escrituras/día) suficiente para un minimarket; el plan de pago parte de 5 USD/mes.</li>
 <li>Mide <strong>resolución, pedidos por conversación, tiempo de respuesta, lectura de plantillas y bajas</strong> con un registro de eventos simple.</li>
@@ -375,7 +380,11 @@ function resumenMetricas(eventos) {
 </tr>
 <tr>
 <td>Ventana de punto de entrada</td>
-<td>Ventana de 72 h gratuita tras un clic en un anuncio a WhatsApp respondido a tiempo.</td>
+<td>Ventana gratuita de hasta 7 días tras un clic en un anuncio a WhatsApp respondido a tiempo.</td>
+</tr>
+<tr>
+<td>Nivel gratuito de servicio</td>
+<td>Los primeros 1.000 mensajes de servicio de cada mes por número, sin cobro.</td>
 </tr>
 <tr>
 <td>Descuento por volumen</td>
@@ -400,7 +409,7 @@ function resumenMetricas(eventos) {
 <p>Elige una respuesta en cada pregunta. Verás al instante si acertaste y por qué.</p>
 <div class="quiz-q"><p>¿Desde cuándo cobra Meta «por mensaje» de plantilla en lugar de por conversación?</p><ul class="opts"><li><button type="button" class="opt">Desde enero de 2024</button></li><li><button type="button" class="opt" data-ok>Desde el 1 de julio de 2025</button></li><li><button type="button" class="opt">Desde el 1 de octubre de 2026</button></li><li><button type="button" class="opt">Nunca cambió el modelo</button></li></ul><p class="explain" hidden>El cambio al cobro por mensaje de plantilla entregado entró en vigor el 1 de julio de 2025.</p></div>
 <div class="quiz-q"><p>¿De qué depende la tarifa de una plantilla?</p><ul class="opts"><li><button type="button" class="opt">Solo del largo del texto</button></li><li><button type="button" class="opt" data-ok>De su categoría y del país del número del destinatario</button></li><li><button type="button" class="opt">Del país del negocio únicamente</button></li><li><button type="button" class="opt">De la hora del envío</button></li></ul><p class="explain" hidden>La tarifa depende de la categoría (marketing, utilidad, autenticación) y del código de país del destinatario.</p></div>
-<div class="quiz-q"><p>Un cliente te escribió hace 2 horas. Le respondes con texto libre. Según la documentación oficial consultada, ¿se cobra?</p><ul class="opts"><li><button type="button" class="opt">Sí, siempre</button></li><li><button type="button" class="opt" data-ok>No, los mensajes no plantilla dentro de la ventana de 24 h eran gratuitos; verifica si esto cambió</button></li><li><button type="button" class="opt">Solo si el cliente es nuevo</button></li><li><button type="button" class="opt">Solo si incluye botones</button></li></ul><p class="explain" hidden>Los mensajes libres dentro de la ventana eran gratuitos; por eso hay que verificar la fuente oficial por si cambia.</p></div>
+<div class="quiz-q"><p>Un cliente te escribió hace 2 horas. Le respondes con texto libre y es el mensaje de servicio número 300 del mes de ese número. Según la página oficial de octubre de 2026, ¿se cobra?</p><ul class="opts"><li><button type="button" class="opt">Sí, desde el primer mensaje</button></li><li><button type="button" class="opt" data-ok>No, entra en los primeros 1.000 mensajes de servicio gratuitos del mes</button></li><li><button type="button" class="opt">No, los mensajes libres nunca se cobran</button></li><li><button type="button" class="opt">Solo si incluye botones</button></li></ul><p class="explain" hidden>Desde el 1 de octubre de 2026 los mensajes de servicio se cobran, pero cada número tiene un nivel gratuito de 1.000 al mes.</p></div>
 <div class="quiz-q"><p>¿Por qué <code>costoMensual</code> recibe las tarifas como parámetro?</p><ul class="opts"><li><button type="button" class="opt">Para que sea más lenta</button></li><li><button type="button" class="opt" data-ok>Para actualizar precios sin cambiar el código cuando Meta modifique las tarifas</button></li><li><button type="button" class="opt">Porque JavaScript no permite constantes</button></li><li><button type="button" class="opt">Para evitar usar números</button></li></ul><p class="explain" hidden>Los precios son datos que cambian; el código no debe llevarlos escritos.</p></div>
 <div class="quiz-q"><p>¿Qué problema tiene contar como «resuelta» una conversación que termina con «quiero hablar con una persona»?</p><ul class="opts"><li><button type="button" class="opt">Ninguno</button></li><li><button type="button" class="opt" data-ok>Infla la tasa de resolución sin humano y oculta los fallos del bot</button></li><li><button type="button" class="opt">Hace que Meta cobre más</button></li><li><button type="button" class="opt">Borra el historial</button></li></ul><p class="explain" hidden>La métrica debe reflejar lo que el bot resolvió por sí mismo; si no, no sirve para decidir.</p></div>
 <p class="quiz-score" aria-live="polite"></p>
