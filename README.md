@@ -26,15 +26,23 @@ Se abre en el navegador, con ejercicios que se corrigen solos, simulador de chat
 </div>
 
 <p align="center">
-  <a href="#-qué-vas-a-construir"><b>Qué construirás</b></a> ·
   <a href="#-simulador-de-whatsapp"><b>Simulador</b></a> ·
-  <a href="#️-tu-ruta"><b>Ruta</b></a> ·
+  <a href="#-qué-vas-a-construir"><b>Qué construirás</b></a> ·
+  <a href="#️-tu-ruta-y-temario"><b>Ruta</b></a> ·
+  <a href="#-antes-de-empezar"><b>Requisitos</b></a> ·
   <a href="#-código-de-referencia"><b>Código</b></a> ·
-  <a href="#-aviso"><b>Aviso</b></a>
+  <a href="#️-aviso-importante"><b>Aviso</b></a>
 </p>
 
-
 ## 💬 Simulador de WhatsApp
+
+<div align="center">
+
+<img src="assets/readme/h-simulador.svg" alt="Simulador de WhatsApp" width="100%">
+
+<img src="assets/readme/simulador.svg" alt="Teléfono con chat, panel JSON con lo que entra y sale, reloj simulado y tres guiones automáticos" width="100%">
+
+</div>
 
 Un WhatsApp de práctica que corre en tu navegador con el mismo motor del bot del curso: sin cuenta de Meta, sin internet y sin costo.
 
@@ -43,13 +51,15 @@ Un WhatsApp de práctica que corre en tu navegador con el mismo motor del bot de
 - **Panel JSON** con lo que entra y sale del motor, y reloj simulado para probar la ventana de 24 h.
 - Es opcional: el curso también se sigue con la terminal (`consola.js`).
 
-## 🙋 Acerca de este material
-
-Lo hace **un estudiante** con ayuda de inteligencia artificial, como aporte gratuito a la comunidad de desarrolladores. No es un curso oficial, no da títulos ni certificados y puede tener errores, sobre todo en datos que Meta cambia (precios, límites, menús). Contrástalo con la [documentación oficial de WhatsApp Business Platform](https://developers.facebook.com/docs/whatsapp/) y avísame de cualquier fallo en los [issues](https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new).
-
-📝 Lee también [lo que aprendí construyendo esto](https://cacg-code.github.io/chatbots-whatsapp-desde-cero/aprendizajes/): decisiones, errores reales y qué haría distinto.
-
 ## 🛒 Qué vas a construir
+
+<div align="center">
+
+<img src="assets/readme/h-construir.svg" alt="Qué vas a construir" width="100%">
+
+<img src="assets/readme/construir.svg" alt="Catálogo, carrito, entrega, pago con Yape o efectivo y aviso al dueño" width="100%">
+
+</div>
 
 Un bot para un negocio ficticio, **Minimarket La Esquina**: muestra el catálogo, arma el carrito, toma el pedido (recojo o delivery, Yape o efectivo), guarda la sesión de cada cliente, avisa al dueño, envía recordatorios con plantillas y pasa a una persona cuando hace falta. La misma base sirve para citas, pedidos o preguntas frecuentes de cualquier negocio.
 
@@ -59,15 +69,20 @@ Un bot para un negocio ficticio, **Minimarket La Esquina**: muestra el catálogo
 
 </div>
 
-## 🗺️ Tu ruta
+## 🗺️ Tu ruta y temario
 
 <div align="center">
 
+<img src="assets/readme/h-ruta.svg" alt="Tu ruta y temario" width="100%">
+
 <img src="assets/readme/ruta.svg" alt="Diez módulos del curso" width="100%">
+
+<img src="assets/readme/temario.svg" alt="Los diez módulos con sus lecciones y el proyecto final" width="100%">
 
 </div>
 
-### Temario (10 módulos, 28 lecciones y un proyecto)
+<details>
+<summary><b>Ver el temario completo en tabla (28 lecciones)</b></summary>
 
 | Módulo | Lecciones |
 |---|---|
@@ -83,11 +98,29 @@ Un bot para un negocio ficticio, **Minimarket La Esquina**: muestra el catálogo
 | Producción y negocio | 23 Pruebas y errores · 24 Seguridad · 25 Atención humana · 26 Vender tu bot |
 | Proyecto final | El bot completo del minimarket |
 
+</details>
+
 ## ✅ Antes de empezar
+
+<div align="center">
+
+<img src="assets/readme/h-antes.svg" alt="Antes de empezar" width="100%">
+
+<img src="assets/readme/antes.svg" alt="Primero lo básico de JavaScript, luego este curso, luego tu propio bot" width="100%">
+
+</div>
 
 Necesitas lo básico de JavaScript. Si vienes de cero, haz primero [Desarrollo web desde cero](https://cacg-code.github.io/web-desde-cero/) (JavaScript y Node.js). Más trabajos del autor en el [portafolio Carlo · Dev](https://cacg-code.github.io/).
 
 ## 🧪 Código de referencia
+
+<div align="center">
+
+<img src="assets/readme/h-codigo.svg" alt="Código de referencia" width="100%">
+
+<img src="assets/readme/codigo.svg" alt="Terminal que instala, corre 113 pruebas y abre la consola del bot" width="100%">
+
+</div>
 
 La carpeta [`codigo/`](codigo/) contiene el bot terminado, con 113 pruebas (`npm test`) y una consola para conversar con él (`node consola.js`). Las lecciones se escriben contra ese código real.
 
@@ -100,12 +133,44 @@ node consola.js
 
 ## 🔧 Cómo está hecho
 
+<div align="center">
+
+<img src="assets/readme/h-hecho.svg" alt="Cómo está hecho" width="100%">
+
+<img src="assets/readme/hecho.svg" alt="Markdown, construir.py, probar-ejercicios, revisar.py y GitHub Pages" width="100%">
+
+</div>
+
 Las lecciones son Markdown en `contenido/`; `python scripts/construir.py` genera el sitio estático y `node scripts/probar-ejercicios.mjs` comprueba que cada ejercicio tiene una solución válida. `python scripts/revisar.py` valida enlaces, sitemap y accesibilidad básica.
 
-## ⚠️ Aviso
+## ⚠️ Aviso importante
+
+<div align="center">
+
+<img src="assets/readme/aviso.svg" alt="Los datos de Meta cambian: verifica siempre en la documentación oficial" width="100%">
+
+</div>
 
 Los datos de Meta (precios, límites, menús, versión de la API) cambian. Las lecciones lo marcan con «Verifica este dato» y enlazan a la documentación oficial. Este curso no está afiliado a Meta ni a WhatsApp.
 
+## 🙋 Acerca de este material
+
+Lo hace **un estudiante** con ayuda de inteligencia artificial, como aporte gratuito a la comunidad de desarrolladores. No es un curso oficial, no da títulos ni certificados y puede tener errores, sobre todo en datos que Meta cambia (precios, límites, menús). Contrástalo con la [documentación oficial de WhatsApp Business Platform](https://developers.facebook.com/docs/whatsapp/) y avísame de cualquier fallo en los [issues](https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new).
+
+📝 Lee también [lo que aprendí construyendo esto](https://cacg-code.github.io/chatbots-whatsapp-desde-cero/aprendizajes/): decisiones, errores reales y qué haría distinto.
+
 ## 📄 Licencia
 
+<div align="center">
+
+<img src="assets/readme/h-licencia.svg" alt="Licencia y comunidad" width="100%">
+
+</div>
+
 Código bajo [MIT](LICENSE); contenido bajo [LICENSE-CONTENIDO.md](LICENSE-CONTENIDO.md). Normas de convivencia en [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+<div align="center">
+
+<a href="https://github.com/Cacg-code/chatbots-whatsapp-desde-cero/issues/new"><img src="assets/readme/cierre.svg" alt="Hecho con cariño por un estudiante, con apoyo de IA" width="100%"></a>
+
+</div>

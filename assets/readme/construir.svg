@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="360" viewBox="0 0 1000 360" role="img" aria-label="Flujo del pedido: catálogo, carrito, entrega, pago con Yape o efectivo, aviso al dueño">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs><style>
+.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.m{font-family:Consolas,Menlo,monospace}
+.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.bl{animation:bl 1s infinite}.bl2{animation-delay:.2s}.bl3{animation-delay:.4s}@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}
+.cur{animation:cu 1s steps(2) infinite}@keyframes cu{50%{opacity:0}}
+.flow{stroke-dasharray:7 8;animation:d 1.2s linear infinite}@keyframes d{to{stroke-dashoffset:-15}}
+.pu{transform-box:fill-box;transform-origin:center;animation:pu 2.4s ease-out infinite}@keyframes pu{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.4);opacity:0}}
+</style>
+<style>
+.st{animation:on 10s infinite}.s2{animation-delay:2s}.s3{animation-delay:4s}.s4{animation-delay:6s}.s5{animation-delay:8s}
+@keyframes on{0%,100%{stroke-opacity:.3;fill-opacity:.55}4%,18%{stroke-opacity:1;fill-opacity:1}24%{stroke-opacity:.3;fill-opacity:.55}}
+.ck{animation:ck 10s infinite;opacity:0}@keyframes ck{0%,86%{opacity:0;transform:scale(.6)}92%,98%{opacity:1;transform:scale(1)}100%{opacity:0}}
+.ck{transform-box:fill-box;transform-origin:center}
+</style>
+<rect width="1000" height="360" rx="24" fill="url(#bg)"/>
+<g class="t" text-anchor="middle">
+<path class="flow" d="M110 120H890" stroke="#14b8a6" stroke-width="3" fill="none" stroke-opacity=".6"/>
+<g><rect class="st" x="30" y="60" width="160" height="120" rx="18" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="110" y="104" font-size="34">📋</text><text x="110" y="136" font-size="16" font-weight="700" fill="#fff">1 · Catálogo</text><text x="110" y="158" font-size="12.5" fill="#99f6e4">productos y precios</text></g>
+<g><rect class="st s2" x="220" y="60" width="160" height="120" rx="18" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="300" y="104" font-size="34">🛒</text><text x="300" y="136" font-size="16" font-weight="700" fill="#fff">2 · Carrito</text><text x="300" y="158" font-size="12.5" fill="#99f6e4">agrega, quita, total</text></g>
+<g><rect class="st s3" x="410" y="60" width="160" height="120" rx="18" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="490" y="104" font-size="34">🛵</text><text x="490" y="136" font-size="16" font-weight="700" fill="#fff">3 · Entrega</text><text x="490" y="158" font-size="12.5" fill="#99f6e4">recojo o delivery</text></g>
+<g><rect class="st s4" x="600" y="60" width="160" height="120" rx="18" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="680" y="104" font-size="34">💜</text><text x="680" y="136" font-size="16" font-weight="700" fill="#fff">4 · Pago</text><text x="680" y="158" font-size="12.5" fill="#99f6e4">Yape o efectivo</text></g>
+<g><rect class="st s5" x="790" y="60" width="160" height="120" rx="18" fill="#0b2a2e" stroke="#fbbf24" stroke-width="2"/><text x="870" y="104" font-size="34">🔔</text><text x="870" y="136" font-size="16" font-weight="700" fill="#fff">5 · Aviso</text><text x="870" y="158" font-size="12.5" fill="#fde68a">le llega al dueño</text></g>
+</g>
+<circle r="8" fill="#fbbf24"><animateMotion dur="10s" repeatCount="indefinite" path="M110 120H870" keyPoints="0;.25;.25;.5;.5;.75;.75;1;1" keyTimes="0;.18;.2;.38;.4;.58;.6;.78;1" calcMode="linear"/></circle>
+<!-- ticket -->
+<g transform="translate(60 220)" class="t"><rect width="880" height="110" rx="18" fill="#0a1214" stroke="#14b8a6" stroke-opacity=".4"/>
+<text x="28" y="38" font-size="15" font-weight="700" fill="#5eead4">TICKET DEL PEDIDO</text>
+<text x="28" y="66" font-size="15" fill="#d1d5db">2 × Leche entera ........ S/ 9.00</text><text x="28" y="90" font-size="15" fill="#d1d5db">1 × Pan francés ........ S/ 0.40</text>
+<text x="400" y="66" font-size="15" fill="#d1d5db">Delivery ........ S/ 3.00</text><text x="400" y="90" font-size="17" font-weight="800" fill="#fbbf24">TOTAL ........ S/ 12.40</text>
+<g class="ck"><rect x="700" y="26" width="150" height="58" rx="29" fill="#16a34a"/><text x="775" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">✓ Pedido listo</text></g></g>
+</svg>

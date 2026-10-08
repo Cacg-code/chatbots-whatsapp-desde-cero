@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420" role="img" aria-label="Simulador de WhatsApp con panel JSON y reloj de 24 horas">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs><style>
+.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.m{font-family:Consolas,Menlo,monospace}
+.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.bl{animation:bl 1s infinite}.bl2{animation-delay:.2s}.bl3{animation-delay:.4s}@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}
+.cur{animation:cu 1s steps(2) infinite}@keyframes cu{50%{opacity:0}}
+.flow{stroke-dasharray:7 8;animation:d 1.2s linear infinite}@keyframes d{to{stroke-dashoffset:-15}}
+.pu{transform-box:fill-box;transform-origin:center;animation:pu 2.4s ease-out infinite}@keyframes pu{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.4);opacity:0}}
+</style>
+<style>
+.p1{animation:pp 10s infinite;opacity:0}.p2{animation:pp 10s infinite;animation-delay:1.5s;opacity:0}.p3{animation:pp 10s infinite;animation-delay:3s;opacity:0}.p4{animation:pp 10s infinite;animation-delay:4.5s;opacity:0}
+@keyframes pp{0%{opacity:0;transform:translateY(10px)}5%,85%{opacity:1;transform:translateY(0)}95%,100%{opacity:0}}
+.js{animation:js 10s steps(1) infinite}@keyframes js{0%{opacity:1}50%{opacity:.4}}
+.hand{transform-box:fill-box;transform-origin:50% 100%;animation:hd 10s linear infinite}@keyframes hd{to{transform:rotate(360deg)}}
+</style>
+<rect width="1000" height="420" rx="24" fill="url(#bg)"/>
+<!-- teléfono -->
+<g transform="translate(40 24)"><g class="fl">
+<rect width="300" height="372" rx="28" fill="#0a1214" stroke="#14b8a6" stroke-opacity=".6" stroke-width="2"/>
+<path d="M0 28a28 28 0 0 1 28-28h244a28 28 0 0 1 28 28v40H0z" fill="#0b7a75"/>
+<circle cx="34" cy="34" r="17" fill="#ccfbf1"/><text class="t" x="34" y="41" text-anchor="middle" font-size="19">🛒</text>
+<text class="t" x="62" y="31" font-size="16" font-weight="700" fill="#fff">La Esquina</text><text class="t" x="62" y="51" font-size="12" fill="#99f6e4">simulador · en línea</text>
+<g class="t" font-size="14">
+<g class="p1"><rect x="150" y="90" width="130" height="34" rx="13" fill="#134e4a"/><text x="166" y="112" fill="#fff">Quiero un pedido</text></g>
+<g class="p2"><rect x="20" y="136" width="210" height="62" rx="13" fill="#1f2937"/><text x="34" y="160" fill="#fff" font-weight="700">¿Recojo o delivery?</text><text x="34" y="182" fill="#9ca3af" font-size="13">1 · Recojo   2 · Delivery</text></g>
+<g class="p3"><rect x="220" y="212" width="60" height="34" rx="13" fill="#134e4a"/><text x="242" y="234" fill="#fff">2</text></g>
+<g class="p4"><rect x="20" y="258" width="230" height="62" rx="13" fill="#1f2937"/><text x="34" y="282" fill="#fff" font-weight="700">Dirección de entrega</text><text x="34" y="304" fill="#9ca3af" font-size="13">Escríbela y seguimos</text></g></g>
+<rect x="16" y="336" width="268" height="24" rx="12" fill="#10272b"/><text class="t" x="30" y="353" font-size="12" fill="#6b8a8d">Escribe un mensaje</text>
+</g></g>
+<!-- panel JSON -->
+<g transform="translate(380 24)"><g class="fl" style="animation-delay:-2s">
+<rect width="320" height="372" rx="18" fill="#0a0a12" stroke="#a78bfa" stroke-opacity=".5" stroke-width="1.5"/>
+<path d="M0 18a18 18 0 0 1 18-18h284a18 18 0 0 1 18 18v28H0z" fill="#1c1738"/><text class="t" x="20" y="30" font-size="14" font-weight="700" fill="#c4b5fd">Panel JSON · entra y sale</text>
+<g class="m js" font-size="13.5"><text x="20" y="80" fill="#8b86b8">// entra</text>
+<text x="20" y="104" fill="#e9e5ff">{ <tspan fill="#a5b4fc">"from"</tspan>: <tspan fill="#86efac">"51999…"</tspan>,</text>
+<text x="20" y="126" fill="#e9e5ff">  <tspan fill="#a5b4fc">"type"</tspan>: <tspan fill="#86efac">"text"</tspan>,</text>
+<text x="20" y="148" fill="#e9e5ff">  <tspan fill="#a5b4fc">"body"</tspan>: <tspan fill="#fcd34d">"2"</tspan> }</text>
+<text x="20" y="196" fill="#8b86b8">// sale</text>
+<text x="20" y="220" fill="#e9e5ff">{ <tspan fill="#a5b4fc">"step"</tspan>: <tspan fill="#86efac">"direccion"</tspan>,</text>
+<text x="20" y="242" fill="#e9e5ff">  <tspan fill="#a5b4fc">"entrega"</tspan>: <tspan fill="#86efac">"delivery"</tspan>,</text>
+<text x="20" y="264" fill="#e9e5ff">  <tspan fill="#a5b4fc">"carrito"</tspan>: <tspan fill="#fcd34d">3</tspan> }<tspan class="cur" fill="#f0abfc"> ▍</tspan></text></g>
+<text class="t" x="20" y="330" font-size="12.5" fill="#8b86b8">Ves cada paso del motor por dentro.</text>
+</g></g>
+<!-- reloj 24h + guiones -->
+<g transform="translate(740 24)"><g class="fl" style="animation-delay:-4s">
+<rect width="220" height="170" rx="18" fill="#0b2a2e" stroke="#14b8a6" stroke-opacity=".5"/>
+<text class="t" x="110" y="30" text-anchor="middle" font-size="14" font-weight="700" fill="#5eead4">Reloj simulado</text>
+<circle cx="110" cy="102" r="46" fill="#08191c" stroke="#14b8a6" stroke-width="3"/>
+<line class="hand" x1="110" y1="102" x2="110" y2="66" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/><circle cx="110" cy="102" r="5" fill="#fbbf24"/>
+<text class="t" x="110" y="162" text-anchor="middle" font-size="12.5" fill="#99f6e4">Prueba la ventana de 24 h</text>
+</g>
+<g transform="translate(0 190)" class="t" font-size="13.5" font-weight="700">
+<rect x="0" y="0" width="220" height="50" rx="14" fill="#134e4a"/><text x="16" y="31" fill="#ccfbf1">▶ Guion: pedido completo</text>
+<rect x="0" y="62" width="220" height="50" rx="14" fill="#1e1b4b"/><text x="16" y="93" fill="#c4b5fd">▶ Guion: cierra la ventana 24 h</text>
+<rect x="0" y="124" width="220" height="50" rx="14" fill="#4a1d3f"/><text x="16" y="155" fill="#fbcfe8">▶ Guion: no entiende al cliente</text></g></g>
+</svg>

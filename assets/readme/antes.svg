@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="250" viewBox="0 0 1000 250" role="img" aria-label="Camino: aprende JavaScript con web desde cero, luego este curso, luego vende tu bot">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs><style>
+.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.m{font-family:Consolas,Menlo,monospace}
+.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.bl{animation:bl 1s infinite}.bl2{animation-delay:.2s}.bl3{animation-delay:.4s}@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}
+.cur{animation:cu 1s steps(2) infinite}@keyframes cu{50%{opacity:0}}
+.flow{stroke-dasharray:7 8;animation:d 1.2s linear infinite}@keyframes d{to{stroke-dashoffset:-15}}
+.pu{transform-box:fill-box;transform-origin:center;animation:pu 2.4s ease-out infinite}@keyframes pu{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.4);opacity:0}}
+</style>
+<style>.n{animation:on 9s infinite}.n2{animation-delay:3s}.n3{animation-delay:6s}
+@keyframes on{0%,100%{stroke-opacity:.35}5%,28%{stroke-opacity:1}36%{stroke-opacity:.35}}
+.ar{animation:ar 1.5s ease-in-out infinite}@keyframes ar{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}</style>
+<rect width="1000" height="250" rx="24" fill="url(#bg)"/>
+<g class="t">
+<rect class="n" x="30" y="40" width="270" height="170" rx="20" fill="#1e1b4b" stroke="#a78bfa" stroke-width="2"/>
+<text x="165" y="86" text-anchor="middle" font-size="34">📚</text><text x="165" y="122" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">1 · Lo básico de JS</text>
+<text x="165" y="148" text-anchor="middle" font-size="13.5" fill="#c4b5fd">Desarrollo web desde cero</text><text x="165" y="168" text-anchor="middle" font-size="13.5" fill="#c4b5fd">(JavaScript y Node.js)</text>
+<g class="ar"><path d="M312 125h40m-14-14l14 14-14 14" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<rect class="n n2" x="365" y="40" width="270" height="170" rx="20" fill="#0b3b40" stroke="#5eead4" stroke-width="2"/>
+<text x="500" y="86" text-anchor="middle" font-size="34">🤖</text><text x="500" y="122" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">2 · Este curso</text>
+<text x="500" y="148" text-anchor="middle" font-size="13.5" fill="#99f6e4">28 lecciones + simulador</text><text x="500" y="168" text-anchor="middle" font-size="13.5" fill="#99f6e4">y el bot del minimarket</text>
+<g class="ar"><path d="M647 125h40m-14-14l14 14-14 14" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>
+<rect class="n n3" x="700" y="40" width="270" height="170" rx="20" fill="#4a2a0a" stroke="#fbbf24" stroke-width="2"/>
+<text x="835" y="86" text-anchor="middle" font-size="34">💼</text><text x="835" y="122" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">3 · Haz el tuyo</text>
+<text x="835" y="148" text-anchor="middle" font-size="13.5" fill="#fde68a">Para citas, pedidos o FAQ</text><text x="835" y="168" text-anchor="middle" font-size="13.5" fill="#fde68a">de cualquier negocio</text>
+</g></svg>

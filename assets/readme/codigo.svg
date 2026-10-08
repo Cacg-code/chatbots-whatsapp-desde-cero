@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="380" viewBox="0 0 1000 380" role="img" aria-label="Terminal: npm install, npm test con 113 pruebas pasando, node consola.js">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0a12"/><stop offset="1" stop-color="#101827"/></linearGradient>
+<clipPath id="a"><rect x="0" y="80" width="0" height="32"><animate attributeName="width" values="0;460;460;0" keyTimes="0;.08;.96;1" dur="14s" repeatCount="indefinite"/></rect></clipPath>
+<clipPath id="b"><rect x="0" y="118" width="0" height="32"><animate attributeName="width" values="0;0;260;260;0" keyTimes="0;.12;.2;.96;1" dur="14s" repeatCount="indefinite"/></rect></clipPath>
+<clipPath id="c"><rect x="0" y="316" width="0" height="32"><animate attributeName="width" values="0;0;460;460;0" keyTimes="0;.56;.64;.96;1" dur="14s" repeatCount="indefinite"/></rect></clipPath></defs><style>
+.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.m{font-family:Consolas,Menlo,monospace}
+.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.bl{animation:bl 1s infinite}.bl2{animation-delay:.2s}.bl3{animation-delay:.4s}@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}
+.cur{animation:cu 1s steps(2) infinite}@keyframes cu{50%{opacity:0}}
+.flow{stroke-dasharray:7 8;animation:d 1.2s linear infinite}@keyframes d{to{stroke-dashoffset:-15}}
+.pu{transform-box:fill-box;transform-origin:center;animation:pu 2.4s ease-out infinite}@keyframes pu{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.4);opacity:0}}
+</style>
+<style>.ok{animation:ok 14s infinite;opacity:0}
+.o1{animation-delay:0s}
+@keyframes ok{0%{opacity:0}100%{opacity:0}}
+.r{opacity:0}
+.r1{animation:rr 14s infinite;animation-delay:.0s}
+@keyframes rr{0%,22%{opacity:0;transform:translateX(-8px)}27%,96%{opacity:1;transform:translateX(0)}100%{opacity:0}}
+.r2{animation:rr 14s infinite;animation-delay:.9s}.r3{animation:rr 14s infinite;animation-delay:1.8s}.r4{animation:rr 14s infinite;animation-delay:2.7s}
+.fin{animation:fi 14s infinite;opacity:0}@keyframes fi{0%,50%{opacity:0;transform:scale(.8)}56%,96%{opacity:1;transform:scale(1)}100%{opacity:0}}
+.fin{transform-box:fill-box;transform-origin:left}
+.bar{transform-box:fill-box;transform-origin:left;animation:ba 14s infinite;transform:scaleX(0)}@keyframes ba{0%,22%{transform:scaleX(0)}50%,96%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+</style>
+<rect width="1000" height="380" rx="24" fill="url(#bg)"/>
+<path d="M0 24a24 24 0 0 1 24-24h952a24 24 0 0 1 24 24v30H0z" fill="#1a2133"/>
+<circle cx="32" cy="27" r="7" fill="#fb7185"/><circle cx="56" cy="27" r="7" fill="#fbbf24"/><circle cx="80" cy="27" r="7" fill="#4ade80"/>
+<text class="t" x="500" y="33" text-anchor="middle" font-size="14" fill="#8b9bb8">codigo/ · terminal</text>
+<g class="m" font-size="19">
+<g clip-path="url(#a)"><text x="36" y="102"><tspan fill="#4ade80">$</tspan><tspan fill="#e5e7eb"> cd codigo &amp;&amp; npm install</tspan></text></g>
+<g clip-path="url(#b)" transform="translate(0 0)"><text x="36" y="140"><tspan fill="#4ade80">$</tspan><tspan fill="#e5e7eb"> npm test</tspan></text></g>
+<g class="r r1"><text x="36" y="182" fill="#4ade80">✔ el catálogo muestra los precios</text></g>
+<g class="r r2"><text x="36" y="210" fill="#4ade80">✔ el carrito suma bien el total</text></g>
+<g class="r r3"><text x="36" y="238" fill="#4ade80">✔ la sesión caduca a las 24 h</text></g>
+<g class="r r4"><text x="36" y="266" fill="#4ade80">✔ el pedido avisa al dueño</text></g>
+<text class="r r4" x="36" y="294" fill="#6b7a99">…</text>
+<g clip-path="url(#c)"><text x="36" y="338"><tspan fill="#4ade80">$</tspan><tspan fill="#e5e7eb"> node consola.js</tspan><tspan class="cur" fill="#f0abfc"> ▍</tspan></text></g>
+</g>
+<g class="t"><rect x="640" y="90" width="320" height="200" rx="20" fill="#0b2a22" stroke="#4ade80" stroke-opacity=".6" stroke-width="2"/>
+<text x="800" y="132" text-anchor="middle" font-size="16" font-weight="700" fill="#86efac" letter-spacing="2">PRUEBAS</text>
+<text class="fin" x="800" y="210" text-anchor="middle" font-size="84" font-weight="800" fill="#4ade80">113</text>
+<text x="800" y="246" text-anchor="middle" font-size="18" fill="#bbf7d0">pasaron ✔</text>
+<rect x="676" y="262" width="248" height="10" rx="5" fill="#052e1a"/><rect class="bar" x="676" y="262" width="248" height="10" rx="5" fill="#4ade80"/></g>
+</svg>

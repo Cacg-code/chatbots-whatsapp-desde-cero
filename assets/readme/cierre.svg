@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="170" viewBox="0 0 1000 170" role="img" aria-label="Gracias por aprender: hecho por un estudiante con apoyo de IA">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b5f6b"/><stop offset="1" stop-color="#08191c"/></linearGradient></defs><style>
+.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.m{font-family:Consolas,Menlo,monospace}
+.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.bl{animation:bl 1s infinite}.bl2{animation-delay:.2s}.bl3{animation-delay:.4s}@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}
+.cur{animation:cu 1s steps(2) infinite}@keyframes cu{50%{opacity:0}}
+.flow{stroke-dasharray:7 8;animation:d 1.2s linear infinite}@keyframes d{to{stroke-dashoffset:-15}}
+.pu{transform-box:fill-box;transform-origin:center;animation:pu 2.4s ease-out infinite}@keyframes pu{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.4);opacity:0}}
+</style>
+<style>.hr{animation:hr 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes hr{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}</style>
+<rect width="1000" height="170" rx="22" fill="url(#bg)"/>
+<g class="t" text-anchor="middle"><text x="500" y="64" font-size="26" font-weight="800" fill="#fff">Hecho con <tspan class="hr" fill="#f472b6">♥</tspan> por un estudiante, con apoyo de IA</text>
+<text x="500" y="96" font-size="16" fill="#99f6e4">Si te sirvió, deja una ⭐ al repo y cuéntale a alguien que quiera aprender.</text>
+<g font-size="14" font-weight="700"><rect x="290" y="116" width="200" height="36" rx="18" fill="#14b8a6"/><text x="390" y="140" fill="#042f2e">Reportar un error</text><rect x="510" y="116" width="200" height="36" rx="18" fill="#0b2a2e" stroke="#5eead4"/><text x="610" y="140" fill="#5eead4">Ver el portafolio</text></g></g>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="750" viewBox="0 0 1000 750" role="img" aria-label="Temario: diez módulos y un proyecto final">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs><style>
+.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.m{font-family:Consolas,Menlo,monospace}
+.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.bl{animation:bl 1s infinite}.bl2{animation-delay:.2s}.bl3{animation-delay:.4s}@keyframes bl{0%,100%{opacity:.2}50%{opacity:1}}
+.cur{animation:cu 1s steps(2) infinite}@keyframes cu{50%{opacity:0}}
+.flow{stroke-dasharray:7 8;animation:d 1.2s linear infinite}@keyframes d{to{stroke-dashoffset:-15}}
+.pu{transform-box:fill-box;transform-origin:center;animation:pu 2.4s ease-out infinite}@keyframes pu{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.4);opacity:0}}
+</style>
+<style>.mc{animation:rv 12s infinite;opacity:0}@keyframes rv{0%{opacity:0;transform:translateY(14px)}6%,90%{opacity:1;transform:translateY(0)}100%{opacity:0}}
+.gl{animation:gl 3s ease-in-out infinite}@keyframes gl{0%,100%{opacity:.5}50%{opacity:1}}</style>
+<rect width="1000" height="750" rx="24" fill="url(#bg)"/>
+<g class="mc" style="animation-delay:0.0s"><rect x="24" y="24" width="464" height="112" rx="18" fill="#0a1214" stroke="#14b8a6" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="74" cy="80" r="28" fill="#14b8a6" fill-opacity=".22" stroke="#14b8a6" stroke-width="2"/><text class="t" x="74" y="89" text-anchor="middle" font-size="24" font-weight="800" fill="#14b8a6">1</text>
+<text class="t" x="120" y="68" font-size="20" font-weight="800" fill="#fff">Fundamentos</text>
+<text class="t" x="120" y="94" font-size="13.5" fill="#9fb8bb">Cómo funciona un bot · Diseñar la conversación</text></g>
+<g class="mc" style="animation-delay:0.35s"><rect x="512" y="24" width="464" height="112" rx="18" fill="#0a1214" stroke="#38bdf8" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="562" cy="80" r="28" fill="#38bdf8" fill-opacity=".22" stroke="#38bdf8" stroke-width="2"/><text class="t" x="562" y="89" text-anchor="middle" font-size="24" font-weight="800" fill="#38bdf8">2</text>
+<text class="t" x="608" y="68" font-size="20" font-weight="800" fill="#fff">Herramientas</text>
+<text class="t" x="608" y="94" font-size="13.5" fill="#9fb8bb">JavaScript y Node · Primer bot en consola</text></g>
+<g class="mc" style="animation-delay:0.7s"><rect x="24" y="152" width="464" height="112" rx="18" fill="#0a1214" stroke="#a78bfa" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="74" cy="208" r="28" fill="#a78bfa" fill-opacity=".22" stroke="#a78bfa" stroke-width="2"/><text class="t" x="74" y="217" text-anchor="middle" font-size="24" font-weight="800" fill="#a78bfa">3</text>
+<text class="t" x="120" y="196" font-size="20" font-weight="800" fill="#fff">Motor de reglas</text>
+<text class="t" x="120" y="222" font-size="13.5" fill="#9fb8bb">Estado · Texto libre</text><text class="t" x="120" y="242" font-size="13.5" fill="#9fb8bb">Catálogo y carrito · Flujo de pedido</text></g>
+<g class="mc" style="animation-delay:1.0499999999999998s"><rect x="512" y="152" width="464" height="112" rx="18" fill="#0a1214" stroke="#fb923c" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="562" cy="208" r="28" fill="#fb923c" fill-opacity=".22" stroke="#fb923c" stroke-width="2"/><text class="t" x="562" y="217" text-anchor="middle" font-size="24" font-weight="800" fill="#fb923c">4</text>
+<text class="t" x="608" y="196" font-size="20" font-weight="800" fill="#fff">Servidor y webhook</text>
+<text class="t" x="608" y="222" font-size="13.5" fill="#9fb8bb">Webhooks y JSON · Servidor</text><text class="t" x="608" y="242" font-size="13.5" fill="#9fb8bb">Despliegue en Cloudflare</text></g>
+<g class="mc" style="animation-delay:1.4s"><rect x="24" y="280" width="464" height="112" rx="18" fill="#0a1214" stroke="#4ade80" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="74" cy="336" r="28" fill="#4ade80" fill-opacity=".22" stroke="#4ade80" stroke-width="2"/><text class="t" x="74" y="345" text-anchor="middle" font-size="24" font-weight="800" fill="#4ade80">5</text>
+<text class="t" x="120" y="324" font-size="20" font-weight="800" fill="#fff">Conectar con WhatsApp</text>
+<text class="t" x="120" y="350" font-size="13.5" fill="#9fb8bb">Cuenta Meta · Recibir</text><text class="t" x="120" y="370" font-size="13.5" fill="#9fb8bb">Enviar · Telegram · Otros proveedores</text></g>
+<g class="mc" style="animation-delay:1.75s"><rect x="512" y="280" width="464" height="112" rx="18" fill="#0a1214" stroke="#f472b6" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="562" cy="336" r="28" fill="#f472b6" fill-opacity=".22" stroke="#f472b6" stroke-width="2"/><text class="t" x="562" y="345" text-anchor="middle" font-size="24" font-weight="800" fill="#f472b6">6</text>
+<text class="t" x="608" y="324" font-size="20" font-weight="800" fill="#fff">Memoria y datos</text>
+<text class="t" x="608" y="350" font-size="13.5" fill="#9fb8bb">Memoria con KV · Panel con Google Sheets</text></g>
+<g class="mc" style="animation-delay:2.0999999999999996s"><rect x="24" y="408" width="464" height="112" rx="18" fill="#0a1214" stroke="#fbbf24" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="74" cy="464" r="28" fill="#fbbf24" fill-opacity=".22" stroke="#fbbf24" stroke-width="2"/><text class="t" x="74" y="473" text-anchor="middle" font-size="24" font-weight="800" fill="#fbbf24">7</text>
+<text class="t" x="120" y="452" font-size="20" font-weight="800" fill="#fff">Plantillas y automatización</text>
+<text class="t" x="120" y="478" font-size="13.5" fill="#9fb8bb">Plantillas · Recordatorios</text><text class="t" x="120" y="498" font-size="13.5" fill="#9fb8bb">WhatsApp Flows</text></g>
+<g class="mc" style="animation-delay:2.4499999999999997s"><rect x="512" y="408" width="464" height="112" rx="18" fill="#0a1214" stroke="#2dd4bf" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="562" cy="464" r="28" fill="#2dd4bf" fill-opacity=".22" stroke="#2dd4bf" stroke-width="2"/><text class="t" x="562" y="473" text-anchor="middle" font-size="24" font-weight="800" fill="#2dd4bf">8</text>
+<text class="t" x="608" y="452" font-size="20" font-weight="800" fill="#fff">Marketing y costos</text>
+<text class="t" x="608" y="478" font-size="13.5" fill="#9fb8bb">Marketing responsable · Costos y métricas</text></g>
+<g class="mc" style="animation-delay:2.8s"><rect x="24" y="536" width="464" height="112" rx="18" fill="#0a1214" stroke="#c084fc" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="74" cy="592" r="28" fill="#c084fc" fill-opacity=".22" stroke="#c084fc" stroke-width="2"/><text class="t" x="74" y="601" text-anchor="middle" font-size="24" font-weight="800" fill="#c084fc">9</text>
+<text class="t" x="120" y="580" font-size="20" font-weight="800" fill="#fff">Inteligencia artificial</text>
+<text class="t" x="120" y="606" font-size="13.5" fill="#9fb8bb">IA como complemento del bot</text></g>
+<g class="mc" style="animation-delay:3.15s"><rect x="512" y="536" width="464" height="112" rx="18" fill="#0a1214" stroke="#f87171" stroke-opacity=".6" stroke-width="1.5"/>
+<circle cx="562" cy="592" r="28" fill="#f87171" fill-opacity=".22" stroke="#f87171" stroke-width="2"/><text class="t" x="562" y="601" text-anchor="middle" font-size="24" font-weight="800" fill="#f87171">10</text>
+<text class="t" x="608" y="580" font-size="20" font-weight="800" fill="#fff">Producción y negocio</text>
+<text class="t" x="608" y="606" font-size="13.5" fill="#9fb8bb">Pruebas · Seguridad</text><text class="t" x="608" y="626" font-size="13.5" fill="#9fb8bb">Atención humana · Vender tu bot</text></g>
+<g class="t gl"><rect x="24" y="664" width="952" height="40" rx="20" fill="#d97706" fill-opacity=".25" stroke="#fbbf24"/><text x="500" y="690" text-anchor="middle" font-size="16" font-weight="800" fill="#fde68a">🏆 Proyecto final: el bot completo del Minimarket La Esquina</text></g>
+</svg>
