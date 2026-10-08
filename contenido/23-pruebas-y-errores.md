@@ -319,7 +319,7 @@ Cuando un envío falla, la API devuelve un JSON con un `code` y un `message`. Ta
 | Código | Qué significa | Qué hacer |
 |---|---|---|
 | `131047` | Pasaron más de 24 horas desde el último mensaje del cliente (*re-engagement*) | Enviar una **plantilla** aprobada en lugar de texto libre ([lección 17](../17-plantillas/)). |
-| `131030` | El destinatario no está en la lista de permitidos | Con el número de prueba, agrega el teléfono en la lista de Meta o usa un número real verificado. |
+| `131030` | El destinatario no está en la lista de permitidos (código que citan muchos tutoriales; **no figura en la lista oficial** consultada el 2026-10-07, así que confía en el `message` de la respuesta) | Con el número de prueba, agrega el teléfono en la lista de Meta o usa un número real verificado. |
 | `131026` | Mensaje no entregable (el número no tiene WhatsApp, usa una versión muy vieja o no aceptó las condiciones) | No reintentar; anotar al cliente como inalcanzable. |
 | `131056` | Demasiados mensajes seguidos entre tu número y ese cliente | Esperar y bajar el ritmo. |
 | `131048` | Límite por calidad o posible spam | Revisar tu contenido y tu lista de opt-in ([lección 20](../20-marketing-responsable/)). |
@@ -377,7 +377,7 @@ Antes de cada despliegue, repasa esta lista. Las primeras líneas las automatiza
 - Guarda payloads reales de Meta en `test/payloads/` y haz que el parser ignore lo desconocido.
 - Los logs deben ser estructurados y **sin secretos** ni teléfonos completos.
 - Reintenta solo `429` y `5xx`, con espera creciente y pocos intentos; nunca los `4xx`.
-- Aprende los códigos `131047`, `131030`, `131026`, `131056` y `190`, y consulta la lista oficial de Meta para el resto.
+- Aprende los códigos `131047`, `131026`, `131056` y `190`, y consulta la lista oficial de Meta para el resto.
 
 ## Glosario
 

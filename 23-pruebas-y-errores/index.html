@@ -347,7 +347,7 @@ export function enviarConReintentos(env, cuerpo, llamar = fetch, opciones = {}) 
 </tr>
 <tr>
 <td><code>131030</code></td>
-<td>El destinatario no está en la lista de permitidos</td>
+<td>El destinatario no está en la lista de permitidos (código que citan muchos tutoriales; <strong>no figura en la lista oficial</strong> consultada el 2026-10-07, así que confía en el <code>message</code> de la respuesta)</td>
 <td>Con el número de prueba, agrega el teléfono en la lista de Meta o usa un número real verificado.</td>
 </tr>
 <tr>
@@ -433,7 +433,7 @@ export function clasificarError(codigo) {
 <li>Guarda payloads reales de Meta en <code>test/payloads/</code> y haz que el parser ignore lo desconocido.</li>
 <li>Los logs deben ser estructurados y <strong>sin secretos</strong> ni teléfonos completos.</li>
 <li>Reintenta solo <code>429</code> y <code>5xx</code>, con espera creciente y pocos intentos; nunca los <code>4xx</code>.</li>
-<li>Aprende los códigos <code>131047</code>, <code>131030</code>, <code>131026</code>, <code>131056</code> y <code>190</code>, y consulta la lista oficial de Meta para el resto.</li>
+<li>Aprende los códigos <code>131047</code>, <code>131026</code>, <code>131056</code> y <code>190</code>, y consulta la lista oficial de Meta para el resto.</li>
 </ul>
 <h2 id="glosario"><span class="n">11.</span>Glosario</h2>
 <div class="table-wrap"><table>
