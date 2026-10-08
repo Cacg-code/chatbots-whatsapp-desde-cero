@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="260" viewBox="0 0 1000 260" role="img" aria-label="Flujo del bot: cliente, webhook, motor de reglas, memoria y panel, respuesta al cliente">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+  <style>
+    .t{font-family:Segoe UI,Helvetica,Arial,sans-serif}
+    .nodo{animation:glow 6s infinite}
+    .n2{animation-delay:1s}.n3{animation-delay:2s}.n4{animation-delay:3s}.n5{animation-delay:4s}
+    @keyframes glow{0%,100%{stroke-opacity:.35}8%,16%{stroke-opacity:1}30%{stroke-opacity:.35}}
+    .flow{stroke-dasharray:8 8;animation:d 1.2s linear infinite}
+    @keyframes d{to{stroke-dashoffset:-16}}
+  </style>
+  <rect width="1000" height="260" rx="24" fill="url(#bg)"/>
+  <text class="t" x="500" y="38" text-anchor="middle" font-size="16" font-weight="700" fill="#5eead4" letter-spacing="2">ASÍ VIAJA UN MENSAJE</text>
+  <g stroke="#14b8a6" stroke-width="3" fill="none" class="flow"><path d="M170 130H235"/><path d="M365 130H420"/><path d="M550 130H610"/><path d="M740 130H800"/></g>
+  <g class="t" text-anchor="middle">
+    <g><rect class="nodo" x="40" y="86" width="130" height="88" rx="16" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="105" y="122" font-size="28">📱</text><text x="105" y="152" font-size="15" font-weight="700" fill="#fff">Cliente</text></g>
+    <g><rect class="nodo n2" x="235" y="86" width="130" height="88" rx="16" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="300" y="122" font-size="28">🔗</text><text x="300" y="152" font-size="15" font-weight="700" fill="#fff">Webhook</text></g>
+    <g><rect class="nodo n3" x="420" y="86" width="130" height="88" rx="16" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="485" y="122" font-size="28">⚙️</text><text x="485" y="152" font-size="15" font-weight="700" fill="#fff">Motor</text></g>
+    <g><rect class="nodo n4" x="610" y="86" width="130" height="88" rx="16" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="675" y="122" font-size="28">🗂️</text><text x="675" y="152" font-size="15" font-weight="700" fill="#fff">KV + Sheets</text></g>
+    <g><rect class="nodo n5" x="800" y="86" width="160" height="88" rx="16" fill="#0b2a2e" stroke="#5eead4" stroke-width="2"/><text x="880" y="122" font-size="28">✅</text><text x="880" y="152" font-size="15" font-weight="700" fill="#fff">Respuesta</text></g>
+    <text x="300" y="206" font-size="13" fill="#99f6e4">recibe el JSON</text><text x="485" y="206" font-size="13" fill="#99f6e4">decide qué responder</text><text x="675" y="206" font-size="13" fill="#99f6e4">recuerda y registra</text><text x="880" y="206" font-size="13" fill="#99f6e4">vuelve a WhatsApp</text>
+  </g>
+  <circle r="7" fill="#fbbf24"><animateMotion dur="6s" repeatCount="indefinite" path="M105 130H880"/></circle>
+</svg>

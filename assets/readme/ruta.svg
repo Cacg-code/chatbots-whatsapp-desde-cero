@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="330" viewBox="0 0 1000 330" role="img" aria-label="Ruta de 10 módulos: Fundamentos, Herramientas, Motor de reglas, Servidor y webhook, Conectar con WhatsApp, Memoria y datos, Plantillas, Marketing y costos, IA, Producción y negocio">
+  <style>
+    .t{font-family:Segoe UI,Helvetica,Arial,sans-serif}
+    .m{animation:on 10s infinite}
+    @keyframes on{0%,100%{opacity:.55}4%,12%{opacity:1}20%{opacity:.55}}
+    .flow{stroke-dasharray:6 8;animation:d 1.4s linear infinite}
+    @keyframes d{to{stroke-dashoffset:-14}}
+  </style>
+  <rect width="1000" height="330" rx="24" fill="#08191c"/>
+  <path class="flow" d="M80 90H920M920 90V240M920 240H80" stroke="#14b8a6" stroke-opacity=".5" stroke-width="3" fill="none"/>
+  <g class="t" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">
+    <g class="m" style="animation-delay:0s"><circle cx="80" cy="90" r="26" fill="#0b7a75"/><text x="80" y="96" font-size="18">1</text><text x="80" y="140" fill="#99f6e4">Fundamentos</text></g>
+    <g class="m" style="animation-delay:1s"><circle cx="270" cy="90" r="26" fill="#0b7a75"/><text x="270" y="96" font-size="18">2</text><text x="270" y="140" fill="#99f6e4">Herramientas</text></g>
+    <g class="m" style="animation-delay:2s"><circle cx="460" cy="90" r="26" fill="#0b7a75"/><text x="460" y="96" font-size="18">3</text><text x="460" y="140" fill="#99f6e4">Motor de reglas</text></g>
+    <g class="m" style="animation-delay:3s"><circle cx="650" cy="90" r="26" fill="#0b7a75"/><text x="650" y="96" font-size="18">4</text><text x="650" y="140" fill="#99f6e4">Servidor y webhook</text></g>
+    <g class="m" style="animation-delay:4s"><circle cx="840" cy="90" r="26" fill="#0b7a75"/><text x="840" y="96" font-size="18">5</text><text x="840" y="140" fill="#99f6e4">Conectar WhatsApp</text></g>
+    <g class="m" style="animation-delay:5s"><circle cx="840" cy="240" r="26" fill="#0b7a75"/><text x="840" y="246" font-size="18">6</text><text x="840" y="290" fill="#99f6e4">Memoria y datos</text></g>
+    <g class="m" style="animation-delay:6s"><circle cx="650" cy="240" r="26" fill="#0b7a75"/><text x="650" y="246" font-size="18">7</text><text x="650" y="290" fill="#99f6e4">Plantillas</text></g>
+    <g class="m" style="animation-delay:7s"><circle cx="460" cy="240" r="26" fill="#0b7a75"/><text x="460" y="246" font-size="18">8</text><text x="460" y="290" fill="#99f6e4">Marketing y costos</text></g>
+    <g class="m" style="animation-delay:8s"><circle cx="270" cy="240" r="26" fill="#0b7a75"/><text x="270" y="246" font-size="18">9</text><text x="270" y="290" fill="#99f6e4">IA como apoyo</text></g>
+    <g class="m" style="animation-delay:9s"><circle cx="80" cy="240" r="26" fill="#d97706"/><text x="80" y="246" font-size="18">10</text><text x="80" y="290" fill="#fde68a">Producción y negocio</text></g>
+  </g>
+  <text class="t" x="500" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="#5eead4" letter-spacing="2">TU RUTA: DE LA IDEA AL BOT VENDIBLE</text>
+</svg>

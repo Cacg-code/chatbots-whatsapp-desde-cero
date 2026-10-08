@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="72" viewBox="0 0 440 72" role="img" aria-label="Entrar al curso">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#0b7a75"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+  <style>.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.a{animation:s 1.6s ease-in-out infinite}@keyframes s{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}.h{animation:h 3s ease-in-out infinite}@keyframes h{0%,100%{opacity:0}50%{opacity:.25}}</style>
+  <rect width="440" height="72" rx="36" fill="url(#g)"/>
+  <rect width="440" height="72" rx="36" fill="#fff" class="h"/>
+  <text class="t" x="40" y="45" font-size="22" font-weight="800" fill="#fff">Chatea con tu primer bot</text>
+  <text class="t a" x="380" y="46" font-size="26" font-weight="800" fill="#fff">→</text>
+</svg>

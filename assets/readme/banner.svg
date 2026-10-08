@@ -1,19 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-label="Chatbots de WhatsApp desde cero">
-<defs>
-<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b5f6b"/></linearGradient>
-<linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14b8a6"/><stop offset="1" stop-color="#0b7a75"/></linearGradient>
-</defs>
-<rect width="1200" height="360" rx="24" fill="url(#g)"/>
-<circle cx="1050" cy="60" r="140" fill="#5eead4" opacity=".08"/>
-<circle cx="120" cy="330" r="110" fill="#ff8a3d" opacity=".08"/>
-<g font-family="Segoe UI,Arial,sans-serif">
-<text x="70" y="140" fill="#5eead4" font-size="22" font-weight="700" letter-spacing="3">CURSO GRATIS · 28 LECCIONES · UN BOT REAL</text>
-<text x="70" y="215" fill="#e4f6f2" font-size="64" font-weight="800">Chatbots de WhatsApp</text>
-<text x="70" y="280" fill="#ff8a3d" font-size="52" font-weight="800">desde cero</text>
-</g>
-<g>
-<rect x="760" y="70" width="340" height="56" rx="18" fill="#143037"/><text x="782" y="105" fill="#e4f6f2" font-size="22" font-family="Segoe UI,Arial">Hola, ¿qué desea pedir?</text>
-<rect x="860" y="146" width="240" height="56" rx="18" fill="url(#b)"/><text x="882" y="181" fill="#fff" font-size="22" font-family="Segoe UI,Arial">2 leches y arroz</text>
-<rect x="760" y="222" width="340" height="56" rx="18" fill="#143037"/><text x="782" y="257" fill="#e4f6f2" font-size="22" font-family="Segoe UI,Arial">Total: S/ 12.80. ¿Confirmas?</text>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" viewBox="0 0 1000 400" role="img" aria-label="Chatbots de WhatsApp desde cero: un chat donde el cliente escribe Hola y el bot responde con el menú del minimarket">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset=".6" stop-color="#0b5f6b"/><stop offset="1" stop-color="#0b7a75"/></linearGradient>
+    <linearGradient id="tt" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#5eead4"/></linearGradient>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="#5eead4" opacity=".18"/></pattern>
+  </defs>
+  <style>
+    .t{font-family:Segoe UI,Helvetica,Arial,sans-serif}
+    .m{font-family:Consolas,Menlo,monospace}
+    .float{animation:f 7s ease-in-out infinite}
+    @keyframes f{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .b1{animation:pop 12s infinite;animation-delay:0s;opacity:0}
+    .b2{animation:pop 12s infinite;animation-delay:1.6s;opacity:0}
+    .b3{animation:pop 12s infinite;animation-delay:3.6s;opacity:0}
+    .b4{animation:pop 12s infinite;animation-delay:5.2s;opacity:0}
+    .ty{animation:pop 12s infinite;animation-delay:6.6s;opacity:0}
+    .dot{animation:bl 1s infinite}
+    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+    @keyframes bl{0%,100%{opacity:.25}50%{opacity:1}}
+    @keyframes pop{0%{opacity:0;transform:translateY(14px)}5%{opacity:1;transform:translateY(0)}88%{opacity:1;transform:translateY(0)}95%,100%{opacity:0;transform:translateY(0)}}
+    .pulse{animation:p 2.4s ease-out infinite;transform-origin:center;transform-box:fill-box}
+    @keyframes p{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.2);opacity:0}}
+  </style>
+  <rect width="1000" height="400" rx="24" fill="url(#bg)"/>
+  <rect width="1000" height="400" rx="24" fill="url(#dots)"/>
+  <g opacity=".12" fill="#5eead4"><circle class="float" cx="90" cy="360" r="110"/><circle class="float" cx="560" cy="30" r="70" style="animation-delay:-3s"/></g>
+
+  <!-- Texto -->
+  <g class="t">
+    <rect x="56" y="52" width="232" height="34" rx="17" fill="#ffffff" fill-opacity=".1" stroke="#5eead4" stroke-opacity=".5"/>
+    <circle cx="78" cy="69" r="5" fill="#5eead4"/><circle class="pulse" cx="78" cy="69" r="5" fill="#5eead4"/>
+    <text x="94" y="75" font-size="15" font-weight="700" fill="#99f6e4" letter-spacing="1.5">CURSO GRATIS · EN ESPAÑOL</text>
+    <text x="56" y="160" font-size="58" font-weight="800" fill="url(#tt)">Chatbots de</text>
+    <text x="56" y="226" font-size="58" font-weight="800" fill="url(#tt)">WhatsApp</text>
+    <text x="58" y="266" font-size="24" fill="#ccfbf1">desde cero, hasta venderlos.</text>
+  </g>
+  <g class="t" font-size="15" font-weight="700">
+    <rect x="56" y="300" width="108" height="34" rx="17" fill="#0b2a2e" stroke="#14b8a6" stroke-opacity=".6"/><text x="110" y="322" text-anchor="middle" fill="#5eead4">28 lecciones</text>
+    <rect x="174" y="300" width="98" height="34" rx="17" fill="#0b2a2e" stroke="#14b8a6" stroke-opacity=".6"/><text x="223" y="322" text-anchor="middle" fill="#5eead4">Simulador</text>
+    <rect x="282" y="300" width="104" height="34" rx="17" fill="#0b2a2e" stroke="#14b8a6" stroke-opacity=".6"/><text x="334" y="322" text-anchor="middle" fill="#5eead4">113 pruebas</text>
+  </g>
+
+  <!-- Teléfono -->
+  <g transform="translate(600 28)">
+    <rect width="340" height="344" rx="30" fill="#0a1214" stroke="#14b8a6" stroke-opacity=".5" stroke-width="2"/>
+    <path d="M0 30a30 30 0 0 1 30-30h280a30 30 0 0 1 30 30v44H0z" fill="#0b7a75"/>
+    <circle cx="36" cy="38" r="18" fill="#ccfbf1"/><text class="t" x="36" y="45" text-anchor="middle" font-size="20">🛒</text>
+    <text class="t" x="64" y="34" font-size="17" font-weight="700" fill="#fff">Minimarket La Esquina</text>
+    <text class="t" x="64" y="55" font-size="13" fill="#99f6e4">bot · en línea</text>
+    <g class="t" font-size="15">
+      <g class="b1"><rect x="196" y="94" width="120" height="38" rx="14" fill="#134e4a"/><text x="212" y="119" fill="#fff">Hola 👋</text></g>
+      <g class="b2"><rect x="24" y="142" width="262" height="86" rx="14" fill="#1f2937"/>
+        <text x="40" y="168" fill="#fff" font-weight="700">¡Bienvenido a La Esquina!</text>
+        <text x="40" y="193" fill="#d1d5db" font-size="14">1 · Ver catálogo</text><text x="40" y="214" fill="#d1d5db" font-size="14">2 · Hacer un pedido</text></g>
+      <g class="b3"><rect x="236" y="238" width="80" height="38" rx="14" fill="#134e4a"/><text x="256" y="263" fill="#fff">1</text></g>
+      <g class="b4"><rect x="24" y="286" width="230" height="38" rx="14" fill="#1f2937"/><text x="40" y="311" fill="#d1d5db" font-size="14">🥛 Leche S/ 4.50 · 🍞 Pan S/ 0.40</text></g>
+    </g>
+  </g>
 </svg>

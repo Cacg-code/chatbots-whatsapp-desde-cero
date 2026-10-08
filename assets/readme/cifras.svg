@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="150" viewBox="0 0 1000 150" role="img" aria-label="28 lecciones, 10 módulos, 113 pruebas, 0 soles de costo">
+  <style>
+    .t{font-family:Segoe UI,Helvetica,Arial,sans-serif}
+    .c{animation:up 8s infinite;opacity:0}
+    .c2{animation-delay:.3s}.c3{animation-delay:.6s}.c4{animation-delay:.9s}
+    @keyframes up{0%{opacity:0;transform:translateY(16px)}8%,90%{opacity:1;transform:translateY(0)}100%{opacity:0}}
+  </style>
+  <g class="t" text-anchor="middle">
+    <g class="c"><rect x="0" y="0" width="235" height="150" rx="20" fill="#08191c" stroke="#14b8a6" stroke-opacity=".5"/><text x="117" y="78" font-size="56" font-weight="800" fill="#5eead4">28</text><text x="117" y="118" font-size="16" fill="#99f6e4">lecciones</text></g>
+    <g class="c c2"><rect x="255" y="0" width="235" height="150" rx="20" fill="#08191c" stroke="#14b8a6" stroke-opacity=".5"/><text x="372" y="78" font-size="56" font-weight="800" fill="#fbbf24">10</text><text x="372" y="118" font-size="16" fill="#99f6e4">módulos</text></g>
+    <g class="c c3"><rect x="510" y="0" width="235" height="150" rx="20" fill="#08191c" stroke="#14b8a6" stroke-opacity=".5"/><text x="627" y="78" font-size="56" font-weight="800" fill="#f472b6">113</text><text x="627" y="118" font-size="16" fill="#99f6e4">pruebas automáticas</text></g>
+    <g class="c c4"><rect x="765" y="0" width="235" height="150" rx="20" fill="#08191c" stroke="#14b8a6" stroke-opacity=".5"/><text x="882" y="78" font-size="56" font-weight="800" fill="#a78bfa">S/ 0</text><text x="882" y="118" font-size="16" fill="#99f6e4">para aprender</text></g>
+  </g>
+</svg>
