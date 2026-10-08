@@ -23,5 +23,6 @@ jobs:
         run: node scripts/probar-ejercicios.mjs
       - name: El sitio está al día con el contenido
         run: |
+          pip install markdown
           python scripts/construir.py
           git diff --exit-code --stat -- . ':!assets/indice.json' ':!sitemap.xml' || (echo "Ejecuta python scripts/construir.py y sube los cambios" && exit 1)
