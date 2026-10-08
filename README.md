@@ -78,28 +78,7 @@ Un bot para un negocio ficticio, **Minimarket La Esquina**: muestra el catálogo
 <img src="assets/readme/ruta.svg" alt="Diez módulos del curso" width="100%">
 
 <p align="center">
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/01-como-funciona-un-bot/"><img src="assets/readme/mod-01.svg" alt="Módulo 1: Fundamentos" width="49%"></a>
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/03-javascript-y-node-para-bots/"><img src="assets/readme/mod-02.svg" alt="Módulo 2: Herramientas" width="49%"></a>
-</p>
-
-<p align="center">
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/05-estado-de-la-conversacion/"><img src="assets/readme/mod-03.svg" alt="Módulo 3: Motor de reglas" width="49%"></a>
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/09-webhooks-y-json-de-whatsapp/"><img src="assets/readme/mod-04.svg" alt="Módulo 4: Servidor y webhook" width="49%"></a>
-</p>
-
-<p align="center">
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/12-cuenta-y-app-de-meta/"><img src="assets/readme/mod-05.svg" alt="Módulo 5: Conectar con WhatsApp" width="49%"></a>
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/15-memoria-con-kv/"><img src="assets/readme/mod-06.svg" alt="Módulo 6: Memoria y datos" width="49%"></a>
-</p>
-
-<p align="center">
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/17-plantillas/"><img src="assets/readme/mod-07.svg" alt="Módulo 7: Plantillas y automatización" width="49%"></a>
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/20-marketing-responsable/"><img src="assets/readme/mod-08.svg" alt="Módulo 8: Marketing y costos" width="49%"></a>
-</p>
-
-<p align="center">
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/22-ia-como-complemento/"><img src="assets/readme/mod-09.svg" alt="Módulo 9: Inteligencia artificial" width="49%"></a>
-<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/23-pruebas-y-errores/"><img src="assets/readme/mod-10.svg" alt="Módulo 10: Producción y negocio" width="49%"></a>
+<a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/01-como-funciona-un-bot/"><picture><source media="(max-width: 600px)" srcset="assets/readme/m-modulos-m.svg"><img src="assets/readme/m-modulos-d.svg" alt="Los diez módulos del curso" width="100%"></picture></a>
 </p>
 
 <p align="center"><a href="https://cacg-code.github.io/chatbots-whatsapp-desde-cero/proyecto-bot-minimarket/"><img src="assets/readme/mod-proyecto.svg" alt="Proyecto final: el bot completo del Minimarket La Esquina" width="100%"></a></p>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="484" height="1544" viewBox="0 0 484 1544" role="img" aria-label="Módulos del curso"><style>.t{font-family:Segoe UI,Helvetica,Arial,sans-serif}.fl{animation:fl 6s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.gl{animation:gl 3s ease-in-out infinite}@keyframes gl{0%,100%{opacity:.55}50%{opacity:1}}</style><svg x="0" y="0" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c0_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:0.0s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#14b8a6" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#14b8a6"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#14b8a6" fill-opacity=".22" stroke="#14b8a6" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#14b8a6">1</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Fundamentos</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Cómo funciona un bot · Diseñar la conversación</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#14b8a6" font-weight="700">Lecciones 1–2 · 1 h 45 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="156" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c1_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:0.4s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#38bdf8" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#38bdf8"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#38bdf8" fill-opacity=".22" stroke="#38bdf8" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#38bdf8">2</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Herramientas</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">JavaScript y Node · Primer bot en consola</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#38bdf8" font-weight="700">Lecciones 3–4 · 2 h 00 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="312" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c2_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:0.8s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#a78bfa" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#a78bfa"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#a78bfa" fill-opacity=".22" stroke="#a78bfa" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#a78bfa">3</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Motor de reglas</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Estado · Texto libre</text><text x="96" y="80" font-size="13.5" fill="#9fb8bb">Catálogo y carrito · Flujo de pedido</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#a78bfa" font-weight="700">Lecciones 5–8 · 3 h 55 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="468" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c3_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:1.2s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#fb923c" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#fb923c"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#fb923c" fill-opacity=".22" stroke="#fb923c" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#fb923c">4</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Servidor y webhook</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Webhooks y JSON · Servidor</text><text x="96" y="80" font-size="13.5" fill="#9fb8bb">Despliegue en Cloudflare</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#fb923c" font-weight="700">Lecciones 9–11 · 3 h 00 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="624" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c4_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:1.6s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#4ade80" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#4ade80"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#4ade80" fill-opacity=".22" stroke="#4ade80" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#4ade80">5</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Conectar con WhatsApp</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Cuenta Meta · Recibir · Enviar</text><text x="96" y="80" font-size="13.5" fill="#9fb8bb">Telegram · Otros proveedores</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#4ade80" font-weight="700">Lecciones 12–14, 27–28 · 4 h 30 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="780" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c5_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:2.0s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#f472b6" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#f472b6"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#f472b6" fill-opacity=".22" stroke="#f472b6" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#f472b6">6</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Memoria y datos</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Memoria con KV · Panel con Google Sheets</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#f472b6" font-weight="700">Lecciones 15–16 · 1 h 55 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="936" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c6_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:2.4s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#fbbf24" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#fbbf24"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#fbbf24" fill-opacity=".22" stroke="#fbbf24" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#fbbf24">7</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Plantillas y automatización</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Plantillas · Recordatorios</text><text x="96" y="80" font-size="13.5" fill="#9fb8bb">WhatsApp Flows</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#fbbf24" font-weight="700">Lecciones 17–19 · 3 h 00 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="1092" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c7_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:2.8s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#2dd4bf" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#2dd4bf"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#2dd4bf" fill-opacity=".22" stroke="#2dd4bf" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#2dd4bf">8</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Marketing y costos</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Marketing responsable · Costos y métricas</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#2dd4bf" font-weight="700">Lecciones 20–21 · 1 h 50 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="1248" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c8_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:3.2s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#c084fc" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#c084fc"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#c084fc" fill-opacity=".22" stroke="#c084fc" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#c084fc">9</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Inteligencia artificial</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">IA como complemento del bot</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#c084fc" font-weight="700">Lección 22 · 1 h 00 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg><svg x="0" y="1404" width="484" height="140" viewBox="0 0 484 140" overflow="hidden">
+<defs><linearGradient id="c9_bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08191c"/><stop offset="1" stop-color="#0b3b40"/></linearGradient></defs>
+<g transform="translate(10 10)"><g class="fl" style="animation-delay:3.6s"><rect width="464" height="120" rx="18" fill="#0a1214" stroke="#f87171" stroke-opacity=".65" stroke-width="1.5"/>
+<rect x="0" y="22" width="5" height="76" rx="2.5" fill="#f87171"/>
+<g class="t"><circle cx="50" cy="48" r="28" fill="#f87171" fill-opacity=".22" stroke="#f87171" stroke-width="2"/><text x="50" y="57" text-anchor="middle" font-size="24" font-weight="800" fill="#f87171">10</text>
+<text x="96" y="40" font-size="20" font-weight="800" fill="#fff">Producción y negocio</text>
+<text x="96" y="62" font-size="13.5" fill="#9fb8bb">Pruebas · Seguridad</text><text x="96" y="80" font-size="13.5" fill="#9fb8bb">Atención humana · Vender tu bot</text>
+<line x1="24" y1="92" x2="440" y2="92" stroke="#1d3a3e"/>
+<text x="24" y="110" font-size="12.5" fill="#f87171" font-weight="700">Lecciones 23–26 · 3 h 50 min</text><text x="440" y="110" text-anchor="end" font-size="12.5" fill="#9fb8bb">Empezar ›</text></g></g></g></svg></svg>
