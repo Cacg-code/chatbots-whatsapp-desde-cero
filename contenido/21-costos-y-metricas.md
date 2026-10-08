@@ -146,6 +146,16 @@ Los límites del plan gratuito se reinician a las 00:00 UTC y, si los superas, l
 - **Cada cambio de estado de una conversación** puede ser una escritura en KV. Con **1.000 escrituras al día**, y un bot que escribe unas 3 veces por conversación, el plan gratuito alcanza para unas **300 conversaciones al día**. Un minimarket de barrio suele estar muy por debajo.
 - Si el cliente crece, pasar al plan de pago cuesta 5 USD al mes por la cuenta, no por cliente.
 
+**¿Cuándo pasar a Workers Paid?** Señales concretas, no una fecha:
+
+- Ves errores por superar las **1.000 escrituras diarias de KV** (el primero en agotarse en bots con mucho estado).
+- Tus tareas tardan más de **10 ms de CPU** por petición (por ejemplo, procesar archivos grandes o criptografía pesada) y el Worker se corta.
+- Superas las **100.000 peticiones al día** (más de ~3.000 al día de promedio ya merece vigilancia).
+- Tienes varios clientes y no quieres que uno agote el cupo de los demás: usa una cuenta por cliente (a su nombre) en lugar de mezclarlos.
+
+> [!importante] INFO REFERENCIAL
+> Estos números salen de la documentación al revisar la lección (octubre de 2026) y **pueden cambiar**. Es mejor que revises siempre el [sitio oficial de precios](https://developers.cloudflare.com/workers/platform/pricing/) antes de decidir o de cotizar a un cliente.
+
 > [!importante] Verifica este dato
 > Los límites y precios de Cloudflare cambian. Confirma en [Precios de Workers](https://developers.cloudflare.com/workers/platform/pricing/) (incluye la tabla de KV) antes de prometer «costo cero». Mantén también la cuenta de Cloudflare a nombre del cliente o en un acuerdo claro (lección [26](../26-vender-tu-bot/)).
 

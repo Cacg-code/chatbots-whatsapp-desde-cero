@@ -47,6 +47,9 @@
 <p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
 <ul><li>Explicar por qué un recordatorio automático necesita un disparador de tiempo (cron) y no solo el webhook.</li><li>Decidir con código si un recordatorio sale como texto libre o como plantilla según la ventana de 24 horas.</li><li>Leer y ejecutar <code>pedidosParaRecordar</code> y <code>carritosAbandonados</code>, y razonar sobre sus umbrales.</li><li>Configurar un cron trigger de Cloudflare y simular su ejecución con un almacenamiento falso.</li><li>Aplicar baja (opt-out), frecuencia máxima y horario razonable antes de enviar cualquier aviso.</li></ul>
 </div>
+<div class="callout importante">
+<p class="callout-title">⚠️ INFO REFERENCIAL: revisa los sitios oficiales</p>
+<p>Los precios, planes, límites y tarifas de esta lección son <strong>solo una referencia</strong> (revisados en octubre de 2026) y cambian con frecuencia. <strong>Antes de decidir o cobrar a un cliente, confirma siempre en los sitios oficiales</strong> de cada proveedor (enlaces al final de la lección).</p></div>
 
 <h2 id="por-que-un-bot-necesita-un-reloj"><span class="n">1.</span>Por qué un bot necesita un reloj</h2>
 <p>Hasta ahora tu bot es <strong>reactivo</strong>: no hace nada hasta que Meta llama al webhook con un mensaje. Un recordatorio es lo contrario: el cliente <strong>no escribió nada</strong> y aun así el bot debe actuar. «Hace una hora dejó un carrito sin cerrar» no es un evento que Meta te envíe; es la <strong>ausencia</strong> de un evento. Alguien tiene que mirar el reloj.</p>

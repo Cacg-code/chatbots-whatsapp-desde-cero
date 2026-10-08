@@ -24,6 +24,8 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.stdout.reconfigure(encoding="utf-8")
 CUR = json.loads((RAIZ / "contenido" / "curso.json").read_text(encoding="utf8"))
 SITE = CUR["sitio"]            # nombre corto del curso
+# Lecciones con datos de dinero (precios, planes, límites de pago): llevan aviso de info referencial
+LECCIONES_CON_DINERO = {"11", "12", "14", "15", "17", "18", "19", "21", "22", "26", "28"}
 BASE = CUR["url"].rstrip("/") + "/"
 REPO = CUR["repo"]             # Usuario/repo
 PREF = "bot-"                  # prefijo de claves de progreso (comparten origen con otros cursos)
@@ -274,6 +276,11 @@ def construir_leccion(s):
         its = "".join(f'<li><a href="{esc(u.strip())}" target="_blank" rel="noopener">{esc(n.strip())}</a></li>' for n, u in (f.rsplit("|", 1) for f in meta["fuentes"]))
         fuentes = ('<div class="callout nota">\n<p class="callout-title">📚 Para profundizar (fuentes oficiales)</p>\n'
                    f'<ul>{its}</ul>\n<p>Este material lo hace un estudiante con ayuda de IA: ante cualquier duda, manda la documentación oficial.</p></div>\n')
+    aviso_dinero = ""
+    if s[:2] in LECCIONES_CON_DINERO:
+        aviso_dinero = ('<div class="callout importante">\n<p class="callout-title">⚠️ INFO REFERENCIAL: revisa los sitios oficiales</p>\n'
+                        '<p>Los precios, planes, límites y tarifas de esta lección son <strong>solo una referencia</strong> (revisados en octubre de 2026) y cambian con frecuencia. '
+                        '<strong>Antes de decidir o cobrar a un cliente, confirma siempre en los sitios oficiales</strong> de cada proveedor (enlaces al final de la lección).</p></div>\n')
     meta_li = f'<li>⏱ {meta["minutos"]} minutos</li><li>📶 Nivel: {esc(meta["nivel"])}</li>' + ("<li>🧩 Incluye ejercicio</li>" if tiene_ej else "")
     h += f'''
   <main class="wrap lesson-layout" id="contenido">
@@ -292,7 +299,7 @@ def construir_leccion(s):
 <p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
 <ul>{obj}</ul>
 </div>
-
+{aviso_dinero}
 {cuerpo_h}
 
 {fuentes}<div class="complete"><button class="btn" type="button" data-complete="{clave(s)}">Marcar como completada</button><p>Tu progreso se guarda en este navegador y se refleja en el índice del curso.</p></div>

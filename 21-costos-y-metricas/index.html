@@ -47,6 +47,9 @@
 <p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
 <ul><li>Explicar el modelo de cobro por mensaje de plantilla y distinguir las categorías marketing, utilidad, autenticación y servicio.</li><li>Identificar qué mensajes no se cobran (el nivel gratuito mensual de servicio y la ventana de punto de entrada de anuncios) y cómo influye la ventana de 24 horas.</li><li>Calcular el costo mensual de un bot pequeño con una función y tarifas parametrizables.</li><li>Estimar el costo de infraestructura en Cloudflare Workers y KV y el costo total para el cliente.</li><li>Definir y registrar métricas útiles: resolución sin humano, pedidos por conversación, tiempos, lectura de plantillas y bajas.</li></ul>
 </div>
+<div class="callout importante">
+<p class="callout-title">⚠️ INFO REFERENCIAL: revisa los sitios oficiales</p>
+<p>Los precios, planes, límites y tarifas de esta lección son <strong>solo una referencia</strong> (revisados en octubre de 2026) y cambian con frecuencia. <strong>Antes de decidir o cobrar a un cliente, confirma siempre en los sitios oficiales</strong> de cada proveedor (enlaces al final de la lección).</p></div>
 
 <h2 id="antes-de-empezar-los-numeros-que-veras-s"><span class="n">1.</span>Antes de empezar: los números que verás son de ejemplo</h2>
 <p>En esta lección hay mucho dinero, y el dinero cambia. Meta no cobra lo mismo en todos los países, actualiza tarifas por trimestre y publica los precios en tablas descargables por moneda. Por eso:</p>
@@ -211,6 +214,16 @@ Sin el nivel gratuito de servicio: 26.2</code></pre>
 <li><strong>Cada cambio de estado de una conversación</strong> puede ser una escritura en KV. Con <strong>1.000 escrituras al día</strong>, y un bot que escribe unas 3 veces por conversación, el plan gratuito alcanza para unas <strong>300 conversaciones al día</strong>. Un minimarket de barrio suele estar muy por debajo.</li>
 <li>Si el cliente crece, pasar al plan de pago cuesta 5 USD al mes por la cuenta, no por cliente.</li>
 </ul>
+<p><strong>¿Cuándo pasar a Workers Paid?</strong> Señales concretas, no una fecha:</p>
+<ul>
+<li>Ves errores por superar las <strong>1.000 escrituras diarias de KV</strong> (el primero en agotarse en bots con mucho estado).</li>
+<li>Tus tareas tardan más de <strong>10 ms de CPU</strong> por petición (por ejemplo, procesar archivos grandes o criptografía pesada) y el Worker se corta.</li>
+<li>Superas las <strong>100.000 peticiones al día</strong> (más de ~3.000 al día de promedio ya merece vigilancia).</li>
+<li>Tienes varios clientes y no quieres que uno agote el cupo de los demás: usa una cuenta por cliente (a su nombre) en lugar de mezclarlos.</li>
+</ul>
+<div class="callout importante">
+<p class="callout-title">⚠️ Importante · INFO REFERENCIAL</p>
+<p>Estos números salen de la documentación al revisar la lección (octubre de 2026) y <strong>pueden cambiar</strong>. Es mejor que revises siempre el <a href="https://developers.cloudflare.com/workers/platform/pricing/">sitio oficial de precios</a> antes de decidir o de cotizar a un cliente.</p></div>
 <div class="callout importante">
 <p class="callout-title">⚠️ Importante · Verifica este dato</p>
 <p>Los límites y precios de Cloudflare cambian. Confirma en <a href="https://developers.cloudflare.com/workers/platform/pricing/">Precios de Workers</a> (incluye la tabla de KV) antes de prometer «costo cero». Mantén también la cuenta de Cloudflare a nombre del cliente o en un acuerdo claro (lección <a href="../26-vender-tu-bot/">26</a>).</p></div>

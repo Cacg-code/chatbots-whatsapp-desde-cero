@@ -22,6 +22,13 @@ Para construir el bot no hace falta dominar JavaScript: hace falta un **subconju
 
 Lo que verás aquí: la terminal, instalar Node, crear un proyecto, objetos y arrays, las cuatro funciones de arrays que más usarás, funciones puras, `async/await`, JSON, `fetch`, variables de entorno y pruebas.
 
+## Un editor para escribir código
+
+Para escribir el código del bot necesitas un editor. Recomendamos **[Cursor](https://cursor.com/)**: es un editor moderno con IA integrada, basado en Visual Studio Code (si ya usas VS Code, te sentirás en casa). Si no lo conoces, empieza por la [guía oficial de Cursor](https://docs.cursor.com/). La terminal integrada se abre con <kbd>Ctrl</kbd> + <kbd>`</kbd>. Cualquier otro editor sirve.
+
+> [!nota] Usa la IA con criterio
+> Aunque el editor te sugiera código, **entiende cada línea** antes de aceptarla y nunca pegues tus claves o tokens en un chat con IA.
+
 ## Instalar Node.js
 
 **Node.js** es el programa que ejecuta JavaScript fuera del navegador. Tu bot será un programa de Node. Descarga la versión **LTS** (soporte a largo plazo) desde [nodejs.org](https://nodejs.org/). Este curso se probó con una versión reciente (Node 24); sirve cualquier LTS actual. Los ejemplos usan `node --test` y `--env-file`, que existen desde Node 20.

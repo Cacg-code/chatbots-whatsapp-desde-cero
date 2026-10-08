@@ -34,7 +34,7 @@
   <main class="wrap lesson-layout" id="contenido">
     <nav class="toc" aria-label="Índice de la lección">
       <h4>En esta lección</h4>
-      <ol><li><a href="#que-necesitas-saber-y-que-no">Qué necesitas saber (y qué no)</a></li><li><a href="#instalar-node-js">Instalar Node.js</a></li><li><a href="#la-terminal-en-cinco-comandos">La terminal en cinco comandos</a></li><li><a href="#crear-un-proyecto-con-npm-y-es-modules">Crear un proyecto con npm y ES Modules</a></li><li><a href="#objetos-y-arrays-la-forma-de-los-datos-d">Objetos y arrays: la forma de los datos de un bot</a></li><li><a href="#map-filter-find-y-reduce">map, filter, find y reduce</a></li><li><a href="#funciones-puras-y-funciones-con-efectos">Funciones puras y funciones con efectos</a></li><li><a href="#async-await-esperar-sin-bloquear">async/await: esperar sin bloquear</a></li><li><a href="#json-el-idioma-de-las-apis">JSON: el idioma de las APIs</a></li><li><a href="#fetch-llamar-a-una-api">fetch: llamar a una API</a></li><li><a href="#variables-de-entorno-y-secretos">Variables de entorno y secretos</a></li><li><a href="#pruebas-con-node-test">Pruebas con node:test</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
+      <ol><li><a href="#que-necesitas-saber-y-que-no">Qué necesitas saber (y qué no)</a></li><li><a href="#un-editor-para-escribir-codigo">Un editor para escribir código</a></li><li><a href="#instalar-node-js">Instalar Node.js</a></li><li><a href="#la-terminal-en-cinco-comandos">La terminal en cinco comandos</a></li><li><a href="#crear-un-proyecto-con-npm-y-es-modules">Crear un proyecto con npm y ES Modules</a></li><li><a href="#objetos-y-arrays-la-forma-de-los-datos-d">Objetos y arrays: la forma de los datos de un bot</a></li><li><a href="#map-filter-find-y-reduce">map, filter, find y reduce</a></li><li><a href="#funciones-puras-y-funciones-con-efectos">Funciones puras y funciones con efectos</a></li><li><a href="#async-await-esperar-sin-bloquear">async/await: esperar sin bloquear</a></li><li><a href="#json-el-idioma-de-las-apis">JSON: el idioma de las APIs</a></li><li><a href="#fetch-llamar-a-una-api">fetch: llamar a una API</a></li><li><a href="#variables-de-entorno-y-secretos">Variables de entorno y secretos</a></li><li><a href="#pruebas-con-node-test">Pruebas con node:test</a></li><li><a href="#errores-frecuentes">Errores frecuentes</a></li><li><a href="#apuntes-para-llevar">Apuntes para llevar</a></li><li><a href="#glosario">Glosario</a></li><li><a href="#quiz">Comprueba lo aprendido</a></li></ol>
     </nav>
 
     <article>
@@ -55,7 +55,12 @@
 <li><a href="https://cacg-code.github.io/web-desde-cero/node/">Curso de Node.js y APIs</a>: módulos, servidores y peticiones.</li>
 </ul>
 <p>Lo que verás aquí: la terminal, instalar Node, crear un proyecto, objetos y arrays, las cuatro funciones de arrays que más usarás, funciones puras, <code>async/await</code>, JSON, <code>fetch</code>, variables de entorno y pruebas.</p>
-<h2 id="instalar-node-js"><span class="n">2.</span>Instalar Node.js</h2>
+<h2 id="un-editor-para-escribir-codigo"><span class="n">2.</span>Un editor para escribir código</h2>
+<p>Para escribir el código del bot necesitas un editor. Recomendamos <strong><a href="https://cursor.com/">Cursor</a></strong>: es un editor moderno con IA integrada, basado en Visual Studio Code (si ya usas VS Code, te sentirás en casa). Si no lo conoces, empieza por la <a href="https://docs.cursor.com/">guía oficial de Cursor</a>. La terminal integrada se abre con <kbd>Ctrl</kbd> + <kbd>`</kbd>. Cualquier otro editor sirve.</p>
+<div class="callout nota">
+<p class="callout-title">📌 Nota · Usa la IA con criterio</p>
+<p>Aunque el editor te sugiera código, <strong>entiende cada línea</strong> antes de aceptarla y nunca pegues tus claves o tokens en un chat con IA.</p></div>
+<h2 id="instalar-node-js"><span class="n">3.</span>Instalar Node.js</h2>
 <p><strong>Node.js</strong> es el programa que ejecuta JavaScript fuera del navegador. Tu bot será un programa de Node. Descarga la versión <strong>LTS</strong> (soporte a largo plazo) desde <a href="https://nodejs.org/">nodejs.org</a>. Este curso se probó con una versión reciente (Node 24); sirve cualquier LTS actual. Los ejemplos usan <code>node --test</code> y <code>--env-file</code>, que existen desde Node 20.</p>
 <ul>
 <li><strong>Windows:</strong> descarga el instalador <code>.msi</code>, acepta las opciones por defecto y reinicia la terminal. Alternativa con el gestor de paquetes: <code>winget install OpenJS.NodeJS.LTS</code>.</li>
@@ -76,7 +81,7 @@ npm -v</code></pre>
 <div class="callout importante">
 <p class="callout-title">⚠️ Importante · Verifica este dato</p>
 <p>Los instaladores y comandos cambian con el tiempo. Si algo de esta sección no coincide con tu pantalla, sigue la guía oficial: <a href="https://nodejs.org/en/download">nodejs.org/en/download</a>.</p></div>
-<h2 id="la-terminal-en-cinco-comandos"><span class="n">3.</span>La terminal en cinco comandos</h2>
+<h2 id="la-terminal-en-cinco-comandos"><span class="n">4.</span>La terminal en cinco comandos</h2>
 <p>Usarás la terminal todo el curso. Con cinco comandos alcanza:</p>
 <div class="table-wrap"><table>
 <thead>
@@ -114,7 +119,7 @@ npm -v</code></pre>
 <pre><code>mkdir bot-minimarket
 cd bot-minimarket</code></pre>
 </div>
-<h2 id="crear-un-proyecto-con-npm-y-es-modules"><span class="n">4.</span>Crear un proyecto con npm y ES Modules</h2>
+<h2 id="crear-un-proyecto-con-npm-y-es-modules"><span class="n">5.</span>Crear un proyecto con npm y ES Modules</h2>
 <p>Un proyecto de Node es una carpeta con un archivo <code>package.json</code>: su «cédula de identidad» (nombre, scripts, dependencias). Se crea con:</p>
 <div class="code">
   <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copiar</button></div>
@@ -151,7 +156,7 @@ console.log(formatearSoles(2.5));</code></pre>
 <pre><code>S/ 2.50</code></pre>
 </div>
 <p>Dos detalles que confunden a todos al empezar: en los imports de archivos propios <strong>debes escribir la extensión</strong> (<code>./util.js</code>) y la ruta empieza con <code>./</code>. Los módulos propios de Node se importan con el prefijo <code>node:</code> (por ejemplo <code>node:test</code>, <code>node:readline</code>).</p>
-<h2 id="objetos-y-arrays-la-forma-de-los-datos-d"><span class="n">5.</span>Objetos y arrays: la forma de los datos de un bot</h2>
+<h2 id="objetos-y-arrays-la-forma-de-los-datos-d"><span class="n">6.</span>Objetos y arrays: la forma de los datos de un bot</h2>
 <p>Casi todo lo que maneja un bot son <strong>objetos</strong> (cosas con propiedades) en <strong>arrays</strong> (listas). El catálogo del minimarket es un array de objetos:</p>
 <div class="code">
   <div class="code-head"><span>catalogo.js</span><button class="copy" type="button">Copiar</button></div>
@@ -171,7 +176,7 @@ console.log(formatearSoles(2.5));</code></pre>
 ];</code></pre>
 </div>
 <p>Accedes a una propiedad con punto (<code>producto.precio</code>) y a un elemento por su posición (<code>catalogo[0]</code>). Para copiar o combinar usa el <strong>operador de propagación</strong>: <code>[...carrito, nuevaLinea]</code> crea un array nuevo sin tocar el original.</p>
-<h2 id="map-filter-find-y-reduce"><span class="n">6.</span>map, filter, find y reduce</h2>
+<h2 id="map-filter-find-y-reduce"><span class="n">7.</span>map, filter, find y reduce</h2>
 <p>Estas cuatro funciones de array reemplazan casi todos los <code>for</code>. Cada una recibe una <strong>función</strong> que se aplica a cada elemento.</p>
 <div class="table-wrap"><table>
 <thead>
@@ -235,7 +240,7 @@ S/ 8.00</code></pre>
 <div class="callout consejo">
 <p class="callout-title">💡 Los decimales engañan</p>
 <p>En JavaScript <code>0.1 + 0.2</code> da <code>0.30000000000000004</code>. Para mostrar dinero usa <code>toFixed(2)</code>; para guardar un total, redondea con <code>Math.round(x * 100) / 100</code>. En proyectos más grandes se guardan los montos en <strong>céntimos</strong> (enteros): S/ 2.50 es <code>250</code>.</p></div>
-<h2 id="funciones-puras-y-funciones-con-efectos"><span class="n">7.</span>Funciones puras y funciones con efectos</h2>
+<h2 id="funciones-puras-y-funciones-con-efectos"><span class="n">8.</span>Funciones puras y funciones con efectos</h2>
 <p>Esta es la idea más importante de la lección, porque define cómo se organiza el bot completo.</p>
 <ul>
 <li>Una <strong>función pura</strong> devuelve siempre lo mismo para los mismos argumentos y <strong>no hace nada más</strong>: no imprime, no lee archivos, no llama a internet, no modifica nada de afuera.</li>
@@ -260,7 +265,7 @@ function mostrarTotal(total) {
 <div class="callout nota">
 <p class="callout-title">📌 Nota · Una regla práctica</p>
 <p>Escribe primero la función pura y llámala desde la que tiene efectos. Si te sorprendes escribiendo <code>console.log</code> o <code>fetch</code> dentro de una regla de negocio, sepáralos.</p></div>
-<h2 id="async-await-esperar-sin-bloquear"><span class="n">8.</span>async/await: esperar sin bloquear</h2>
+<h2 id="async-await-esperar-sin-bloquear"><span class="n">9.</span>async/await: esperar sin bloquear</h2>
 <p>Algunas operaciones tardan: llamar a una API, leer un archivo, esperar una respuesta de Meta. En JavaScript devuelven una <strong>promesa</strong> (un valor que llegará más tarde). <code>async/await</code> te permite escribirlas como si fueran código normal:</p>
 <div class="code">
   <div class="code-head"><span>b.js</span><button class="copy" type="button">Copiar</button></div>
@@ -296,7 +301,7 @@ después de 0,5 s</code></pre>
   console.log(&quot;No se pudo conectar:&quot;, error.message);
 }</code></pre>
 </div>
-<h2 id="json-el-idioma-de-las-apis"><span class="n">9.</span>JSON: el idioma de las APIs</h2>
+<h2 id="json-el-idioma-de-las-apis"><span class="n">10.</span>JSON: el idioma de las APIs</h2>
 <p><strong>JSON</strong> es un texto con la misma forma que los objetos de JavaScript. Es el formato en que Meta te entrega cada mensaje. Dos funciones lo manejan:</p>
 <div class="code">
   <div class="code-head"><span>JavaScript</span><button class="copy" type="button">Copiar</button></div>
@@ -310,7 +315,7 @@ console.log(JSON.parse(texto).items);</code></pre>
 2</code></pre>
 </div>
 <p><code>JSON.stringify</code> convierte un objeto en texto y <code>JSON.parse</code> hace lo contrario. Dos trampas: el JSON exige <strong>comillas dobles</strong> en las claves y los textos, y <code>JSON.parse</code> lanza un error si el texto no es JSON válido (por eso, con datos que vienen de afuera, siempre conviene <code>try/catch</code>).</p>
-<h2 id="fetch-llamar-a-una-api"><span class="n">10.</span>fetch: llamar a una API</h2>
+<h2 id="fetch-llamar-a-una-api"><span class="n">11.</span>fetch: llamar a una API</h2>
 <p><code>fetch</code> hace una petición HTTP y viene incluido en Node. Con él enviarás los mensajes a WhatsApp en la <a href="../14-enviar-mensajes/">lección 14</a>. Aquí un ejemplo de lectura (usa una API pública de prueba):</p>
 <div class="code">
   <div class="code-head"><span>c.js</span><button class="copy" type="button">Copiar</button></div>
@@ -334,7 +339,7 @@ delectus aut autem</code></pre>
 });</code></pre>
 </div>
 <p><code>await fetch(...)</code> devuelve la respuesta; <code>await r.json()</code> lee su cuerpo como objeto. Revisa siempre <code>r.ok</code> o <code>r.status</code> antes de fiarte del resultado.</p>
-<h2 id="variables-de-entorno-y-secretos"><span class="n">11.</span>Variables de entorno y secretos</h2>
+<h2 id="variables-de-entorno-y-secretos"><span class="n">12.</span>Variables de entorno y secretos</h2>
 <p>El bot necesitará <strong>secretos</strong>: el token de WhatsApp, claves de otras APIs. Nunca se escriben dentro del código (si subes el código a GitHub, todo el mundo las ve). Se guardan en <strong>variables de entorno</strong> y se leen con <code>process.env</code>:</p>
 <div class="code">
   <div class="code-head"><span>env.js</span><button class="copy" type="button">Copiar</button></div>
@@ -366,7 +371,7 @@ delectus aut autem</code></pre>
 <div class="callout importante">
 <p class="callout-title">⚠️ Importante · Que el secreto no llegue a Git</p>
 <p>Crea un archivo <code>.gitignore</code> con las líneas <code>.env</code>, <code>.dev.vars</code> y <code>node_modules</code>. Así Git no los sube. Si alguna vez publicas un token por error, <strong>revócalo y genera uno nuevo</strong>: borrar el commit no basta.</p></div>
-<h2 id="pruebas-con-node-test"><span class="n">12.</span>Pruebas con node:test</h2>
+<h2 id="pruebas-con-node-test"><span class="n">13.</span>Pruebas con node:test</h2>
 <p>Una <strong>prueba automática</strong> es una función que llama a tu código con datos conocidos y verifica el resultado. Node trae un ejecutor sin instalar nada. Crea <code>util.test.js</code> junto a <code>util.js</code>:</p>
 <div class="code">
   <div class="code-head"><span>util.test.js</span><button class="copy" type="button">Copiar</button></div>
@@ -400,7 +405,7 @@ test at util.test.js:5:1
   &#x27;S/ 1.00&#x27; !== &#x27;S/ 1&#x27;</code></pre>
 </div>
 <p>Lee el mensaje: dice cuál esperabas y cuál recibió. Corrige el valor esperado a <code>"S/ 1.00"</code> y las dos pasan. Los tiempos y detalles de la salida varían; lo que importa es la marca ✔ o ✖. En el resto del curso cada regla del bot tendrá su prueba: son tu red de seguridad cuando cambies algo.</p>
-<h2 id="errores-frecuentes"><span class="n">13.</span>Errores frecuentes</h2>
+<h2 id="errores-frecuentes"><span class="n">14.</span>Errores frecuentes</h2>
 <ul>
 <li><strong>Olvidar <code>"type": "module"</code>.</strong> Sin él, Node no acepta <code>import</code>/<code>export</code> y muestra un error de sintaxis.</li>
 <li><strong>Importar sin extensión</strong> (<code>./util</code> en vez de <code>./util.js</code>) en ES Modules.</li>
@@ -411,7 +416,7 @@ test at util.test.js:5:1
 <li><strong>Subir <code>.env</code> a GitHub.</strong> Añádelo al <code>.gitignore</code> antes del primer commit.</li>
 <li><strong>Comparar decimales con <code>===</code>.</strong> Redondea o trabaja en céntimos.</li>
 </ul>
-<h2 id="apuntes-para-llevar"><span class="n">14.</span>Apuntes para llevar</h2>
+<h2 id="apuntes-para-llevar"><span class="n">15.</span>Apuntes para llevar</h2>
 <ul>
 <li>Node ejecuta JavaScript fuera del navegador; con <code>npm init</code> creas un proyecto y con <code>"type": "module"</code> usas <code>import</code>/<code>export</code>.</li>
 <li>El catálogo y el carrito son arrays de objetos; <code>map</code>, <code>filter</code>, <code>find</code> y <code>reduce</code> cubren casi todo lo que necesitas.</li>
@@ -420,7 +425,7 @@ test at util.test.js:5:1
 <li>Los secretos van en variables de entorno (<code>process.env</code>, <code>.env</code> o <code>.dev.vars</code>), nunca en el código ni en Git.</li>
 <li><code>node --test</code> ejecuta tus pruebas con <code>node:test</code>.</li>
 </ul>
-<h2 id="glosario"><span class="n">15.</span>Glosario</h2>
+<h2 id="glosario"><span class="n">16.</span>Glosario</h2>
 <div class="table-wrap"><table>
 <thead>
 <tr>

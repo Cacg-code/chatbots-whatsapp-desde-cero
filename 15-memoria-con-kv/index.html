@@ -47,6 +47,9 @@
 <p class="callout-title">💡 🎯 Al terminar esta lección podrás…</p>
 <ul><li>Explicar por qué un Worker necesita memoria externa y qué lugar ocupa KV en la arquitectura del bot.</li><li>Diseñar claves con prefijo y asignar un TTL distinto a sesiones, pedidos e ids de mensajes ya vistos.</li><li>Leer y guardar JSON en KV con <code>get</code> y <code>put</code> usando <code>expirationTtl</code>, y comprobar el vencimiento con un reloj controlado.</li><li>Reconocer las limitaciones de KV (consistencia eventual, sin atomicidad, un <code>list</code> de máximo 1000 claves, cuotas del plan gratuito).</li><li>Decidir cuándo conviene pasar a D1 o Durable Objects.</li></ul>
 </div>
+<div class="callout importante">
+<p class="callout-title">⚠️ INFO REFERENCIAL: revisa los sitios oficiales</p>
+<p>Los precios, planes, límites y tarifas de esta lección son <strong>solo una referencia</strong> (revisados en octubre de 2026) y cambian con frecuencia. <strong>Antes de decidir o cobrar a un cliente, confirma siempre en los sitios oficiales</strong> de cada proveedor (enlaces al final de la lección).</p></div>
 
 <h2 id="por-que-el-worker-necesita-memoria"><span class="n">1.</span>Por qué el Worker necesita memoria</h2>
 <p>En la <a href="../05-estado-de-la-conversacion/">lección 5</a> el bot recordaba el carrito porque la sesión vivía en una variable de tu programa. En la consola funciona: el programa sigue encendido mientras conversas. En la nube no.</p>
